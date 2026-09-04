@@ -155,7 +155,7 @@ function Sidebar({
         <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
           <Mic className="size-4" />
         </div>
-        <span className="text-lg font-bold tracking-tight">모먼트</span>
+        <span className="text-lg font-bold tracking-tight">모아</span>
       </div>
       <Button onClick={onNew} className="mb-7 w-full justify-center gap-2">
         <Plus className="size-4" />새 회의 시작
