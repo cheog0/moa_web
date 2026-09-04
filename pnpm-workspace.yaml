@@ -1,5 +1,0 @@
-minimumReleaseAgeExclude:
-  - "@next/*"
-  - next
-  - "apps/*"
-  - "packages/*"
