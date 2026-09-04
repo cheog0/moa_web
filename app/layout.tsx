@@ -5,7 +5,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "모아 | AI 회의록",
   description:
-    "회의 녹음부터 AI 요약과 액션 아이템까지, 모먼트에서 한 번에 정리하세요.",
+    "회의 녹음부터 AI 요약과 액션 아이템까지, 모아에서 한 번에 정리하세요.",
   generator: "v0.app",
   icons: {
     icon: [
