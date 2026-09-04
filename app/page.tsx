@@ -86,7 +86,7 @@ function AuthScreen() {
           <div className="flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground mb-4">
             <Mic className="size-6" />
           </div>
-          <h1 className="text-2xl font-bold">모먼트 로그인</h1>
+          <h1 className="text-2xl font-bold">모아 로그인</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             AI 회의록 서비스에 오신 것을 환영합니다.
           </p>
