@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+// 💡 Calendar, List 아이콘이 추가되었습니다!
 import {
   BookOpen,
   Clock3,
@@ -10,6 +11,8 @@ import {
   Search,
   Sparkles,
   ChevronRight,
+  Calendar,
+  List,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -21,6 +24,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import SettingsPanel from "@/components/settings/SettingsPanel";
 import RecordingPanel from "@/components/meeting/RecordingPanel";
 import DetailPanel from "@/components/meeting/DetailPanel";
+import CalendarView from "@/components/meeting/CalenderView";
 
 function Stat({
   icon: Icon,
@@ -51,6 +55,11 @@ export default function Page() {
   const [currentView, setCurrentView] = useState<"dashboard" | "settings">(
     "dashboard",
   );
+  // 💡 리스트 뷰와 달력 뷰를 전환하기 위한 상태
+  const [dashboardMode, setDashboardMode] = useState<"list" | "calendar">(
+    "list",
+  );
+
   const [recording, setRecording] = useState(false);
   const [detail, setDetail] = useState(false);
   const [generatedMinutes, setGeneratedMinutes] =
@@ -149,6 +158,19 @@ export default function Page() {
     setDetail(false);
   };
 
+  const handleOpenDetail = async (meeting: any) => {
+    setSelectedMeeting(meeting);
+    setDetail(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+      const res = await fetch(`${apiUrl}/api/meetings/${meeting.id}/minutes`);
+      const data = await res.json();
+      if (data.success) setGeneratedMinutes(data.minutes);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       <Sidebar
@@ -224,40 +246,62 @@ export default function Page() {
             </div>
 
             <section className="mt-10">
-              <h2 className="text-lg font-bold">최근 회의</h2>
-              <div className="mt-4 flex flex-col gap-3">
-                {filtered.map((meeting) => (
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-bold">기록된 회의</h2>
+                </div>
+                {/* 💡 뷰 모드 전환 토글 버튼 */}
+                <div className="flex items-center rounded-lg border border-border bg-muted/30 p-1">
                   <button
-                    key={meeting.id}
-                    onClick={async () => {
-                      setSelectedMeeting(meeting);
-                      setDetail(true);
-                      const apiUrl =
-                        process.env.NEXT_PUBLIC_API_URL ||
-                        "http://127.0.0.1:8000";
-                      const res = await fetch(
-                        `${apiUrl}/api/meetings/${meeting.id}/minutes`,
-                      );
-                      const data = await res.json();
-                      if (data.success) setGeneratedMinutes(data.minutes);
-                    }}
-                    className="group flex w-full items-center gap-4 rounded-xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm"
+                    onClick={() => setDashboardMode("list")}
+                    className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-semibold transition-colors ${dashboardMode === "list" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
                   >
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-sky-500 text-white">
-                      <FileText className="size-5" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-sm font-semibold">
-                        {meeting.title || "새 회의"}
-                      </h3>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {new Date(meeting.created_at).toLocaleString("ko-KR")}
-                      </p>
-                    </div>
-                    <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                    <List className="size-4" /> 리스트
                   </button>
-                ))}
+                  <button
+                    onClick={() => setDashboardMode("calendar")}
+                    className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-semibold transition-colors ${dashboardMode === "calendar" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    <Calendar className="size-4" /> 캘린더
+                  </button>
+                </div>
               </div>
+
+              {/* 💡 상태에 따라 리스트나 달력을 보여줍니다 */}
+              {dashboardMode === "calendar" ? (
+                <CalendarView
+                  meetings={filtered}
+                  onMeetingClick={handleOpenDetail}
+                />
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {filtered.map((meeting) => (
+                    <button
+                      key={meeting.id}
+                      onClick={() => handleOpenDetail(meeting)}
+                      className="group flex w-full items-center gap-4 rounded-xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm"
+                    >
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-sky-500 text-white">
+                        <FileText className="size-5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="truncate text-sm font-semibold">
+                          {meeting.title || "새 회의"}
+                        </h3>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {new Date(meeting.created_at).toLocaleString("ko-KR")}
+                        </p>
+                      </div>
+                      <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                    </button>
+                  ))}
+                  {filtered.length === 0 && (
+                    <div className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
+                      아직 기록된 회의가 없습니다. '새 회의 시작'을 눌러보세요!
+                    </div>
+                  )}
+                </div>
+              )}
             </section>
           </main>
         )}

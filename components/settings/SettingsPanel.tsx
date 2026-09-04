@@ -95,7 +95,7 @@ export default function SettingsPanel({ session }: { session: any }) {
           <select
             value={aiEngine}
             onChange={(e) => setAiEngine(e.target.value)}
-            className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm outline-none focus:border-primary"
+            className="w-full h-11 rounded-lg border border-input bg-background px-4 text-sm outline-none focus:border-primary"
           >
             <option value="gemini">Google Gemini 3.6 Flash</option>
             <option value="deepgram">Deepgram</option>
@@ -116,7 +116,7 @@ export default function SettingsPanel({ session }: { session: any }) {
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="API 키를 붙여넣으세요"
-            className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm outline-none focus:border-primary"
+            className="w-full h-11 rounded-lg border border-input bg-background px-4 text-sm outline-none focus:border-primary"
           />
         </section>
 
@@ -178,6 +178,7 @@ export default function SettingsPanel({ session }: { session: any }) {
               </span>
             ))}
           </div>
+          {/* 💡 높이를 h-11로 똑같이 맞췄습니다 */}
           <div className="flex gap-2">
             <input
               type="text"
@@ -185,9 +186,13 @@ export default function SettingsPanel({ session }: { session: any }) {
               onChange={(e) => setNewKeyword(e.target.value)}
               onKeyDown={addKeyword}
               placeholder="예: 디자인, 클라이언트"
-              className="flex-1 rounded-lg border border-input bg-background px-4 py-2.5 text-sm outline-none focus:border-primary"
+              className="flex-1 h-11 rounded-lg border border-input bg-background px-4 text-sm outline-none focus:border-primary"
             />
-            <Button onClick={addKeyword} variant="outline">
+            <Button
+              onClick={addKeyword}
+              variant="outline"
+              className="h-11 px-6"
+            >
               추가
             </Button>
           </div>
@@ -197,7 +202,7 @@ export default function SettingsPanel({ session }: { session: any }) {
           onClick={handleSave}
           disabled={saving}
           size="lg"
-          className="w-full"
+          className="w-full h-12 text-base"
         >
           {saving ? "저장 중..." : "모든 설정 저장하기"}
         </Button>
