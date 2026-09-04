@@ -168,12 +168,6 @@ function Sidebar({
           onClick={() => onNavigate("dashboard")}
         />
         <NavItem
-          icon={FileText}
-          label="내 회의록"
-          active={currentView === "minutes"}
-          onClick={() => onNavigate("dashboard")}
-        />
-        <NavItem
           icon={Settings}
           label="설정"
           active={currentView === "settings"}
