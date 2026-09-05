@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import {
   Check,
   Clock3,
@@ -87,6 +87,20 @@ export default function DetailPanel({
     ? new Date(meeting.created_at).toLocaleDateString("ko-KR")
     : new Date().toLocaleDateString("ko-KR");
 
+  // 💡 핵심 추가: 텍스트로 넘어온 JSON 배열을 실제 배열 객체로 변환하여 예쁜 UI로 연결합니다.
+  const normalizedTranscript = useMemo(() => {
+    let t = minutes?.transcript;
+    if (typeof t === "string") {
+      try {
+        const parsed = JSON.parse(t);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {
+        // 파싱 실패 시 일반 텍스트로 유지
+      }
+    }
+    return t;
+  }, [minutes?.transcript]);
+
   const handlePrintPDF = () => {
     setTab("minutes");
     setTimeout(() => {
@@ -154,12 +168,12 @@ export default function DetailPanel({
   };
 
   const handleDownloadTranscript = () => {
-    if (!minutes?.transcript) return alert("다운로드할 대화 내용이 없습니다.");
+    if (!normalizedTranscript) return alert("다운로드할 대화 내용이 없습니다.");
     let content = "";
-    if (typeof minutes.transcript === "string") {
-      content = minutes.transcript;
-    } else if (Array.isArray(minutes.transcript)) {
-      content = minutes.transcript
+    if (typeof normalizedTranscript === "string") {
+      content = normalizedTranscript;
+    } else if (Array.isArray(normalizedTranscript)) {
+      content = normalizedTranscript
         .map(
           (t) =>
             `[${t.time || "00:00"}] ${t.speaker || "알 수 없음"}: ${t.text || ""}`,
@@ -415,7 +429,6 @@ export default function DetailPanel({
                         <Sparkles className="size-5 text-blue-500" /> 회의 요약
                         및 내용
                       </h3>
-                      {/* 💡 min-h-[220px]에서 min-h-[400px]로 대폭 확장하여 기본 입력창 크기를 키웠습니다. */}
                       <textarea
                         value={summaryText}
                         onChange={(e) => setSummaryText(e.target.value)}
@@ -457,16 +470,16 @@ export default function DetailPanel({
             </div>
           ) : (
             <div className="flex flex-col gap-2 py-7 print:py-[15mm] print:px-[20mm]">
-              {minutes ? (
-                typeof minutes.transcript === "string" ? (
+              {normalizedTranscript ? (
+                typeof normalizedTranscript === "string" ? (
                   <div
                     className={`rounded-xl border border-border bg-card p-4 whitespace-pre-wrap text-sm leading-7 text-muted-foreground ${isPreviewMode ? "border-none bg-transparent p-0 text-black" : "print:border-none print:bg-transparent print:p-0 print:text-black"}`}
                   >
-                    {minutes.transcript}
+                    {normalizedTranscript}
                   </div>
-                ) : Array.isArray(minutes.transcript) &&
-                  minutes.transcript.length > 0 ? (
-                  minutes.transcript.map((t, idx) => (
+                ) : Array.isArray(normalizedTranscript) &&
+                  normalizedTranscript.length > 0 ? (
+                  normalizedTranscript.map((t, idx) => (
                     <div
                       key={idx}
                       onClick={() => handleSeek(t.time || "00:00")}
