@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Mic, Pause, Play, Sparkles, X } from "lucide-react";
+import { Check, Mic, Pause, Play, Sparkles, X, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { MeetingMinutes } from "@/lib/constants";
@@ -17,6 +17,10 @@ export default function RecordingPanel({
     "ready" | "recording" | "paused" | "processing"
   >("ready");
   const [seconds, setSeconds] = useState(0);
+
+  // 💡 실시간 현장 메모를 저장하는 상태
+  const [liveMemo, setLiveMemo] = useState("");
+
   const [userSettings, setUserSettings] = useState({
     user_id: "",
     ai_engine: "gemini",
@@ -158,7 +162,14 @@ export default function RecordingPanel({
       formData.append("engine", userSettings.ai_engine);
       formData.append("api_key", userSettings.api_key);
       formData.append("keywords", userSettings.keywords);
-      formData.append("custom_template", userSettings.custom_template);
+
+      // 💡 현장 메모가 작성되어 있다면 AI 프롬프트(custom_template)에 강제 주입합니다.
+      let finalTemplate = userSettings.custom_template;
+      if (liveMemo.trim()) {
+        const defaultStructure = `{\n  "summary": "회의 핵심 내용",\n  "decisions": "결정된 사항",\n  "action_items": []\n}`;
+        finalTemplate = `[사용자 현장 실시간 메모]\n${liveMemo}\n\n⚠️ AI 지시사항: 사용자가 직접 작성한 위 현장 메모의 내용, 고유명사, 문맥을 오디오 스크립트 해석 시 최우선으로 반영하세요.\n\n[출력 템플릿 구조]\n${userSettings.custom_template || defaultStructure}`;
+      }
+      formData.append("custom_template", finalTemplate);
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
       const response = await fetch(`${apiUrl}/api/meetings/transcribe`, {
@@ -179,7 +190,7 @@ export default function RecordingPanel({
 
   return (
     <div className="fixed inset-0 z-20 flex items-end justify-center bg-foreground/20 p-4 backdrop-blur-sm sm:items-center print:hidden">
-      <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl">
+      <div className="w-full max-w-xl rounded-2xl border border-border bg-card p-6 shadow-2xl transition-all">
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2 text-sm font-semibold">
@@ -236,10 +247,24 @@ export default function RecordingPanel({
           </div>
         ) : (
           <>
-            <div className="text-center font-mono text-4xl mt-10 font-semibold tabular-nums">
+            <div className="text-center font-mono text-5xl mt-6 font-semibold tabular-nums tracking-tight">
               {String(Math.floor(seconds / 60)).padStart(2, "0")}:
               {String(seconds % 60).padStart(2, "0")}
             </div>
+
+            {/* 💡 현장 메모 UI 추가 영역 */}
+            <div className="mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <PenLine className="size-4" /> 현장 메모 (AI 문맥 참고용)
+              </label>
+              <textarea
+                value={liveMemo}
+                onChange={(e) => setLiveMemo(e.target.value)}
+                placeholder="음성이 잘 안 들릴 때를 대비해 중요한 키워드나 결론을 메모해 두세요. AI가 회의록 작성 시 최우선으로 참고합니다."
+                className="h-32 w-full resize-none rounded-xl border border-input bg-background/50 p-4 text-sm leading-relaxed outline-none ring-primary transition-all focus:bg-background focus:ring-2"
+              />
+            </div>
+
             <div className="mt-8 flex gap-3">
               <Button
                 variant="outline"
