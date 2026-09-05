@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Mic, Pause, Play, Sparkles, X, PenLine } from "lucide-react";
+import { Mic, Pause, Play, Sparkles, X, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { MeetingMinutes } from "@/lib/constants";
@@ -18,7 +18,7 @@ export default function RecordingPanel({
   >("ready");
   const [seconds, setSeconds] = useState(0);
 
-  // 💡 실시간 현장 메모를 저장하는 상태
+  // 실시간 현장 메모
   const [liveMemo, setLiveMemo] = useState("");
 
   const [userSettings, setUserSettings] = useState({
@@ -163,7 +163,6 @@ export default function RecordingPanel({
       formData.append("api_key", userSettings.api_key);
       formData.append("keywords", userSettings.keywords);
 
-      // 💡 현장 메모가 작성되어 있다면 AI 프롬프트(custom_template)에 강제 주입합니다.
       let finalTemplate = userSettings.custom_template;
       if (liveMemo.trim()) {
         const defaultStructure = `{\n  "summary": "회의 핵심 내용",\n  "decisions": "결정된 사항",\n  "action_items": []\n}`;
@@ -188,101 +187,122 @@ export default function RecordingPanel({
     }
   };
 
+  const timeString = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+
   return (
-    <div className="fixed inset-0 z-20 flex items-end justify-center bg-foreground/20 p-4 backdrop-blur-sm sm:items-center print:hidden">
-      <div className="w-full max-w-xl rounded-2xl border border-border bg-card p-6 shadow-2xl transition-all">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <span
-                className={`size-2 rounded-full ${status === "processing" ? "bg-primary" : status === "ready" ? "bg-muted-foreground/40" : status === "paused" ? "bg-amber-500" : "animate-pulse bg-red-500"}`}
-              />
-              {status === "ready"
-                ? "녹음 준비"
-                : status === "recording"
-                  ? "녹음 중"
-                  : status === "paused"
-                    ? "녹음 일시정지"
-                    : "AI 처리 중"}
-            </div>
-            <h2 className="mt-2 text-xl font-bold">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 p-4 backdrop-blur-sm sm:p-10 print:hidden">
+      {/* 💡 화면을 넓게 쓰도록 max-w-5xl, 높이 85vh 적용 */}
+      <div className="relative flex h-full max-h-[900px] min-h-[500px] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl transition-all">
+        {/* 상단 헤더 영역 */}
+        <div className="flex shrink-0 items-center justify-between border-b border-border px-8 py-5">
+          <div className="flex items-center gap-3">
+            <span
+              className={`size-2.5 rounded-full ${status === "processing" ? "bg-primary" : status === "ready" ? "bg-muted-foreground/40" : status === "paused" ? "bg-amber-500" : "animate-pulse bg-red-500"}`}
+            />
+            <h2 className="text-xl font-bold tracking-tight">
               {status === "processing"
                 ? "회의 내용을 정리하고 있어요"
-                : "새 회의 녹음"}
+                : "새로운 노트"}
             </h2>
           </div>
           {status !== "processing" && (
             <button
               onClick={onClose}
-              className="rounded-lg p-2 text-muted-foreground hover:bg-muted"
+              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
-              <X className="size-4" />
+              <X className="size-5" />
             </button>
           )}
         </div>
 
-        {status === "processing" ? (
-          <div className="py-16 text-center">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-primary/10">
-              <Sparkles className="size-7 animate-pulse text-primary" />
+        {/* 메인 콘텐츠 영역 */}
+        <div className="flex-1 overflow-hidden p-8">
+          {status === "processing" ? (
+            <div className="flex h-full flex-col items-center justify-center">
+              <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-primary/10">
+                <Sparkles className="size-10 animate-pulse text-primary" />
+              </div>
+              <p className="mt-6 text-lg font-semibold text-foreground">
+                AI가 대화와 메모를 바탕으로 회의록을 생성하고 있습니다
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                잠시만 기다려주세요...
+              </p>
             </div>
-            <p className="mt-5 text-sm font-semibold">
-              AI가 회의록을 생성하고 있습니다
-            </p>
-          </div>
-        ) : status === "ready" ? (
-          <div className="py-10 text-center">
-            <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-primary/10">
-              <Mic className="size-9 text-primary" />
-            </div>
-            <div className="mt-8">
+          ) : status === "ready" ? (
+            <div className="flex h-full flex-col items-center justify-center">
+              <div className="mx-auto flex size-24 items-center justify-center rounded-full bg-primary/10">
+                <Mic className="size-10 text-primary" />
+              </div>
               <Button
-                className="w-full"
-                size="lg"
+                className="mt-8 px-8 py-6 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all"
                 onClick={handleStartRecording}
               >
-                <Mic className="mr-2 size-4" /> 녹음 시작
+                <Mic className="mr-2 size-5" /> 녹음 및 노트 시작
               </Button>
             </div>
-          </div>
-        ) : (
-          <>
-            <div className="text-center font-mono text-5xl mt-6 font-semibold tabular-nums tracking-tight">
-              {String(Math.floor(seconds / 60)).padStart(2, "0")}:
-              {String(seconds % 60).padStart(2, "0")}
-            </div>
-
-            {/* 💡 현장 메모 UI 추가 영역 */}
-            <div className="mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                <PenLine className="size-4" /> 현장 메모 (AI 문맥 참고용)
-              </label>
+          ) : (
+            // 💡 대형 텍스트 에디터 영역
+            <div className="flex h-full flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="mb-4 flex items-center text-sm font-semibold text-muted-foreground">
+                <span className="font-mono text-primary mr-2">
+                  {timeString}
+                </span>
+                자유롭게 현장 메모를 작성해보세요. (줄바꿈: Enter)
+              </div>
               <textarea
                 value={liveMemo}
                 onChange={(e) => setLiveMemo(e.target.value)}
                 placeholder="음성이 잘 안 들릴 때를 대비해 중요한 키워드나 결론을 메모해 두세요. AI가 회의록 작성 시 최우선으로 참고합니다."
-                className="h-32 w-full resize-none rounded-xl border border-input bg-background/50 p-4 text-sm leading-relaxed outline-none ring-primary transition-all focus:bg-background focus:ring-2"
+                className="w-full flex-1 resize-none bg-transparent text-lg leading-relaxed text-foreground outline-none placeholder:text-muted-foreground/50"
               />
             </div>
+          )}
+        </div>
 
-            <div className="mt-8 flex gap-3">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={status === "paused" ? handleResume : handlePause}
+        {/* 💡 하단 플로팅 컨트롤 바 (스크린샷 스타일) */}
+        {(status === "recording" || status === "paused") && (
+          <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 items-center gap-6 rounded-full bg-zinc-900 px-6 py-3 shadow-2xl dark:bg-zinc-100">
+            <button
+              onClick={status === "paused" ? handleResume : handlePause}
+              className="flex size-10 items-center justify-center rounded-full bg-zinc-700 text-white transition-colors hover:bg-zinc-600 dark:bg-zinc-200 dark:text-black dark:hover:bg-zinc-300"
+            >
+              {status === "paused" ? (
+                <Play className="size-4 ml-0.5" fill="currentColor" />
+              ) : (
+                <Pause className="size-4" fill="currentColor" />
+              )}
+            </button>
+
+            <div className="flex items-center gap-3">
+              <div
+                className={`flex items-center gap-1.5 ${status === "recording" ? "animate-pulse" : "opacity-50"}`}
               >
-                {status === "paused" ? (
-                  <Play className="mr-2 size-4" />
-                ) : (
-                  <Pause className="mr-2 size-4" />
-                )}{" "}
-                {status === "paused" ? "계속 녹음" : "일시정지"}
-              </Button>
-              <Button className="flex-1" onClick={handleFinish}>
-                <Check className="mr-2 size-4" /> 녹음 종료
-              </Button>
+                <span className="h-4 w-1 rounded-full bg-sky-500" />
+                <span className="h-3 w-1 rounded-full bg-sky-500" />
+                <span className="h-5 w-1 rounded-full bg-sky-500" />
+                <span className="h-3 w-1 rounded-full bg-sky-500" />
+              </div>
+              <span className="font-mono text-sm font-medium text-zinc-300 dark:text-zinc-700">
+                {status === "recording" ? "녹음 중" : "일시정지"} {timeString}
+              </span>
             </div>
-          </>
+
+            <div className="h-5 w-px bg-zinc-700 dark:bg-zinc-300" />
+
+            <button
+              onClick={onClose}
+              className="text-sm font-medium text-zinc-400 transition-colors hover:text-white dark:text-zinc-500 dark:hover:text-black"
+            >
+              취소
+            </button>
+            <button
+              onClick={handleFinish}
+              className="flex items-center gap-1.5 rounded-full bg-sky-500/10 px-4 py-1.5 text-sm font-bold text-sky-400 transition-colors hover:bg-sky-500/20 hover:text-sky-300 dark:text-sky-600 dark:hover:bg-sky-50 dark:hover:text-sky-700"
+            >
+              <Square className="size-3.5" fill="currentColor" /> 종료
+            </button>
+          </div>
         )}
       </div>
     </div>
