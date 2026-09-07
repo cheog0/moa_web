@@ -87,7 +87,13 @@ export default function RecordingPanel({
         : MediaRecorder.isTypeSupported("audio/webm")
           ? "audio/webm"
           : "audio/mp4";
-      const recorder = new MediaRecorder(stream, { mimeType });
+
+      // 💡 핵심 수정: 음성 녹음 품질을 64kbps로 제한하여 50MB 제한 안에서 긴 시간 녹음 가능하도록 최적화
+      const recorder = new MediaRecorder(stream, {
+        mimeType,
+        audioBitsPerSecond: 64000,
+      });
+
       mediaRecorderRef.current = recorder;
       recorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0)
@@ -191,7 +197,6 @@ export default function RecordingPanel({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 p-4 backdrop-blur-sm sm:p-10 print:hidden">
-      {/* 💡 화면을 넓게 쓰도록 max-w-5xl, 높이 85vh 적용 */}
       <div className="relative flex h-full max-h-[900px] min-h-[500px] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl transition-all">
         {/* 상단 헤더 영역 */}
         <div className="flex shrink-0 items-center justify-between border-b border-border px-8 py-5">
@@ -242,7 +247,6 @@ export default function RecordingPanel({
               </Button>
             </div>
           ) : (
-            // 💡 대형 텍스트 에디터 영역
             <div className="flex h-full flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="mb-4 flex items-center text-sm font-semibold text-muted-foreground">
                 <span className="font-mono text-primary mr-2">
@@ -260,7 +264,7 @@ export default function RecordingPanel({
           )}
         </div>
 
-        {/* 💡 하단 플로팅 컨트롤 바 (스크린샷 스타일) */}
+        {/* 하단 플로팅 컨트롤 바 */}
         {(status === "recording" || status === "paused") && (
           <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 items-center gap-6 rounded-full bg-zinc-900 px-6 py-3 shadow-2xl dark:bg-zinc-100">
             <button
