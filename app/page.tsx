@@ -81,8 +81,11 @@ export default function Page() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // 💡 핵심 수정: session 객체 전체가 아닌 session?.user?.id를 의존성으로 사용하여 무한 렌더링 방지
   useEffect(() => {
-    if (!session || currentView !== "dashboard") return;
+    const userId = session?.user?.id;
+    if (!userId || currentView !== "dashboard") return;
+
     const fetchMeetings = async () => {
       try {
         const apiUrl =
@@ -95,7 +98,7 @@ export default function Page() {
       }
     };
     fetchMeetings();
-  }, [session, recording, currentView]);
+  }, [session?.user?.id, recording, currentView]);
 
   if (loadingSession)
     return (
