@@ -263,7 +263,7 @@ export default function RecordingPanel({
               <div className="mt-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <Loader2 className="size-4 animate-spin" />
                 <span>
-                  잠시만 기다려주세요... 오디오 길이에 따라 1~2분 소요될 수
+                  잠시만 기다려주세요... 오디오 길이에 따라 시간이 소요될 수
                   있습니다.
                 </span>
               </div>
