@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Mic, Pause, Play, Sparkles, X, Square } from "lucide-react";
+// 💡 Loader2 아이콘이 추가되었습니다.
+import { Mic, Pause, Play, Sparkles, X, Square, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { MeetingMinutes } from "@/lib/constants";
@@ -17,8 +18,6 @@ export default function RecordingPanel({
     "ready" | "recording" | "paused" | "processing"
   >("ready");
   const [seconds, setSeconds] = useState(0);
-
-  // 실시간 현장 메모
   const [liveMemo, setLiveMemo] = useState("");
 
   const [userSettings, setUserSettings] = useState({
@@ -33,6 +32,7 @@ export default function RecordingPanel({
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
 
+  // 1. 설정 불러오기 & 서버 모닝콜 (Pre-warming)
   useEffect(() => {
     const fetchSettings = async () => {
       const {
@@ -57,12 +57,36 @@ export default function RecordingPanel({
       }
     };
     fetchSettings();
+
+    // [1차 기상 방어] 모달 창이 열릴 때 백엔드를 미리 깨웁니다.
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+    fetch(`${apiUrl}/api/meetings`).catch(() => {
+      console.log("모달 열림: 백엔드 기상 호출 완료 (응답 대기 안 함)");
+    });
   }, []);
 
+  // 2. 타이머 및 하트비트 (Keep-Alive) 로직
   useEffect(() => {
     if (status !== "recording") return;
+
+    // 1초마다 화면의 시간 증가
     const timer = setInterval(() => setSeconds((prev) => prev + 1), 1000);
-    return () => clearInterval(timer);
+
+    // [2차 수면 방어] 녹음 중 10분(600,000ms)마다 백엔드가 잠들지 않게 콕콕 찌르기
+    const keepAlive = setInterval(
+      () => {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+        fetch(`${apiUrl}/api/meetings`).catch(() => {});
+        console.log("💓 하트비트 발송: 서버야 자지마!");
+      },
+      10 * 60 * 1000,
+    );
+
+    return () => {
+      clearInterval(timer);
+      clearInterval(keepAlive);
+    };
   }, [status]);
 
   useEffect(() => {
@@ -82,16 +106,16 @@ export default function RecordingPanel({
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       audioChunksRef.current = [];
+
       let mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? "audio/webm;codecs=opus"
         : MediaRecorder.isTypeSupported("audio/webm")
           ? "audio/webm"
           : "audio/mp4";
 
-      // 💡 핵심 수정: 음성 녹음 품질을 64kbps로 제한하여 50MB 제한 안에서 긴 시간 녹음 가능하도록 최적화
       const recorder = new MediaRecorder(stream, {
         mimeType,
-        audioBitsPerSecond: 64000,
+        audioBitsPerSecond: 64000, // 용량 최적화 (64kbps) 유지
       });
 
       mediaRecorderRef.current = recorder;
@@ -99,6 +123,7 @@ export default function RecordingPanel({
         if (event.data && event.data.size > 0)
           audioChunksRef.current.push(event.data);
       };
+
       recorder.start(1000);
       setSeconds(0);
       setStatus("recording");
@@ -181,6 +206,7 @@ export default function RecordingPanel({
         method: "POST",
         body: formData,
       });
+
       if (!response.ok) throw new Error(`서버 오류 (${response.status})`);
 
       const result = await response.json();
@@ -223,16 +249,24 @@ export default function RecordingPanel({
         {/* 메인 콘텐츠 영역 */}
         <div className="flex-1 overflow-hidden p-8">
           {status === "processing" ? (
-            <div className="flex h-full flex-col items-center justify-center">
-              <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-primary/10">
+            <div className="flex h-full flex-col items-center justify-center animate-in fade-in duration-500">
+              {/* 💡 수정된 예쁜 로딩 UI 영역 */}
+              <div className="relative flex size-24 items-center justify-center">
+                {/* 바깥쪽 회전하는 스피너 링 */}
+                <div className="absolute inset-0 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                {/* 안쪽 반짝이는 아이콘 */}
                 <Sparkles className="size-10 animate-pulse text-primary" />
               </div>
-              <p className="mt-6 text-lg font-semibold text-foreground">
-                AI가 대화와 메모를 바탕으로 회의록을 생성하고 있습니다
+              <p className="mt-8 text-xl font-bold text-foreground tracking-tight">
+                AI가 회의록을 작성하고 있습니다
               </p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                잠시만 기다려주세요...
-              </p>
+              <div className="mt-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <Loader2 className="size-4 animate-spin" />
+                <span>
+                  잠시만 기다려주세요... 오디오 길이에 따라 1~2분 소요될 수
+                  있습니다.
+                </span>
+              </div>
             </div>
           ) : status === "ready" ? (
             <div className="flex h-full flex-col items-center justify-center">
