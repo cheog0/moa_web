@@ -57,15 +57,46 @@ export default function SettingsPanel({ session }: { session: any }) {
     else alert("설정이 안전하게 저장되었습니다.");
   };
 
+  // 💡 수정된 핵심 로직: 콤마 분리 및 중복 알림 추가
   const addKeyword = (e: React.KeyboardEvent | React.MouseEvent) => {
     if (e.type === "keydown" && (e as React.KeyboardEvent).key !== "Enter")
       return;
     e.preventDefault();
-    const trimmed = newKeyword.trim();
-    if (trimmed && !keywords.includes(trimmed)) {
-      setKeywords([...keywords, trimmed]);
-      setNewKeyword("");
+
+    if (!newKeyword.trim()) return;
+
+    // 1. 콤마(,)를 기준으로 나누고, 양옆 공백을 제거한 뒤 빈 값은 걸러냅니다.
+    const inputKeywords = newKeyword
+      .split(",")
+      .map((k) => k.trim())
+      .filter((k) => k !== "");
+
+    const uniqueNewKeywords: string[] = [];
+    const duplicateKeywords: string[] = [];
+
+    // 2. 각각의 키워드가 이미 존재하는지 검사합니다.
+    inputKeywords.forEach((kw) => {
+      if (keywords.includes(kw) || uniqueNewKeywords.includes(kw)) {
+        duplicateKeywords.push(kw);
+      } else {
+        uniqueNewKeywords.push(kw);
+      }
+    });
+
+    // 3. 중복된 키워드가 있다면 알림창을 띄워 사용자에게 알려줍니다.
+    if (duplicateKeywords.length > 0) {
+      alert(
+        `다음 키워드는 이미 등록되어 있습니다:\n[ ${duplicateKeywords.join(", ")} ]`,
+      );
     }
+
+    // 4. 중복되지 않은 신규 키워드만 기존 배열에 추가합니다.
+    if (uniqueNewKeywords.length > 0) {
+      setKeywords([...keywords, ...uniqueNewKeywords]);
+    }
+
+    // 5. 입력창을 깔끔하게 비워줍니다.
+    setNewKeyword("");
   };
 
   const removeKeyword = (target: string) =>
@@ -178,14 +209,13 @@ export default function SettingsPanel({ session }: { session: any }) {
               </span>
             ))}
           </div>
-          {/* 💡 높이를 h-11로 똑같이 맞췄습니다 */}
           <div className="flex gap-2">
             <input
               type="text"
               value={newKeyword}
               onChange={(e) => setNewKeyword(e.target.value)}
               onKeyDown={addKeyword}
-              placeholder="예: 디자인, 클라이언트"
+              placeholder="예: 업무, 계약 (쉼표로 구분 가능)"
               className="flex-1 h-11 rounded-lg border border-input bg-background px-4 text-sm outline-none focus:border-primary"
             />
             <Button
