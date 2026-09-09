@@ -1,8 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-// 💡 AlertCircle 아이콘이 추가되었습니다.
-import { Cpu, FileEdit, Key, Tags, X, AlertCircle } from "lucide-react";
+// 💡 CheckCircle2 아이콘이 추가되었습니다.
+import {
+  Cpu,
+  FileEdit,
+  Key,
+  Tags,
+  X,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import {
@@ -20,9 +28,15 @@ export default function SettingsPanel({ session }: { session: any }) {
   const [keywords, setKeywords] = useState<string[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
 
-  // 💡 에러 메시지를 관리할 상태와 타이머 Ref 추가
   const [errorMsg, setErrorMsg] = useState("");
   const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 💡 저장 결과(토스트)를 관리할 상태와 타이머 Ref 추가
+  const [toast, setToast] = useState<{
+    type: "success" | "error";
+    msg: string;
+  } | null>(null);
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -58,8 +72,17 @@ export default function SettingsPanel({ session }: { session: any }) {
       keywords: keywords,
     });
     setSaving(false);
-    if (error) alert("설정 저장에 실패했습니다.");
-    else alert("설정이 안전하게 저장되었습니다.");
+
+    // 💡 alert 대신 예쁜 토스트 메시지 띄우기
+    if (error) {
+      setToast({ type: "error", msg: "설정 저장에 실패했습니다." });
+    } else {
+      setToast({ type: "success", msg: "설정이 안전하게 저장되었습니다." });
+    }
+
+    // 3초 뒤에 토스트 알림 자연스럽게 숨기기
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    toastTimeoutRef.current = setTimeout(() => setToast(null), 3000);
   };
 
   const addKeyword = (e: React.KeyboardEvent | React.MouseEvent) => {
@@ -69,7 +92,6 @@ export default function SettingsPanel({ session }: { session: any }) {
 
     if (!newKeyword.trim()) return;
 
-    // 1. 콤마(,) 기준 분리 및 공백 제거
     const inputKeywords = newKeyword
       .split(",")
       .map((k) => k.trim())
@@ -78,7 +100,6 @@ export default function SettingsPanel({ session }: { session: any }) {
     const uniqueNewKeywords: string[] = [];
     const duplicateKeywords: string[] = [];
 
-    // 2. 중복 검사
     inputKeywords.forEach((kw) => {
       if (keywords.includes(kw) || uniqueNewKeywords.includes(kw)) {
         duplicateKeywords.push(kw);
@@ -87,26 +108,20 @@ export default function SettingsPanel({ session }: { session: any }) {
       }
     });
 
-    // 3. 중복된 키워드가 있다면 예쁜 에러 메시지로 안내 (alert 제거)
     if (duplicateKeywords.length > 0) {
       setErrorMsg(
         `'${duplicateKeywords.join(", ")}' 은(는) 이미 등록된 키워드입니다.`,
       );
-
-      // 기존에 작동하던 타이머가 있다면 끄고 새로 3초 세팅
       if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
       errorTimeoutRef.current = setTimeout(() => setErrorMsg(""), 3000);
     } else {
-      // 에러가 없으면 기존 메시지 즉시 숨김
       setErrorMsg("");
     }
 
-    // 4. 중복되지 않은 신규 키워드만 추가
     if (uniqueNewKeywords.length > 0) {
       setKeywords([...keywords, ...uniqueNewKeywords]);
     }
 
-    // 5. 입력창 비우기
     setNewKeyword("");
   };
 
@@ -121,7 +136,7 @@ export default function SettingsPanel({ session }: { session: any }) {
     );
 
   return (
-    <main className="mx-auto w-full max-w-3xl p-5 sm:p-8 print:hidden">
+    <main className="relative mx-auto w-full max-w-3xl p-5 sm:p-8 print:hidden">
       <div className="mb-8">
         <h1 className="text-2xl font-bold">AI 및 앱 설정</h1>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -239,7 +254,6 @@ export default function SettingsPanel({ session }: { session: any }) {
               </Button>
             </div>
 
-            {/* 💡 예쁜 인라인 에러 메시지 영역 */}
             {errorMsg && (
               <div className="flex items-center gap-1.5 text-sm font-medium text-red-500 animate-in fade-in slide-in-from-top-1">
                 <AlertCircle className="size-4" />
@@ -253,11 +267,28 @@ export default function SettingsPanel({ session }: { session: any }) {
           onClick={handleSave}
           disabled={saving}
           size="lg"
-          className="w-full h-12 text-base"
+          className="w-full h-12 text-base relative overflow-hidden transition-all"
         >
           {saving ? "저장 중..." : "모든 설정 저장하기"}
         </Button>
       </div>
+
+      {/* 💡 화면 하단에서 스르륵 올라오는 예쁜 플로팅 토스트 알림 */}
+      {toast && (
+        <div
+          className="fixed bottom-10 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-full px-6 py-3.5 text-sm font-bold text-white shadow-2xl animate-in fade-in slide-in-from-bottom-5 duration-300"
+          style={{
+            backgroundColor: toast.type === "success" ? "#10b981" : "#ef4444",
+          }}
+        >
+          {toast.type === "success" ? (
+            <CheckCircle2 className="size-5" />
+          ) : (
+            <AlertCircle className="size-5" />
+          )}
+          {toast.msg}
+        </div>
+      )}
     </main>
   );
 }
