@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-// 💡 Calendar, List 아이콘이 추가되었습니다!
 import {
   BookOpen,
   Clock3,
@@ -55,7 +54,6 @@ export default function Page() {
   const [currentView, setCurrentView] = useState<"dashboard" | "settings">(
     "dashboard",
   );
-  // 💡 리스트 뷰와 달력 뷰를 전환하기 위한 상태
   const [dashboardMode, setDashboardMode] = useState<"list" | "calendar">(
     "list",
   );
@@ -81,7 +79,6 @@ export default function Page() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // 💡 핵심 수정: session 객체 전체가 아닌 session?.user?.id를 의존성으로 사용하여 무한 렌더링 방지
   useEffect(() => {
     const userId = session?.user?.id;
     if (!userId || currentView !== "dashboard") return;
@@ -128,35 +125,60 @@ export default function Page() {
       lastMeetingDateStr = `${new Date(latest.created_at).getMonth() + 1}월 ${new Date(latest.created_at).getDate()}일`;
   }
 
+  // 💡 제목 수정 함수 (에러 방어 및 알림 추가)
   const handleUpdateTitle = async (id: string, newTitle: string) => {
     const { error } = await supabase
       .from("meetings")
       .update({ title: newTitle })
       .eq("id", id);
-    if (!error)
-      setDbMeetings((prev) =>
-        prev.map((m) => (m.id === id ? { ...m, title: newTitle } : m)),
+
+    if (error) {
+      alert(
+        `제목 저장 실패: ${error.message}\n(Supabase 테이블의 UPDATE 권한(RLS)을 확인하세요)`,
       );
+      return; // 실패하면 상태를 업데이트하지 않고 중단
+    }
+
+    setDbMeetings((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, title: newTitle } : m)),
+    );
   };
 
+  // 💡 내용 수정 함수 (에러 방어 및 알림 추가)
   const handleUpdateMinutes = async (
     meetingId: string,
     updatedMinutes: Partial<MeetingMinutes>,
   ) => {
-    await supabase
+    const { error } = await supabase
       .from("meeting_minutes")
       .update({
         summary: updatedMinutes.summary,
         decisions: updatedMinutes.decisions,
       })
       .eq("meeting_id", meetingId);
+
+    if (error) {
+      alert(
+        `내용 저장 실패: ${error.message}\n(Supabase 테이블의 UPDATE 권한(RLS)을 확인하세요)`,
+      );
+      return; // 실패하면 상태를 업데이트하지 않고 중단
+    }
+
     setGeneratedMinutes((prev) =>
       prev ? { ...prev, ...updatedMinutes } : null,
     );
   };
 
   const handleDeleteMeeting = async (id: string) => {
-    await supabase.from("meetings").delete().eq("id", id);
+    const { error } = await supabase.from("meetings").delete().eq("id", id);
+
+    if (error) {
+      alert(
+        `삭제 실패: ${error.message}\n(Supabase 테이블의 DELETE 권한을 확인하세요)`,
+      );
+      return;
+    }
+
     setDbMeetings((prev) => prev.filter((m) => m.id !== id));
     setDetail(false);
   };
@@ -253,7 +275,6 @@ export default function Page() {
                 <div>
                   <h2 className="text-lg font-bold">기록된 회의</h2>
                 </div>
-                {/* 💡 뷰 모드 전환 토글 버튼 */}
                 <div className="flex items-center rounded-lg border border-border bg-muted/30 p-1">
                   <button
                     onClick={() => setDashboardMode("list")}
@@ -270,7 +291,6 @@ export default function Page() {
                 </div>
               </div>
 
-              {/* 💡 상태에 따라 리스트나 달력을 보여줍니다 */}
               {dashboardMode === "calendar" ? (
                 <CalendarView
                   meetings={filtered}
