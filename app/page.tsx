@@ -263,7 +263,6 @@ export default function Page() {
                 </p>
               </div>
 
-              {/* 💡 기본 파란색 버튼으로 원복 */}
               <Button
                 onClick={() => setRecording(true)}
                 className="w-full sm:w-auto shadow-sm"
@@ -327,7 +326,7 @@ export default function Page() {
                       onClick={() => handleOpenDetail(meeting)}
                       className="group flex w-full items-center gap-4 rounded-xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm"
                     >
-                      {/* 💡 기본 파란색 아이콘 박스로 원복 */}
+                      {/* 💡 아이콘 배경색을 원래의 부드러운 테마 색상(bg-primary)으로 원복 */}
                       <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                         <FileText className="size-5" />
                       </div>
