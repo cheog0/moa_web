@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo } from "react";
-// 💡 Loader2, CheckCircle2 아이콘 추가
 import {
   Check,
   Clock3,
@@ -17,6 +16,7 @@ import {
   ChevronDown,
   Loader2,
   CheckCircle2,
+  AlertCircle, // 💡 경고 아이콘 추가
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MeetingMinutes } from "@/lib/constants";
@@ -46,7 +46,9 @@ export default function DetailPanel({
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
 
-  // 💡 저장 상태를 관리하는 State (idle, saving, saved)
+  // 💡 커스텀 삭제 확인 모달 오픈 상태
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
     "idle",
   );
@@ -59,13 +61,11 @@ export default function DetailPanel({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTimeDisplay, setCurrentTimeDisplay] = useState("00:00");
 
-  // 변경 사항이 있는지 실시간으로 감지
   const hasChanges =
     meetingTitle !== (meeting?.title || "새 회의") ||
     summaryText !== (minutes?.summary || "") ||
     decisionsText !== (minutes?.decisions || "");
 
-  // 변경 사항이 생기면 '저장됨' 상태를 다시 '대기' 상태로 돌림
   useEffect(() => {
     if (hasChanges) setSaveStatus("idle");
   }, [hasChanges]);
@@ -112,9 +112,7 @@ export default function DetailPanel({
       try {
         const parsed = JSON.parse(t);
         if (Array.isArray(parsed)) return parsed;
-      } catch (e) {
-        // 파싱 실패 시 일반 텍스트로 유지
-      }
+      } catch (e) {}
     }
     return t;
   }, [minutes?.transcript]);
@@ -132,7 +130,6 @@ export default function DetailPanel({
     setIsDownloadOpen(false);
   };
 
-  // 💡 명시적 수동 저장 함수
   const handleManualSave = () => {
     if (!meeting?.id || !hasChanges) return;
     setSaveStatus("saving");
@@ -148,13 +145,10 @@ export default function DetailPanel({
       });
     }
 
-    // 약간의 딜레이를 주어 저장되는 시각적 효과 부여
     setTimeout(() => setSaveStatus("saved"), 600);
   };
 
-  // 💡 창을 닫을 때 실행되는 스마트 자동 저장 함수
   const handleSmartClose = () => {
-    // 닫기 버튼을 눌렀는데 변경 사항이 있다면, 버리지 말고 자동 저장 후 종료
     if (hasChanges && meeting?.id) {
       if (meetingTitle !== meeting.title)
         onUpdateTitle(meeting.id, meetingTitle);
@@ -171,13 +165,17 @@ export default function DetailPanel({
     onClose();
   };
 
-  const handleDelete = () => {
-    if (
-      confirm(
-        "정말로 이 회의록을 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.",
-      )
-    ) {
-      if (meeting?.id) onDelete(meeting.id);
+  // 💡 예쁜 모달을 열어주는 트리거 함수
+  const handleDeleteClick = () => {
+    if (!meeting?.id) return;
+    setIsDeleteModalOpen(true);
+  };
+
+  // 💡 실제 삭제 실행 함수
+  const executeDelete = () => {
+    if (meeting?.id) {
+      setIsDeleteModalOpen(false);
+      onDelete(meeting.id);
     }
   };
 
@@ -235,8 +233,8 @@ export default function DetailPanel({
 
   return (
     <div
-      className="fixed inset-0 z-30 flex justify-end bg-foreground/20 backdrop-blur-sm print:static print:block print:h-auto print:min-h-0 print:bg-white print:backdrop-blur-none"
-      onClick={handleSmartClose} // 배경 클릭 시에도 안전하게 자동 저장되도록 수정
+      className="fixed inset-0 z-30 flex justify-end bg-foreground/25 backdrop-blur-sm print:static print:block print:h-auto print:min-h-0 print:bg-white print:backdrop-blur-none"
+      onClick={handleSmartClose}
     >
       <style>{`
         @media print {
@@ -306,7 +304,7 @@ export default function DetailPanel({
           <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/95 px-6 py-4 backdrop-blur print:hidden">
             <div className="flex items-center gap-3">
               <button
-                onClick={handleSmartClose} // X 버튼 클릭 시 안전 종료
+                onClick={handleSmartClose}
                 className="rounded-lg p-2 hover:bg-muted"
               >
                 <X className="size-4" />
@@ -338,7 +336,6 @@ export default function DetailPanel({
                 </div>
               )}
 
-              {/* 💡 새로운 저장 버튼 UI */}
               <Button
                 variant={hasChanges ? "default" : "outline"}
                 size="sm"
@@ -347,7 +344,7 @@ export default function DetailPanel({
                   saveStatus === "saving" ||
                   (!hasChanges && saveStatus !== "saved")
                 }
-                className={`w-[110px] ${hasChanges ? "bg-sky-500 text-white hover:bg-sky-600" : ""}`}
+                className={`w-[110px] ${hasChanges ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}`}
               >
                 {saveStatus === "saving" ? (
                   <>
@@ -355,7 +352,7 @@ export default function DetailPanel({
                   </>
                 ) : saveStatus === "saved" && !hasChanges ? (
                   <>
-                    <CheckCircle2 className="mr-2 size-4 text-green-500" />{" "}
+                    <CheckCircle2 className="mr-2 size-4 text-emerald-500" />{" "}
                     저장됨
                   </>
                 ) : (
@@ -434,7 +431,7 @@ export default function DetailPanel({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={handleDelete}
+                  onClick={handleDeleteClick} // 💡 예쁜 모달 오픈 함수 연결
                   className="ml-1 text-red-500 hover:bg-red-50 hover:text-red-600"
                 >
                   <Trash2 className="size-4" />
@@ -582,6 +579,46 @@ export default function DetailPanel({
           )}
         </main>
       </div>
+
+      {/* 💡 커스텀 삭제 확인 모달 */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="bg-background rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden flex flex-col border border-border p-6 text-center animate-in zoom-in-95 duration-200">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-rose-100 text-rose-500 mb-5">
+              <Trash2 className="size-7" />
+            </div>
+
+            <h2 className="text-xl font-bold mb-2 text-foreground">
+              회의록 삭제
+            </h2>
+
+            <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
+              <span className="font-bold text-foreground">
+                '{meetingTitle}'
+              </span>
+              을(를) 정말 삭제하시겠습니까?
+              <br />
+              삭제된 데이터는 복구할 수 없습니다.
+            </p>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteModalOpen(false)}
+                className="flex-1 h-11"
+              >
+                취소
+              </Button>
+              <Button
+                onClick={executeDelete}
+                className="flex-1 h-11 bg-rose-500 hover:bg-rose-600 text-white font-semibold flex items-center justify-center"
+              >
+                삭제하기
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
