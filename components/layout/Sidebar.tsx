@@ -6,9 +6,7 @@ import {
   Plus,
   Settings,
   LogOut,
-  CheckSquare,
   LineChart,
-  FolderClosed,
   Star,
   FileEdit,
   Trash2,
@@ -31,7 +29,7 @@ export default function Sidebar({
 }) {
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-sidebar px-4 py-5 lg:flex print:hidden">
-      <div className="flex items-center gap-3 px-2 pb-8">
+      <div className="flex items-center gap-3 px-2 pb-6">
         <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
           <Mic className="size-4" />
         </div>
@@ -40,14 +38,16 @@ export default function Sidebar({
         </span>
       </div>
 
+      {/* 💡 임의로 넣었던 색상 코드를 빼고 원래 쓰시던 기본 스타일로 되돌렸습니다! */}
       <Button
         onClick={onNew}
-        className="mb-7 w-full justify-center gap-2 shadow-sm"
+        className="mb-5 w-full justify-center gap-2 shadow-sm"
       >
         <Plus className="size-4" />새 회의 시작
       </Button>
 
-      <nav className="flex flex-1 flex-col gap-6 overflow-y-auto custom-scrollbar text-sm">
+      {/* 스크롤바는 숨기고 스크롤 기능만 유지 */}
+      <nav className="flex flex-1 flex-col gap-4 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] text-sm">
         {/* 워크스페이스 */}
         <div className="flex flex-col gap-1">
           <span className="px-3 text-xs font-bold text-muted-foreground/60 mb-1 tracking-wider">
@@ -59,7 +59,6 @@ export default function Sidebar({
             active={currentView === "dashboard"}
             onClick={() => onNavigate("dashboard")}
           />
-          <NavItem icon={CheckSquare} label="내 할 일" disabled />
           <NavItem icon={LineChart} label="인사이트" disabled />
         </div>
 
@@ -89,12 +88,11 @@ export default function Sidebar({
           />
         </div>
 
-        {/* 💡 회의 관리 (맞춤 템플릿 잠금 해제!) */}
+        {/* 회의 관리 */}
         <div className="flex flex-col gap-1">
           <span className="px-3 text-xs font-bold text-muted-foreground/60 mb-1 tracking-wider">
             회의 관리
           </span>
-          <NavItem icon={FolderClosed} label="전체 폴더" disabled />
           <NavItem icon={Star} label="중요한 회의" disabled />
           <NavItem
             icon={FileEdit}
@@ -119,7 +117,7 @@ export default function Sidebar({
         </div>
       </nav>
 
-      <div className="mt-6 shrink-0 border-t border-border pt-4">
+      <div className="mt-4 shrink-0 border-t border-border pt-4">
         <button
           onClick={onLogout}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-muted-foreground transition-colors hover:bg-red-50 hover:text-red-600"
@@ -155,7 +153,7 @@ function NavItem({
   return (
     <button
       onClick={handleClick}
-      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
+      className={`flex items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors ${
         active
           ? "bg-primary/10 font-semibold text-primary"
           : "text-muted-foreground hover:bg-muted hover:text-foreground"

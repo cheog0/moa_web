@@ -21,7 +21,7 @@ import { MeetingMinutes } from "@/lib/constants";
 import AuthScreen from "@/components/auth/AuthScreen";
 import Sidebar from "@/components/layout/Sidebar";
 import SettingsPanel from "@/components/settings/SettingsPanel";
-import TemplatePanel from "@/components/settings/TemplatePanel"; // 💡 새롭게 분리한 템플릿 패널 추가!
+import TemplatePanel from "@/components/settings/TemplatePanel";
 import RecordingPanel from "@/components/meeting/RecordingPanel";
 import DetailPanel from "@/components/meeting/DetailPanel";
 import CalendarView from "@/components/meeting/CalenderView";
@@ -194,7 +194,7 @@ export default function Page() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
+    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
       <Sidebar
         currentView={currentView}
         onNavigate={(view) => setCurrentView(view)}
@@ -203,7 +203,7 @@ export default function Page() {
         projects={dbProjects}
       />
 
-      <div className="min-w-0 flex-1 flex flex-col h-screen overflow-y-auto print:hidden">
+      <div className="min-w-0 flex-1 flex flex-col h-full overflow-y-auto print:hidden">
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-border px-5 sm:px-8">
           <div className="flex items-center gap-3">
             <button className="rounded-lg p-2 hover:bg-muted lg:hidden">
@@ -229,7 +229,6 @@ export default function Page() {
         {currentView === "settings" ? (
           <SettingsPanel session={session} />
         ) : currentView === "templates" ? (
-          // 💡 새로 만든 독립 템플릿 패널 라우팅
           <TemplatePanel session={session} />
         ) : currentView === "new_project" ? (
           <main className="mx-auto w-full max-w-6xl py-8">
@@ -263,9 +262,11 @@ export default function Page() {
                   더 선명하게 기록해보세요.
                 </p>
               </div>
+
+              {/* 💡 기본 파란색 버튼으로 원복 */}
               <Button
                 onClick={() => setRecording(true)}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto shadow-sm"
               >
                 <Plus className="mr-2 size-4" />새 회의 시작
               </Button>
@@ -326,7 +327,8 @@ export default function Page() {
                       onClick={() => handleOpenDetail(meeting)}
                       className="group flex w-full items-center gap-4 rounded-xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm"
                     >
-                      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-sky-500 text-white">
+                      {/* 💡 기본 파란색 아이콘 박스로 원복 */}
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                         <FileText className="size-5" />
                       </div>
                       <div className="min-w-0 flex-1">
