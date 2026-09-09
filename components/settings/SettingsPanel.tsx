@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-// 💡 CheckCircle2 아이콘이 추가되었습니다.
 import {
   Cpu,
   FileEdit,
@@ -31,7 +30,6 @@ export default function SettingsPanel({ session }: { session: any }) {
   const [errorMsg, setErrorMsg] = useState("");
   const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 💡 저장 결과(토스트)를 관리할 상태와 타이머 Ref 추가
   const [toast, setToast] = useState<{
     type: "success" | "error";
     msg: string;
@@ -73,14 +71,12 @@ export default function SettingsPanel({ session }: { session: any }) {
     });
     setSaving(false);
 
-    // 💡 alert 대신 예쁜 토스트 메시지 띄우기
     if (error) {
       setToast({ type: "error", msg: "설정 저장에 실패했습니다." });
     } else {
       setToast({ type: "success", msg: "설정이 안전하게 저장되었습니다." });
     }
 
-    // 3초 뒤에 토스트 알림 자연스럽게 숨기기
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     toastTimeoutRef.current = setTimeout(() => setToast(null), 3000);
   };
@@ -273,10 +269,10 @@ export default function SettingsPanel({ session }: { session: any }) {
         </Button>
       </div>
 
-      {/* 💡 화면 하단에서 스르륵 올라오는 예쁜 플로팅 토스트 알림 */}
+      {/* 💡 화면 상단에서 스르륵 내려오는 예쁜 플로팅 토스트 알림 */}
       {toast && (
         <div
-          className="fixed bottom-10 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-full px-6 py-3.5 text-sm font-bold text-white shadow-2xl animate-in fade-in slide-in-from-bottom-5 duration-300"
+          className="fixed top-10 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-full px-6 py-3.5 text-sm font-bold text-white shadow-2xl animate-in fade-in slide-in-from-top-5 duration-300"
           style={{
             backgroundColor: toast.type === "success" ? "#10b981" : "#ef4444",
           }}
