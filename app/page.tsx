@@ -21,9 +21,11 @@ import { MeetingMinutes } from "@/lib/constants";
 import AuthScreen from "@/components/auth/AuthScreen";
 import Sidebar from "@/components/layout/Sidebar";
 import SettingsPanel from "@/components/settings/SettingsPanel";
+import TemplatePanel from "@/components/settings/TemplatePanel"; // 💡 새롭게 분리한 템플릿 패널 추가!
 import RecordingPanel from "@/components/meeting/RecordingPanel";
 import DetailPanel from "@/components/meeting/DetailPanel";
 import CalendarView from "@/components/meeting/CalenderView";
+import ProjectTimeline from "@/components/meeting/ProjectTimeline";
 
 function Stat({
   icon: Icon,
@@ -51,9 +53,8 @@ function Stat({
 export default function Page() {
   const [session, setSession] = useState<any>(null);
   const [loadingSession, setLoadingSession] = useState(true);
-  const [currentView, setCurrentView] = useState<"dashboard" | "settings">(
-    "dashboard",
-  );
+
+  const [currentView, setCurrentView] = useState<string>("dashboard");
   const [dashboardMode, setDashboardMode] = useState<"list" | "calendar">(
     "list",
   );
@@ -63,7 +64,9 @@ export default function Page() {
   const [generatedMinutes, setGeneratedMinutes] =
     useState<MeetingMinutes | null>(null);
   const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
+
   const [dbMeetings, setDbMeetings] = useState<any[]>([]);
+  const [dbProjects, setDbProjects] = useState<any[]>([]);
   const [query, setQuery] = useState("");
 
   useEffect(() => {
@@ -79,9 +82,21 @@ export default function Page() {
     return () => subscription.unsubscribe();
   }, []);
 
+  const fetchProjects = async () => {
+    try {
+      const { data } = await supabase
+        .from("projects")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (data) setDbProjects(data);
+    } catch (error) {
+      console.error("프로젝트 로드 실패", error);
+    }
+  };
+
   useEffect(() => {
     const userId = session?.user?.id;
-    if (!userId || currentView !== "dashboard") return;
+    if (!userId) return;
 
     const fetchMeetings = async () => {
       try {
@@ -91,11 +106,13 @@ export default function Page() {
         const data = await res.json();
         if (data.success) setDbMeetings(data.meetings);
       } catch (error) {
-        console.error("❌ 회의 목록을 불러오지 못했습니다.", error);
+        console.error("회의 목록 로드 실패", error);
       }
     };
+
     fetchMeetings();
-  }, [session?.user?.id, recording, currentView]);
+    fetchProjects();
+  }, [session?.user?.id, recording]);
 
   if (loadingSession)
     return (
@@ -125,26 +142,18 @@ export default function Page() {
       lastMeetingDateStr = `${new Date(latest.created_at).getMonth() + 1}월 ${new Date(latest.created_at).getDate()}일`;
   }
 
-  // 💡 제목 수정 함수 (에러 방어 및 알림 추가)
   const handleUpdateTitle = async (id: string, newTitle: string) => {
     const { error } = await supabase
       .from("meetings")
       .update({ title: newTitle })
       .eq("id", id);
-
-    if (error) {
-      alert(
-        `제목 저장 실패: ${error.message}\n(Supabase 테이블의 UPDATE 권한(RLS)을 확인하세요)`,
+    if (!error) {
+      setDbMeetings((prev) =>
+        prev.map((m) => (m.id === id ? { ...m, title: newTitle } : m)),
       );
-      return; // 실패하면 상태를 업데이트하지 않고 중단
     }
-
-    setDbMeetings((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, title: newTitle } : m)),
-    );
   };
 
-  // 💡 내용 수정 함수 (에러 방어 및 알림 추가)
   const handleUpdateMinutes = async (
     meetingId: string,
     updatedMinutes: Partial<MeetingMinutes>,
@@ -156,31 +165,19 @@ export default function Page() {
         decisions: updatedMinutes.decisions,
       })
       .eq("meeting_id", meetingId);
-
-    if (error) {
-      alert(
-        `내용 저장 실패: ${error.message}\n(Supabase 테이블의 UPDATE 권한(RLS)을 확인하세요)`,
+    if (!error) {
+      setGeneratedMinutes((prev) =>
+        prev ? { ...prev, ...updatedMinutes } : null,
       );
-      return; // 실패하면 상태를 업데이트하지 않고 중단
     }
-
-    setGeneratedMinutes((prev) =>
-      prev ? { ...prev, ...updatedMinutes } : null,
-    );
   };
 
   const handleDeleteMeeting = async (id: string) => {
     const { error } = await supabase.from("meetings").delete().eq("id", id);
-
-    if (error) {
-      alert(
-        `삭제 실패: ${error.message}\n(Supabase 테이블의 DELETE 권한을 확인하세요)`,
-      );
-      return;
+    if (!error) {
+      setDbMeetings((prev) => prev.filter((m) => m.id !== id));
+      setDetail(false);
     }
-
-    setDbMeetings((prev) => prev.filter((m) => m.id !== id));
-    setDetail(false);
   };
 
   const handleOpenDetail = async (meeting: any) => {
@@ -200,9 +197,10 @@ export default function Page() {
     <div className="flex min-h-screen bg-background text-foreground">
       <Sidebar
         currentView={currentView}
-        onNavigate={(view) => setCurrentView(view as any)}
+        onNavigate={(view) => setCurrentView(view)}
         onNew={() => setRecording(true)}
         onLogout={() => supabase.auth.signOut()}
+        projects={dbProjects}
       />
 
       <div className="min-w-0 flex-1 flex flex-col h-screen overflow-y-auto print:hidden">
@@ -230,7 +228,31 @@ export default function Page() {
 
         {currentView === "settings" ? (
           <SettingsPanel session={session} />
-        ) : (
+        ) : currentView === "templates" ? (
+          // 💡 새로 만든 독립 템플릿 패널 라우팅
+          <TemplatePanel session={session} />
+        ) : currentView === "new_project" ? (
+          <main className="mx-auto w-full max-w-6xl py-8">
+            <ProjectTimeline
+              dbMeetings={dbMeetings}
+              onSaveSuccess={fetchProjects}
+              onMeetingClick={handleOpenDetail}
+            />
+          </main>
+        ) : currentView.startsWith("project_") ? (
+          <main className="mx-auto w-full max-w-6xl py-8">
+            <ProjectTimeline
+              dbMeetings={dbMeetings}
+              projectId={currentView.replace("project_", "")}
+              onSaveSuccess={fetchProjects}
+              onDeleteSuccess={() => {
+                fetchProjects();
+                setCurrentView("dashboard");
+              }}
+              onMeetingClick={handleOpenDetail}
+            />
+          </main>
+        ) : currentView === "dashboard" ? (
           <main className="mx-auto w-full max-w-6xl p-5 sm:p-8">
             <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
               <div>
@@ -326,6 +348,15 @@ export default function Page() {
                 </div>
               )}
             </section>
+          </main>
+        ) : (
+          <main className="flex h-full items-center justify-center">
+            <div className="text-center text-muted-foreground">
+              <h3 className="text-lg font-bold text-foreground">
+                🚀 준비 중인 기능입니다
+              </h3>
+              <p className="mt-2 text-sm">조금만 기다려주세요!</p>
+            </div>
           </main>
         )}
       </div>

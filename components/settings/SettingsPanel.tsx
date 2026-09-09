@@ -1,29 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  Cpu,
-  FileEdit,
-  Key,
-  Tags,
-  X,
-  AlertCircle,
-  CheckCircle2,
-} from "lucide-react";
+import { Cpu, Key, Tags, X, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
-import {
-  TEMPLATE_BASIC,
-  TEMPLATE_SALES,
-  TEMPLATE_SCRUM,
-} from "@/lib/constants";
 
 export default function SettingsPanel({ session }: { session: any }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [aiEngine, setAiEngine] = useState("gemini");
   const [apiKey, setApiKey] = useState("");
-  const [customTemplate, setCustomTemplate] = useState("");
   const [keywords, setKeywords] = useState<string[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
 
@@ -42,11 +28,10 @@ export default function SettingsPanel({ session }: { session: any }) {
         .from("user_settings")
         .select("*")
         .eq("user_id", session.user.id)
-        .single();
+        .maybeSingle();
       if (data) {
         setAiEngine(data.ai_engine || "gemini");
         setApiKey(data.api_key || "");
-        setCustomTemplate(data.custom_template || "");
         setKeywords(
           Array.isArray(data.keywords)
             ? data.keywords
@@ -62,23 +47,42 @@ export default function SettingsPanel({ session }: { session: any }) {
 
   const handleSave = async () => {
     setSaving(true);
-    const { error } = await supabase.from("user_settings").upsert({
-      user_id: session.user.id,
-      ai_engine: aiEngine,
-      api_key: apiKey,
-      custom_template: customTemplate,
-      keywords: keywords,
-    });
-    setSaving(false);
 
-    if (error) {
-      setToast({ type: "error", msg: "설정 저장에 실패했습니다." });
-    } else {
+    try {
+      const { data: existing } = await supabase
+        .from("user_settings")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      // 💡 템플릿(custom_template)이 날아가지 않도록 기존 데이터를 합칩니다.
+      const payload = existing
+        ? {
+            ...existing,
+            ai_engine: aiEngine,
+            api_key: apiKey,
+            keywords: keywords,
+          }
+        : {
+            user_id: session.user.id,
+            ai_engine: aiEngine,
+            api_key: apiKey,
+            keywords: keywords,
+          };
+
+      const { error } = await supabase.from("user_settings").upsert(payload);
+
+      if (error) throw error;
+
       setToast({ type: "success", msg: "설정이 안전하게 저장되었습니다." });
+    } catch (error) {
+      console.error("설정 저장 에러:", error);
+      setToast({ type: "error", msg: "설정 저장에 실패했습니다." });
+    } finally {
+      setSaving(false);
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+      toastTimeoutRef.current = setTimeout(() => setToast(null), 3000);
     }
-
-    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-    toastTimeoutRef.current = setTimeout(() => setToast(null), 3000);
   };
 
   const addKeyword = (e: React.KeyboardEvent | React.MouseEvent) => {
@@ -132,11 +136,11 @@ export default function SettingsPanel({ session }: { session: any }) {
     );
 
   return (
-    <main className="relative mx-auto w-full max-w-3xl p-5 sm:p-8 print:hidden">
+    <main className="relative mx-auto w-full max-w-3xl p-5 sm:p-8 print:hidden animate-in fade-in duration-500">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">AI 및 앱 설정</h1>
+        <h1 className="text-2xl font-bold">시스템 설정</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          회의록 요약 방식과 AI 모델을 커스텀하세요.
+          AI 모델을 선택하고 자동 적용 키워드를 커스텀하세요.
         </p>
       </div>
 
@@ -170,44 +174,6 @@ export default function SettingsPanel({ session }: { session: any }) {
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="API 키를 붙여넣으세요"
             className="w-full h-11 rounded-lg border border-input bg-background px-4 text-sm outline-none focus:border-primary"
-          />
-        </section>
-
-        <section>
-          <div className="mb-2 flex items-center gap-2 font-bold">
-            <FileEdit className="size-5" /> 맞춤형 AI 회의록 템플릿
-          </div>
-          <div className="mb-3 flex flex-wrap gap-2">
-            <button
-              onClick={() => setCustomTemplate(TEMPLATE_SALES)}
-              className="rounded-full bg-blue-50 px-4 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-100"
-            >
-              📋 영업 미팅
-            </button>
-            <button
-              onClick={() => setCustomTemplate(TEMPLATE_SCRUM)}
-              className="rounded-full bg-green-50 px-4 py-1.5 text-xs font-semibold text-green-600 hover:bg-green-100"
-            >
-              🏃‍♂️ 데일리 스크럼
-            </button>
-            <button
-              onClick={() => setCustomTemplate(TEMPLATE_BASIC)}
-              className="rounded-full bg-gray-100 px-4 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-200"
-            >
-              📝 기본 회의
-            </button>
-            <button
-              onClick={() => setCustomTemplate("")}
-              className="rounded-full border border-border bg-white px-4 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-gray-50"
-            >
-              🔄 비우기
-            </button>
-          </div>
-          <textarea
-            value={customTemplate}
-            onChange={(e) => setCustomTemplate(e.target.value)}
-            placeholder="템플릿 양식을 작성하세요..."
-            className="h-64 w-full resize-y rounded-lg border border-input bg-background p-4 text-sm outline-none focus:border-primary"
           />
         </section>
 
@@ -263,13 +229,12 @@ export default function SettingsPanel({ session }: { session: any }) {
           onClick={handleSave}
           disabled={saving}
           size="lg"
-          className="w-full h-12 text-base relative overflow-hidden transition-all"
+          className="w-full h-12 text-base relative overflow-hidden transition-all bg-slate-900 hover:bg-slate-800 text-white"
         >
           {saving ? "저장 중..." : "모든 설정 저장하기"}
         </Button>
       </div>
 
-      {/* 💡 화면 상단에서 스르륵 내려오는 예쁜 플로팅 토스트 알림 */}
       {toast && (
         <div
           className="fixed top-10 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-full px-6 py-3.5 text-sm font-bold text-white shadow-2xl animate-in fade-in slide-in-from-top-5 duration-300"
