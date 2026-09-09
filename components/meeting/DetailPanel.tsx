@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo } from "react";
+// 💡 Loader2, CheckCircle2 아이콘 추가
 import {
   Check,
   Clock3,
@@ -14,6 +15,8 @@ import {
   Music,
   FileText,
   ChevronDown,
+  Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MeetingMinutes } from "@/lib/constants";
@@ -43,6 +46,11 @@ export default function DetailPanel({
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
 
+  // 💡 저장 상태를 관리하는 State (idle, saving, saved)
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
+    "idle",
+  );
+
   const [printOptions, setPrintOptions] = useState({
     decisions: true,
   });
@@ -50,6 +58,17 @@ export default function DetailPanel({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTimeDisplay, setCurrentTimeDisplay] = useState("00:00");
+
+  // 변경 사항이 있는지 실시간으로 감지
+  const hasChanges =
+    meetingTitle !== (meeting?.title || "새 회의") ||
+    summaryText !== (minutes?.summary || "") ||
+    decisionsText !== (minutes?.decisions || "");
+
+  // 변경 사항이 생기면 '저장됨' 상태를 다시 '대기' 상태로 돌림
+  useEffect(() => {
+    if (hasChanges) setSaveStatus("idle");
+  }, [hasChanges]);
 
   useEffect(() => {
     if (minutes) {
@@ -87,7 +106,6 @@ export default function DetailPanel({
     ? new Date(meeting.created_at).toLocaleDateString("ko-KR")
     : new Date().toLocaleDateString("ko-KR");
 
-  // 💡 핵심 추가: 텍스트로 넘어온 JSON 배열을 실제 배열 객체로 변환하여 예쁜 UI로 연결합니다.
   const normalizedTranscript = useMemo(() => {
     let t = minutes?.transcript;
     if (typeof t === "string") {
@@ -114,22 +132,45 @@ export default function DetailPanel({
     setIsDownloadOpen(false);
   };
 
-  const handleTitleBlur = () => {
+  // 💡 명시적 수동 저장 함수
+  const handleManualSave = () => {
+    if (!meeting?.id || !hasChanges) return;
+    setSaveStatus("saving");
+
+    if (meetingTitle !== meeting.title) onUpdateTitle(meeting.id, meetingTitle);
     if (
-      meeting?.id &&
-      meetingTitle.trim() !== "" &&
-      meetingTitle !== meeting.title
-    )
-      onUpdateTitle(meeting.id, meetingTitle);
+      summaryText !== minutes?.summary ||
+      decisionsText !== minutes?.decisions
+    ) {
+      onUpdateMinutes(meeting.id, {
+        summary: summaryText,
+        decisions: decisionsText,
+      });
+    }
+
+    // 약간의 딜레이를 주어 저장되는 시각적 효과 부여
+    setTimeout(() => setSaveStatus("saved"), 600);
   };
-  const handleSummaryBlur = () => {
-    if (meeting?.id && summaryText !== minutes?.summary)
-      onUpdateMinutes(meeting.id, { summary: summaryText });
+
+  // 💡 창을 닫을 때 실행되는 스마트 자동 저장 함수
+  const handleSmartClose = () => {
+    // 닫기 버튼을 눌렀는데 변경 사항이 있다면, 버리지 말고 자동 저장 후 종료
+    if (hasChanges && meeting?.id) {
+      if (meetingTitle !== meeting.title)
+        onUpdateTitle(meeting.id, meetingTitle);
+      if (
+        summaryText !== minutes?.summary ||
+        decisionsText !== minutes?.decisions
+      ) {
+        onUpdateMinutes(meeting.id, {
+          summary: summaryText,
+          decisions: decisionsText,
+        });
+      }
+    }
+    onClose();
   };
-  const handleDecisionsBlur = () => {
-    if (meeting?.id && decisionsText !== minutes?.decisions)
-      onUpdateMinutes(meeting.id, { decisions: decisionsText });
-  };
+
   const handleDelete = () => {
     if (
       confirm(
@@ -195,7 +236,7 @@ export default function DetailPanel({
   return (
     <div
       className="fixed inset-0 z-30 flex justify-end bg-foreground/20 backdrop-blur-sm print:static print:block print:h-auto print:min-h-0 print:bg-white print:backdrop-blur-none"
-      onClick={onClose}
+      onClick={handleSmartClose} // 배경 클릭 시에도 안전하게 자동 저장되도록 수정
     >
       <style>{`
         @media print {
@@ -265,7 +306,7 @@ export default function DetailPanel({
           <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/95 px-6 py-4 backdrop-blur print:hidden">
             <div className="flex items-center gap-3">
               <button
-                onClick={onClose}
+                onClick={handleSmartClose} // X 버튼 클릭 시 안전 종료
                 className="rounded-lg p-2 hover:bg-muted"
               >
                 <X className="size-4" />
@@ -296,6 +337,31 @@ export default function DetailPanel({
                   </span>
                 </div>
               )}
+
+              {/* 💡 새로운 저장 버튼 UI */}
+              <Button
+                variant={hasChanges ? "default" : "outline"}
+                size="sm"
+                onClick={handleManualSave}
+                disabled={
+                  saveStatus === "saving" ||
+                  (!hasChanges && saveStatus !== "saved")
+                }
+                className={`w-[110px] ${hasChanges ? "bg-sky-500 text-white hover:bg-sky-600" : ""}`}
+              >
+                {saveStatus === "saving" ? (
+                  <>
+                    <Loader2 className="mr-2 size-4 animate-spin" /> 저장 중
+                  </>
+                ) : saveStatus === "saved" && !hasChanges ? (
+                  <>
+                    <CheckCircle2 className="mr-2 size-4 text-green-500" />{" "}
+                    저장됨
+                  </>
+                ) : (
+                  "변경사항 저장"
+                )}
+              </Button>
 
               <Button
                 variant="outline"
@@ -404,7 +470,6 @@ export default function DetailPanel({
                 className={`w-full rounded-md bg-transparent p-1 -ml-1 text-4xl font-extrabold tracking-tight text-gray-900 outline-none placeholder:text-gray-300 transition-colors hover:bg-gray-50 focus:bg-white ${hideUI}`}
                 value={meetingTitle}
                 onChange={(e) => setMeetingTitle(e.target.value)}
-                onBlur={handleTitleBlur}
                 placeholder="제목 없는 문서"
               />
               <h1
@@ -432,7 +497,6 @@ export default function DetailPanel({
                       <textarea
                         value={summaryText}
                         onChange={(e) => setSummaryText(e.target.value)}
-                        onBlur={handleSummaryBlur}
                         className={`w-full min-h-[400px] resize-y rounded-lg border border-transparent p-3 text-base leading-relaxed text-gray-800 transition-colors hover:border-gray-200 focus:border-primary focus:outline-none ${hideUI}`}
                       />
                       <div
@@ -451,7 +515,6 @@ export default function DetailPanel({
                       <textarea
                         value={decisionsText}
                         onChange={(e) => setDecisionsText(e.target.value)}
-                        onBlur={handleDecisionsBlur}
                         className={`w-full min-h-[80px] resize-y rounded-lg border border-transparent p-3 text-base leading-relaxed text-gray-800 transition-colors hover:border-gray-200 focus:border-primary focus:outline-none ${hideUI}`}
                       />
                       <div
