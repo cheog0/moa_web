@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-// 💡 Loader2 아이콘이 추가되었습니다.
 import { Mic, Pause, Play, Sparkles, X, Square, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
@@ -20,6 +19,9 @@ export default function RecordingPanel({
   const [seconds, setSeconds] = useState(0);
   const [liveMemo, setLiveMemo] = useState("");
 
+  // 💡 1. 서버 준비 상태를 관리하는 State 추가
+  const [isServerReady, setIsServerReady] = useState(false);
+
   const [userSettings, setUserSettings] = useState({
     user_id: "",
     ai_engine: "gemini",
@@ -32,7 +34,6 @@ export default function RecordingPanel({
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // 1. 설정 불러오기 & 서버 모닝콜 (Pre-warming)
   useEffect(() => {
     const fetchSettings = async () => {
       const {
@@ -58,21 +59,25 @@ export default function RecordingPanel({
     };
     fetchSettings();
 
-    // [1차 기상 방어] 모달 창이 열릴 때 백엔드를 미리 깨웁니다.
+    // 💡 2. 모닝콜 로직 변경: 대답이 올 때까지 기다렸다가 버튼 활성화
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-    fetch(`${apiUrl}/api/meetings`).catch(() => {
-      console.log("모달 열림: 백엔드 기상 호출 완료 (응답 대기 안 함)");
-    });
+    fetch(`${apiUrl}/api/meetings`)
+      .then(() => {
+        console.log("백엔드 기상 완료! 녹음 준비 끝");
+        setIsServerReady(true); // 서버가 응답하면 버튼 열림!
+      })
+      .catch(() => {
+        // 혹시라도 에러가 나면 무한 로딩에 빠지지 않도록 일단 버튼을 열어줍니다.
+        console.log("모닝콜 에러 발생 (버튼은 활성화됨)");
+        setIsServerReady(true);
+      });
   }, []);
 
-  // 2. 타이머 및 하트비트 (Keep-Alive) 로직
   useEffect(() => {
     if (status !== "recording") return;
 
-    // 1초마다 화면의 시간 증가
     const timer = setInterval(() => setSeconds((prev) => prev + 1), 1000);
 
-    // [2차 수면 방어] 녹음 중 10분(600,000ms)마다 백엔드가 잠들지 않게 콕콕 찌르기
     const keepAlive = setInterval(
       () => {
         const apiUrl =
@@ -115,7 +120,7 @@ export default function RecordingPanel({
 
       const recorder = new MediaRecorder(stream, {
         mimeType,
-        audioBitsPerSecond: 64000, // 용량 최적화 (64kbps) 유지
+        audioBitsPerSecond: 64000,
       });
 
       mediaRecorderRef.current = recorder;
@@ -250,11 +255,8 @@ export default function RecordingPanel({
         <div className="flex-1 overflow-hidden p-8">
           {status === "processing" ? (
             <div className="flex h-full flex-col items-center justify-center animate-in fade-in duration-500">
-              {/* 💡 수정된 예쁜 로딩 UI 영역 */}
               <div className="relative flex size-24 items-center justify-center">
-                {/* 바깥쪽 회전하는 스피너 링 */}
                 <div className="absolute inset-0 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-                {/* 안쪽 반짝이는 아이콘 */}
                 <Sparkles className="size-10 animate-pulse text-primary" />
               </div>
               <p className="mt-8 text-xl font-bold text-foreground tracking-tight">
@@ -270,15 +272,38 @@ export default function RecordingPanel({
             </div>
           ) : status === "ready" ? (
             <div className="flex h-full flex-col items-center justify-center">
-              <div className="mx-auto flex size-24 items-center justify-center rounded-full bg-primary/10">
-                <Mic className="size-10 text-primary" />
-              </div>
-              <Button
-                className="mt-8 px-8 py-6 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all"
-                onClick={handleStartRecording}
+              <div
+                className={`mx-auto flex size-24 items-center justify-center rounded-full transition-colors ${isServerReady ? "bg-primary/10" : "bg-muted"}`}
               >
-                <Mic className="mr-2 size-5" /> 녹음 및 노트 시작
+                <Mic
+                  className={`size-10 ${isServerReady ? "text-primary" : "text-muted-foreground"}`}
+                />
+              </div>
+
+              {/* 💡 3. 버튼 비활성화 로직 및 문구 변경 */}
+              <Button
+                className="mt-8 px-8 py-6 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all disabled:cursor-not-allowed"
+                onClick={handleStartRecording}
+                disabled={!isServerReady}
+              >
+                {!isServerReady ? (
+                  <>
+                    <Loader2 className="mr-2 size-5 animate-spin" /> 서버를
+                    깨우는 중...
+                  </>
+                ) : (
+                  <>
+                    <Mic className="mr-2 size-5" /> 녹음 및 노트 시작
+                  </>
+                )}
               </Button>
+
+              {/* 서버가 깨어나는 중일 때 보여줄 친절한 안내 문구 */}
+              {!isServerReady && (
+                <p className="mt-4 text-sm text-muted-foreground animate-pulse">
+                  서버와 연결을 설정하고 있습니다. 잠시만 기다려주세요
+                </p>
+              )}
             </div>
           ) : (
             <div className="flex h-full flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
