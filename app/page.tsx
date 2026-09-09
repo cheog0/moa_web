@@ -326,8 +326,8 @@ export default function Page() {
                       onClick={() => handleOpenDetail(meeting)}
                       className="group flex w-full items-center gap-4 rounded-xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm"
                     >
-                      {/* 💡 아이콘 배경색을 원래의 부드러운 테마 색상(bg-primary)으로 원복 */}
-                      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                      {/* 💡 진한 배경을 빼고, 눈이 편안한 연한 하늘색 배경(bg-sky-50)과 차분한 아이콘 색상(text-sky-500)으로 부드럽게 변경했습니다! */}
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-500">
                         <FileText className="size-5" />
                       </div>
                       <div className="min-w-0 flex-1">
