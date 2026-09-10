@@ -233,15 +233,14 @@ export default function DetailPanel({
 
   return (
     <div
-      className="fixed inset-0 z-30 flex justify-end bg-foreground/25 backdrop-blur-sm print:static print:block print:h-auto print:min-h-0 print:bg-white print:backdrop-blur-none"
+      className="fixed inset-0 z-30 flex justify-end bg-foreground/25 backdrop-blur-sm print:static print:block print:h-auto print:min-h-0 print:overflow-visible print:bg-white print:backdrop-blur-none"
       onClick={handleSmartClose}
     >
       <style>{`
         @media print {
           @page { margin: 0; }
-          html, body, #__next, .min-h-screen {
+          html, body {
             height: auto !important;
-            min-height: 0 !important;
             overflow: visible !important;
             background-color: white !important;
           }
@@ -249,7 +248,7 @@ export default function DetailPanel({
       `}</style>
 
       <div
-        className={`flex h-full w-full max-w-4xl flex-col overflow-y-auto border-l border-border shadow-2xl print:block print:h-auto print:min-h-0 print:w-full print:max-w-none print:overflow-visible print:border-none print:shadow-none print:bg-white ${isPreviewMode ? "bg-zinc-100" : "bg-background"}`}
+        className={`flex h-full w-full max-w-4xl flex-col overflow-y-auto border-l border-border shadow-2xl print:block print:h-auto print:min-h-0 print:max-h-none print:w-full print:max-w-none print:overflow-visible print:border-none print:shadow-none print:bg-white ${isPreviewMode ? "bg-zinc-100" : "bg-background"}`}
         onClick={(e) => e.stopPropagation()}
       >
         {meeting?.audio_url && (
@@ -457,7 +456,7 @@ export default function DetailPanel({
         </div>
 
         <main
-          className={`mx-auto w-full max-w-3xl ${isPreviewMode ? "p-8" : "p-6 sm:p-12"} print:block print:max-w-none print:h-auto print:min-h-0 print:py-[15mm] print:px-[20mm] print:m-0`}
+          className={`mx-auto w-full max-w-3xl ${isPreviewMode ? "p-8" : "p-6 sm:p-12"} print:block print:max-w-none print:h-auto print:min-h-0 print:max-h-none print:overflow-visible print:py-[15mm] print:px-[20mm] print:m-0`}
         >
           {tab === "minutes" ? (
             <div
@@ -504,7 +503,7 @@ export default function DetailPanel({
                     </div>
 
                     <div
-                      className={`print:break-inside-avoid ${!printOptions.decisions ? "print:hidden" : ""} ${!printOptions.decisions && isPreviewMode ? "hidden" : ""}`}
+                      className={`${!printOptions.decisions ? "print:hidden" : ""} ${!printOptions.decisions && isPreviewMode ? "hidden" : ""}`}
                     >
                       <h3 className="mb-2 flex items-center gap-2 text-lg font-bold text-gray-900">
                         <Check className="size-5 text-green-500" /> 결정된 사항

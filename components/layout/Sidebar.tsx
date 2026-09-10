@@ -38,7 +38,6 @@ export default function Sidebar({
         </span>
       </div>
 
-      {/* 💡 임의로 넣었던 색상 코드를 빼고 원래 쓰시던 기본 스타일로 되돌렸습니다! */}
       <Button
         onClick={onNew}
         className="mb-5 w-full justify-center gap-2 shadow-sm"
@@ -46,7 +45,6 @@ export default function Sidebar({
         <Plus className="size-4" />새 회의 시작
       </Button>
 
-      {/* 스크롤바는 숨기고 스크롤 기능만 유지 */}
       <nav className="flex flex-1 flex-col gap-4 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] text-sm">
         {/* 워크스페이스 */}
         <div className="flex flex-col gap-1">
@@ -88,12 +86,17 @@ export default function Sidebar({
           />
         </div>
 
-        {/* 회의 관리 */}
+        {/* 회의 관리 (즐겨찾기 활성화) */}
         <div className="flex flex-col gap-1">
           <span className="px-3 text-xs font-bold text-muted-foreground/60 mb-1 tracking-wider">
             회의 관리
           </span>
-          <NavItem icon={Star} label="중요한 회의" disabled />
+          <NavItem
+            icon={Star}
+            label="즐겨찾기"
+            active={currentView === "starred_meetings"}
+            onClick={() => onNavigate("starred_meetings")}
+          />
           <NavItem
             icon={FileEdit}
             label="맞춤 템플릿"

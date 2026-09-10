@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Calendar,
   List,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -123,6 +124,8 @@ export default function Page() {
   if (!session) return <AuthScreen />;
 
   const filtered = dbMeetings.filter((m) => m.title && m.title.includes(query));
+  const starredMeetings = filtered.filter((m) => m.is_starred);
+
   const totalMeetings = dbMeetings.length;
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -150,6 +153,26 @@ export default function Page() {
     if (!error) {
       setDbMeetings((prev) =>
         prev.map((m) => (m.id === id ? { ...m, title: newTitle } : m)),
+      );
+    }
+  };
+
+  const handleToggleStar = async (
+    e: React.MouseEvent,
+    id: string,
+    currentStatus: boolean,
+  ) => {
+    e.stopPropagation();
+    const nextStatus = !currentStatus;
+
+    const { error } = await supabase
+      .from("meetings")
+      .update({ is_starred: nextStatus })
+      .eq("id", id);
+
+    if (!error) {
+      setDbMeetings((prev) =>
+        prev.map((m) => (m.id === id ? { ...m, is_starred: nextStatus } : m)),
       );
     }
   };
@@ -194,7 +217,7 @@ export default function Page() {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
+    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground print:block print:h-auto print:max-h-none print:overflow-visible print:bg-white">
       <Sidebar
         currentView={currentView}
         onNavigate={(view) => setCurrentView(view)}
@@ -209,7 +232,8 @@ export default function Page() {
             <button className="rounded-lg p-2 hover:bg-muted lg:hidden">
               <Menu className="size-5" />
             </button>
-            {currentView === "dashboard" && (
+            {(currentView === "dashboard" ||
+              currentView === "starred_meetings") && (
               <div className="relative hidden sm:block">
                 <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <input
@@ -230,6 +254,57 @@ export default function Page() {
           <SettingsPanel session={session} />
         ) : currentView === "templates" ? (
           <TemplatePanel session={session} />
+        ) : currentView === "starred_meetings" ? (
+          <main className="mx-auto w-full max-w-6xl p-5 sm:p-8">
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold tracking-tight">즐겨찾기</h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                자주 찾는 즐겨찾기 회의록을 모아두었어요.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              {starredMeetings.map((meeting) => (
+                <div
+                  key={meeting.id}
+                  onClick={() => handleOpenDetail(meeting)}
+                  className="group flex w-full items-center gap-4 rounded-xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm cursor-pointer"
+                >
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-500">
+                    <FileText className="size-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate text-sm font-semibold">
+                      {meeting.title || "새 회의"}
+                    </h3>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {new Date(meeting.created_at).toLocaleString("ko-KR")}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={(e) =>
+                      handleToggleStar(e, meeting.id, meeting.is_starred)
+                    }
+                    className="p-2 text-amber-400 hover:text-amber-500 transition-transform hover:scale-110"
+                    title="중요 회의 해제"
+                  >
+                    <Star className="size-5" fill="currentColor" />
+                  </button>
+
+                  <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                </div>
+              ))}
+
+              {starredMeetings.length === 0 && (
+                <div className="rounded-xl border border-dashed border-border p-16 text-center text-sm text-muted-foreground">
+                  <Star className="mx-auto size-10 text-muted-foreground/30 mb-3" />
+                  아직 지정된 즐겨찾기가 없습니다. 대시보드에서 별표를
+                  눌러보세요!
+                </div>
+              )}
+            </div>
+          </main>
         ) : currentView === "new_project" ? (
           <main className="mx-auto w-full max-w-6xl py-8">
             <ProjectTimeline
@@ -321,12 +396,12 @@ export default function Page() {
               ) : (
                 <div className="flex flex-col gap-3">
                   {filtered.map((meeting) => (
-                    <button
+                    /* 💡 <button> 대신 <div> 태그를 사용하여 button 안에 button이 들어가는 구조적 에러를 완벽히 해결했습니다. */
+                    <div
                       key={meeting.id}
                       onClick={() => handleOpenDetail(meeting)}
-                      className="group flex w-full items-center gap-4 rounded-xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm"
+                      className="group flex w-full items-center gap-4 rounded-xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm cursor-pointer"
                     >
-                      {/* 💡 진한 배경을 빼고, 눈이 편안한 연한 하늘색 배경(bg-sky-50)과 차분한 아이콘 색상(text-sky-500)으로 부드럽게 변경했습니다! */}
                       <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-500">
                         <FileText className="size-5" />
                       </div>
@@ -338,8 +413,30 @@ export default function Page() {
                           {new Date(meeting.created_at).toLocaleString("ko-KR")}
                         </p>
                       </div>
+
+                      <button
+                        onClick={(e) =>
+                          handleToggleStar(e, meeting.id, meeting.is_starred)
+                        }
+                        className={`p-2 transition-transform hover:scale-110 ${
+                          meeting.is_starred
+                            ? "text-amber-400 hover:text-amber-500"
+                            : "text-muted-foreground/30 hover:text-amber-400"
+                        }`}
+                        title={
+                          meeting.is_starred
+                            ? "중요 회의 해제"
+                            : "중요 회의로 지정"
+                        }
+                      >
+                        <Star
+                          className="size-5"
+                          fill={meeting.is_starred ? "currentColor" : "none"}
+                        />
+                      </button>
+
                       <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-                    </button>
+                    </div>
                   ))}
                   {filtered.length === 0 && (
                     <div className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">

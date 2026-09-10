@@ -34,3 +34,25 @@
 html { background: var(--background); }
 body { @apply bg-background text-foreground antialiased; }
 button, input { font: inherit; }
+
+@media print {
+  @page {
+    margin: 0;
+  }
+
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  /* Flex + 100vh 래퍼가 Chromium 인쇄를 1쪽으로 자름 */
+  body > div {
+    display: block !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    position: static !important;
+  }
+}
