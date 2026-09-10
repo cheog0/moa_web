@@ -125,7 +125,6 @@ export default function ProjectTimeline({
     fetchProjectData();
   }, [projectId, dbMeetings]);
 
-  // 💡 [UX 개선] 타임라인 이름이 비어있으면 모달을 열지 않고 경고창 표시 후 입력창 포커스!
   const handleOpenModal = () => {
     if (!projectName.trim()) {
       showToast("타임라인 이름을 먼저 입력해 주세요", "warning");
@@ -444,8 +443,9 @@ export default function ProjectTimeline({
                 className="rounded-2xl border bg-white border-border p-4 transition-all hover:shadow-md cursor-pointer hover:border-sky-300 group/card"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
-                  <div className="flex items-center gap-1 text-sm font-semibold text-muted-foreground">
-                    <Calendar className="size-4 ml-1" />
+                  <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                    <Calendar className="size-4 ml-1 text-sky-500" />
+                    {/* 💡 우측 기본 달력 아이콘을 숨기는 CSS 스타일([&::-webkit-calendar-picker-indicator]:hidden) 적용 */}
                     <input
                       type="date"
                       value={meeting.date}
@@ -453,7 +453,7 @@ export default function ProjectTimeline({
                       onChange={(e) =>
                         handleUpdateDate(meeting.id, e.target.value)
                       }
-                      className="bg-transparent outline-none text-slate-600 font-medium cursor-pointer px-2 py-1 rounded-md hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-sky-500/30 transition-all"
+                      className="bg-transparent outline-none text-slate-600 font-medium cursor-pointer px-1 py-1 rounded-md hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-sky-500/30 transition-all [&::-webkit-calendar-picker-indicator]:hidden"
                     />
                   </div>
 
