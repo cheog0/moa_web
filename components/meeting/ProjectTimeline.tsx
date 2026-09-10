@@ -444,8 +444,8 @@ export default function ProjectTimeline({
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
                   <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                    <Calendar className="size-4 ml-1 text-sky-500" />
-                    {/* 💡 우측 기본 달력 아이콘을 숨기는 CSS 스타일([&::-webkit-calendar-picker-indicator]:hidden) 적용 */}
+                    {/* 💡 개별 지정 컬러를 빼고 원래의 기본 테마 색상(text-muted-foreground)으로 원복 */}
+                    <Calendar className="size-4 ml-1 text-muted-foreground" />
                     <input
                       type="date"
                       value={meeting.date}
