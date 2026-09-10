@@ -308,6 +308,7 @@ export default function Page() {
         ) : currentView === "new_project" ? (
           <main className="mx-auto w-full max-w-6xl py-8">
             <ProjectTimeline
+              key="new_project"
               dbMeetings={dbMeetings}
               onSaveSuccess={fetchProjects}
               onMeetingClick={handleOpenDetail}
@@ -316,6 +317,7 @@ export default function Page() {
         ) : currentView.startsWith("project_") ? (
           <main className="mx-auto w-full max-w-6xl py-8">
             <ProjectTimeline
+              key={currentView}
               dbMeetings={dbMeetings}
               projectId={currentView.replace("project_", "")}
               onSaveSuccess={fetchProjects}

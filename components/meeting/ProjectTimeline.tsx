@@ -42,8 +42,9 @@ export default function ProjectTimeline({
 }) {
   const [projectName, setProjectName] = useState("");
   const [projectStatus, setProjectStatus] = useState("진행 중");
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(!projectId);
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
+  const [isLoadingProject, setIsLoadingProject] = useState(Boolean(projectId));
 
   const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
 
@@ -77,8 +78,12 @@ export default function ProjectTimeline({
       setProjectStatus("진행 중");
       setTimelineItems([]);
       setIsEditing(true);
+      setIsLoadingProject(false);
       return;
     }
+
+    let isCancelled = false;
+    setIsLoadingProject(true);
 
     const fetchProjectData = async () => {
       try {
@@ -87,6 +92,8 @@ export default function ProjectTimeline({
           .select("name, status")
           .eq("id", projectId)
           .single();
+
+        if (isCancelled) return;
 
         if (pData) {
           setProjectName(pData.name);
@@ -99,6 +106,7 @@ export default function ProjectTimeline({
           .eq("project_id", projectId);
 
         if (pmError) throw pmError;
+        if (isCancelled) return;
 
         if (pmData) {
           const loadedItems = pmData.map((pm: any) => {
@@ -119,11 +127,32 @@ export default function ProjectTimeline({
         }
       } catch (error) {
         console.error("❌ 타임라인 데이터를 불러오지 못했습니다.", error);
+      } finally {
+        if (!isCancelled) setIsLoadingProject(false);
       }
     };
 
     fetchProjectData();
-  }, [projectId, dbMeetings]);
+    return () => {
+      isCancelled = true;
+    };
+  }, [projectId]);
+
+  useEffect(() => {
+    if (dbMeetings.length === 0) return;
+
+    setTimelineItems((previousItems: TimelineItem[]) =>
+      previousItems.map((item) => {
+        const matchedMeeting = dbMeetings.find(
+          (meeting) => meeting.id === item.id,
+        );
+        if (!matchedMeeting?.title || matchedMeeting.title === item.title) {
+          return item;
+        }
+        return { ...item, title: matchedMeeting.title };
+      }),
+    );
+  }, [dbMeetings]);
 
   const handleOpenModal = () => {
     if (!projectName.trim()) {
@@ -305,7 +334,11 @@ export default function ProjectTimeline({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 border-b border-border pb-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            {timelineItems.length === 0 ? (
+            {isLoadingProject ? (
+              <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-400">
+                불러오는 중
+              </span>
+            ) : timelineItems.length === 0 ? (
               <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-400">
                 대기 중
               </span>
@@ -330,7 +363,9 @@ export default function ProjectTimeline({
           </div>
 
           <div className="flex items-center gap-2 group">
-            {isEditing ? (
+            {isLoadingProject ? (
+              <div className="h-8 w-48 animate-pulse rounded-md bg-slate-200" />
+            ) : isEditing ? (
               <input
                 autoFocus
                 className="text-2xl font-extrabold tracking-tight text-foreground bg-transparent border-b-2 border-sky-500 outline-none w-64 placeholder:text-muted-foreground/40 placeholder:font-semibold"
@@ -398,7 +433,14 @@ export default function ProjectTimeline({
         </div>
       </div>
 
-      {timelineItems.length === 0 ? (
+      {isLoadingProject ? (
+        <div className="mt-12 flex flex-col items-center justify-center rounded-3xl border border-border bg-card px-6 py-24 text-center">
+          <Loader2 className="mb-4 size-8 animate-spin text-sky-500" />
+          <p className="text-sm text-muted-foreground">
+            타임라인을 불러오는 중입니다...
+          </p>
+        </div>
+      ) : timelineItems.length === 0 ? (
         <div className="mt-12 flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 px-6 py-24 text-center transition-all hover:bg-slate-50">
           <div className="mb-6 flex size-20 items-center justify-center rounded-full bg-sky-100 text-sky-500 shadow-sm">
             <History className="size-10" />
