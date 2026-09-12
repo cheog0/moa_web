@@ -366,9 +366,10 @@ export default function ProjectTimeline({
             {isLoadingProject ? (
               <div className="h-8 w-48 animate-pulse rounded-md bg-slate-200" />
             ) : isEditing ? (
+              // 💡 하단 밑줄(border-b-2)을 제거하고 깔끔한 인풋으로 수정
               <input
                 autoFocus
-                className="text-2xl font-extrabold tracking-tight text-foreground bg-transparent border-b-2 border-sky-500 outline-none w-64 placeholder:text-muted-foreground/40 placeholder:font-semibold"
+                className="text-2xl font-extrabold tracking-tight text-foreground bg-transparent outline-none w-64 placeholder:text-muted-foreground/40 placeholder:font-semibold"
                 placeholder="타임라인 이름 입력..."
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
@@ -486,7 +487,6 @@ export default function ProjectTimeline({
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
                   <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                    {/* 💡 개별 지정 컬러를 빼고 원래의 기본 테마 색상(text-muted-foreground)으로 원복 */}
                     <Calendar className="size-4 ml-1 text-muted-foreground" />
                     <input
                       type="date"

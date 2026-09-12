@@ -30,12 +30,16 @@ export default function Sidebar({
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-sidebar px-4 py-5 lg:flex print:hidden">
       <div className="flex items-center gap-3 px-2 pb-6">
-        <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-          <Mic className="size-4" />
+        <div className="flex h-8 items-center gap-2">
+          <img
+            src="/raple_icon.png"
+            alt="랩플 로고"
+            className="h-7 w-auto object-contain"
+          />
+          <span className="text-xl font-bold tracking-tight text-foreground">
+            Raple
+          </span>
         </div>
-        <span className="text-xl font-bold tracking-tight text-foreground">
-          모아
-        </span>
       </div>
 
       <Button
@@ -57,7 +61,12 @@ export default function Sidebar({
             active={currentView === "dashboard"}
             onClick={() => onNavigate("dashboard")}
           />
-          <NavItem icon={LineChart} label="인사이트" disabled />
+          <NavItem
+            icon={LineChart}
+            label="인사이트"
+            active={currentView === "insight"}
+            onClick={() => onNavigate("insight")}
+          />
         </div>
 
         {/* 타임라인 */}

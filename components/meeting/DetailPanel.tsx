@@ -16,7 +16,7 @@ import {
   ChevronDown,
   Loader2,
   CheckCircle2,
-  AlertCircle, // 💡 경고 아이콘 추가
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MeetingMinutes } from "@/lib/constants";
@@ -300,36 +300,41 @@ export default function DetailPanel({
             </div>
           </div>
         ) : (
-          <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/95 px-6 py-4 backdrop-blur print:hidden">
-            <div className="flex items-center gap-3">
+          <header className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border bg-background/95 px-6 py-3 backdrop-blur print:hidden">
+            <div className="flex items-center gap-3 w-0 flex-1 min-w-0">
               <button
                 onClick={handleSmartClose}
-                className="rounded-lg p-2 hover:bg-muted"
+                className="rounded-lg p-2 hover:bg-muted shrink-0"
               >
                 <X className="size-4" />
               </button>
-              <div className="hidden sm:block">
-                <p className="text-xs text-muted-foreground">{dateStr}</p>
-                <h2 className="font-bold truncate max-w-[150px]">
+              <div className="hidden sm:block w-0 flex-1 min-w-0">
+                <p className="text-[11px] text-muted-foreground truncate">
+                  {dateStr}
+                </p>
+                <h2
+                  className="font-bold text-xs md:text-sm tracking-tight text-foreground leading-snug line-clamp-1 hover:line-clamp-none transition-all cursor-default"
+                  title={meetingTitle}
+                >
                   {meetingTitle}
                 </h2>
               </div>
             </div>
 
-            <div className="flex gap-2 items-center relative">
+            <div className="flex items-center gap-2 shrink-0 relative">
               {meeting?.audio_url && (
-                <div className="hidden sm:flex mr-2 items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-1.5 shadow-sm transition-colors hover:bg-muted/80">
+                <div className="hidden md:flex mr-1 items-center gap-2 rounded-full border border-border bg-muted/40 px-2.5 py-1 shadow-sm transition-colors hover:bg-muted/80 shrink-0">
                   <button
                     onClick={togglePlay}
                     className="text-primary hover:text-sky-600 transition-colors"
                   >
                     {isPlaying ? (
-                      <Pause className="size-4" fill="currentColor" />
+                      <Pause className="size-3.5" fill="currentColor" />
                     ) : (
-                      <Play className="size-4" fill="currentColor" />
+                      <Play className="size-3.5" fill="currentColor" />
                     )}
                   </button>
-                  <span className="w-10 text-center font-mono text-xs font-semibold text-muted-foreground">
+                  <span className="w-9 text-center font-mono text-[11px] font-semibold text-muted-foreground">
                     {currentTimeDisplay}
                   </span>
                 </div>
@@ -343,15 +348,15 @@ export default function DetailPanel({
                   saveStatus === "saving" ||
                   (!hasChanges && saveStatus !== "saved")
                 }
-                className={`w-[110px] ${hasChanges ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}`}
+                className={`h-8 px-3 text-xs sm:w-[110px] shrink-0 ${hasChanges ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}`}
               >
                 {saveStatus === "saving" ? (
                   <>
-                    <Loader2 className="mr-2 size-4 animate-spin" /> 저장 중
+                    <Loader2 className="mr-1.5 size-3.5 animate-spin" /> 저장 중
                   </>
                 ) : saveStatus === "saved" && !hasChanges ? (
                   <>
-                    <CheckCircle2 className="mr-2 size-4 text-emerald-500" />{" "}
+                    <CheckCircle2 className="mr-1.5 size-3.5 text-emerald-500" />{" "}
                     저장됨
                   </>
                 ) : (
@@ -364,19 +369,21 @@ export default function DetailPanel({
                 size="sm"
                 onClick={handleEnterPreview}
                 title="PDF 인쇄 미리보기"
+                className="h-8 px-2.5 text-xs shrink-0 hidden sm:flex"
               >
-                <Eye className="size-4 sm:mr-2 text-sky-500" />{" "}
-                <span className="hidden sm:inline">미리보기</span>
+                <Eye className="size-3.5 sm:mr-1.5 text-sky-500" />
+                <span className="hidden md:inline">미리보기</span>
               </Button>
 
-              <div className="relative">
+              <div className="relative shrink-0">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setIsDownloadOpen(!isDownloadOpen)}
+                  className="h-8 px-2.5 text-xs"
                 >
-                  <Download className="size-4 sm:mr-2" />
-                  <span className="hidden sm:inline">다운로드</span>
+                  <Download className="size-3.5 sm:mr-1.5" />
+                  <span className="hidden md:inline">다운로드</span>
                   <ChevronDown className="ml-1 size-3 text-muted-foreground" />
                 </Button>
 
@@ -397,9 +404,10 @@ export default function DetailPanel({
                             handleDownloadAudio();
                             setIsDownloadOpen(false);
                           }}
-                          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
+                          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors hover:bg-muted"
                         >
-                          <Music className="size-4 text-indigo-500" /> 음성 파일
+                          <Music className="size-3.5 text-indigo-500" /> 음성
+                          파일
                         </button>
                       )}
                       <button
@@ -407,19 +415,20 @@ export default function DetailPanel({
                           handleDownloadTranscript();
                           setIsDownloadOpen(false);
                         }}
-                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors hover:bg-muted"
                       >
-                        <FileText className="size-4 text-green-500" /> 대화
+                        <FileText className="size-3.5 text-green-500" /> 대화
                         텍스트
                       </button>
                       <button
                         onClick={() => {
-                          handleEnterPreview();
                           setIsDownloadOpen(false);
+                          handlePrintPDF();
                         }}
-                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors hover:bg-muted"
                       >
-                        <Download className="size-4 text-sky-500" /> 문서 (PDF)
+                        <Download className="size-3.5 text-sky-500" /> 문서
+                        (PDF)
                       </button>
                     </div>
                   </>
@@ -430,8 +439,8 @@ export default function DetailPanel({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={handleDeleteClick} // 💡 예쁜 모달 오픈 함수 연결
-                  className="ml-1 text-red-500 hover:bg-red-50 hover:text-red-600"
+                  onClick={handleDeleteClick}
+                  className="size-8 text-rose-500 hover:bg-rose-50 hover:text-rose-600 shrink-0"
                 >
                   <Trash2 className="size-4" />
                 </Button>

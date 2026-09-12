@@ -27,6 +27,24 @@ import RecordingPanel from "@/components/meeting/RecordingPanel";
 import DetailPanel from "@/components/meeting/DetailPanel";
 import CalendarView from "@/components/meeting/CalenderView";
 import ProjectTimeline from "@/components/meeting/ProjectTimeline";
+import InsightPanel from "@/components/insight/InsightPanel";
+
+// 💡 초를 제외하고 년, 월, 일, 시, 분까지만 깔끔하게 포맷하는 헬퍼 함수
+const formatMeetingDate = (dateString: string) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date
+    .toLocaleString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    })
+    .replace(/\./g, ".")
+    .replace(/\s/g, " ");
+};
 
 function Stat({
   icon: Icon,
@@ -254,6 +272,8 @@ export default function Page() {
           <SettingsPanel session={session} />
         ) : currentView === "templates" ? (
           <TemplatePanel session={session} />
+        ) : currentView === "insight" ? (
+          <InsightPanel dbMeetings={dbMeetings} />
         ) : currentView === "starred_meetings" ? (
           <main className="mx-auto w-full max-w-6xl p-5 sm:p-8">
             <div className="mb-8">
@@ -277,8 +297,9 @@ export default function Page() {
                     <h3 className="truncate text-sm font-semibold">
                       {meeting.title || "새 회의"}
                     </h3>
+                    {/* 💡 초가 제거된 날짜 포맷 적용 */}
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {new Date(meeting.created_at).toLocaleString("ko-KR")}
+                      {formatMeetingDate(meeting.created_at)}
                     </p>
                   </div>
 
@@ -398,7 +419,6 @@ export default function Page() {
               ) : (
                 <div className="flex flex-col gap-3">
                   {filtered.map((meeting) => (
-                    /* 💡 <button> 대신 <div> 태그를 사용하여 button 안에 button이 들어가는 구조적 에러를 완벽히 해결했습니다. */
                     <div
                       key={meeting.id}
                       onClick={() => handleOpenDetail(meeting)}
@@ -411,8 +431,9 @@ export default function Page() {
                         <h3 className="truncate text-sm font-semibold">
                           {meeting.title || "새 회의"}
                         </h3>
+                        {/* 💡 초가 제거된 날짜 포맷 적용 */}
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {new Date(meeting.created_at).toLocaleString("ko-KR")}
+                          {formatMeetingDate(meeting.created_at)}
                         </p>
                       </div>
 

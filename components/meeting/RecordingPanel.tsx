@@ -1,7 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Mic, Pause, Play, Sparkles, X, Square, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState, KeyboardEvent } from "react";
+import {
+  Mic,
+  Pause,
+  Play,
+  Sparkles,
+  X,
+  Square,
+  Loader2,
+  Users,
+  Plus,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { MeetingMinutes } from "@/lib/constants";
@@ -19,7 +29,11 @@ export default function RecordingPanel({
   const [seconds, setSeconds] = useState(0);
   const [liveMemo, setLiveMemo] = useState("");
 
-  // 💡 1. 서버 준비 상태를 관리하는 State 추가
+  // 💡 기본 추천 멤버를 모두 없애고 빈 배열로 초기화
+  const [selectedAttendees, setSelectedAttendees] = useState<string[]>([]);
+  const [customInput, setCustomInput] = useState("");
+  const [isAddingCustom, setIsAddingCustom] = useState(false);
+
   const [isServerReady, setIsServerReady] = useState(false);
 
   const [userSettings, setUserSettings] = useState({
@@ -59,15 +73,13 @@ export default function RecordingPanel({
     };
     fetchSettings();
 
-    // 💡 2. 모닝콜 로직 변경: 대답이 올 때까지 기다렸다가 버튼 활성화
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
     fetch(`${apiUrl}/api/meetings`)
       .then(() => {
         console.log("백엔드 기상 완료! 녹음 준비 끝");
-        setIsServerReady(true); // 서버가 응답하면 버튼 열림!
+        setIsServerReady(true);
       })
       .catch(() => {
-        // 혹시라도 에러가 나면 무한 로딩에 빠지지 않도록 일단 버튼을 열어줍니다.
         console.log("모닝콜 에러 발생 (버튼은 활성화됨)");
         setIsServerReady(true);
       });
@@ -83,7 +95,6 @@ export default function RecordingPanel({
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
         fetch(`${apiUrl}/api/meetings`).catch(() => {});
-        console.log("💓 하트비트 발송: 서버야 자지마!");
       },
       10 * 60 * 1000,
     );
@@ -105,6 +116,24 @@ export default function RecordingPanel({
         streamRef.current.getTracks().forEach((track) => track.stop());
     };
   }, []);
+
+  const removeAttendee = (nameToRemove: string) => {
+    setSelectedAttendees(
+      selectedAttendees.filter((name) => name !== nameToRemove),
+    );
+  };
+
+  const handleCustomKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && customInput.trim()) {
+      e.preventDefault();
+      const name = customInput.trim();
+      if (name && !selectedAttendees.includes(name)) {
+        setSelectedAttendees([...selectedAttendees, name]);
+      }
+      setCustomInput("");
+      setIsAddingCustom(false);
+    }
+  };
 
   const handleStartRecording = async () => {
     try {
@@ -199,10 +228,20 @@ export default function RecordingPanel({
       formData.append("api_key", userSettings.api_key);
       formData.append("keywords", userSettings.keywords);
 
+      const attendeesStr = selectedAttendees.join(", ");
+      if (attendeesStr) {
+        formData.append("attendees", attendeesStr);
+      }
+
       let finalTemplate = userSettings.custom_template;
-      if (liveMemo.trim()) {
+      if (liveMemo.trim() || attendeesStr) {
         const defaultStructure = `{\n  "summary": "회의 핵심 내용",\n  "decisions": "결정된 사항",\n  "action_items": []\n}`;
-        finalTemplate = `[사용자 현장 실시간 메모]\n${liveMemo}\n\n⚠️ AI 지시사항: 사용자가 직접 작성한 위 현장 메모의 내용, 고유명사, 문맥을 오디오 스크립트 해석 시 최우선으로 반영하세요.\n\n[출력 템플릿 구조]\n${userSettings.custom_template || defaultStructure}`;
+        let extraContext = "";
+        if (attendeesStr) extraContext += `[참석자]: ${attendeesStr}\n`;
+        if (liveMemo.trim())
+          extraContext += `[사용자 현장 실시간 메모]\n${liveMemo}\n`;
+
+        finalTemplate = `${extraContext}\n⚠️ AI 지시사항: 위 참석자 정보 및 현장 메모의 내용, 고유명사를 오디오 스크립트 해석 시 최우선으로 반영하세요.\n\n[출력 템플릿 구조]\n${userSettings.custom_template || defaultStructure}`;
       }
       formData.append("custom_template", finalTemplate);
 
@@ -252,7 +291,7 @@ export default function RecordingPanel({
         </div>
 
         {/* 메인 콘텐츠 영역 */}
-        <div className="flex-1 overflow-hidden p-8">
+        <div className="flex-1 overflow-y-auto p-8">
           {status === "processing" ? (
             <div className="flex h-full flex-col items-center justify-center animate-in fade-in duration-500">
               <div className="relative flex size-24 items-center justify-center">
@@ -271,18 +310,65 @@ export default function RecordingPanel({
               </div>
             </div>
           ) : status === "ready" ? (
-            <div className="flex h-full flex-col items-center justify-center">
+            <div className="flex h-full flex-col items-center justify-center max-w-md mx-auto w-full">
               <div
-                className={`mx-auto flex size-24 items-center justify-center rounded-full transition-colors ${isServerReady ? "bg-primary/10" : "bg-muted"}`}
+                className={`flex size-20 items-center justify-center rounded-full transition-colors mb-6 ${isServerReady ? "bg-primary/10" : "bg-muted"}`}
               >
                 <Mic
-                  className={`size-10 ${isServerReady ? "text-primary" : "text-muted-foreground"}`}
+                  className={`size-8 ${isServerReady ? "text-primary" : "text-muted-foreground"}`}
                 />
               </div>
 
-              {/* 💡 3. 버튼 비활성화 로직 및 문구 변경 */}
+              {/* 💡 추천 없이 빈 상태에서 시작하는 동적 참석자 추가 영역 */}
+              <div className="w-full mb-8 text-center">
+                <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-muted-foreground mb-3">
+                  <Users className="size-3.5" /> 참석자 추가 (선택 사항)
+                </div>
+
+                <div className="flex flex-wrap items-center justify-center gap-2 min-h-[36px]">
+                  {/* 이미 추가된 참석자 칩들 */}
+                  {selectedAttendees.map((name) => (
+                    <span
+                      key={name}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary text-primary-foreground shadow-sm animate-in fade-in zoom-in-95 duration-150"
+                    >
+                      {name}
+                      <button
+                        type="button"
+                        onClick={() => removeAttendee(name)}
+                        className="text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </span>
+                  ))}
+
+                  {/* 직접 입력 인풋 또는 추가 버튼 */}
+                  {isAddingCustom ? (
+                    <input
+                      type="text"
+                      autoFocus
+                      value={customInput}
+                      onChange={(e) => setCustomInput(e.target.value)}
+                      onKeyDown={handleCustomKeyDown}
+                      onBlur={() => setIsAddingCustom(false)}
+                      placeholder=""
+                      className="px-3 py-1 rounded-full text-xs bg-background border border-primary text-foreground outline-none w-32 text-center animate-in fade-in"
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsAddingCustom(true)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                    >
+                      <Plus className="size-3" /> 참석자 추가
+                    </button>
+                  )}
+                </div>
+              </div>
+
               <Button
-                className="mt-8 px-8 py-6 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all disabled:cursor-not-allowed"
+                className="w-full h-12 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:cursor-not-allowed"
                 onClick={handleStartRecording}
                 disabled={!isServerReady}
               >
@@ -298,9 +384,8 @@ export default function RecordingPanel({
                 )}
               </Button>
 
-              {/* 서버가 깨어나는 중일 때 보여줄 친절한 안내 문구 */}
               {!isServerReady && (
-                <p className="mt-4 text-sm text-muted-foreground animate-pulse">
+                <p className="mt-4 text-xs text-muted-foreground animate-pulse">
                   서버와 연결을 설정하고 있습니다. 잠시만 기다려주세요
                 </p>
               )}
