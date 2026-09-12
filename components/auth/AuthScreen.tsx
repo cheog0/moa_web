@@ -36,7 +36,7 @@ export default function AuthScreen() {
           <div className="flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground mb-4">
             <Mic className="size-6" />
           </div>
-          <h1 className="text-2xl font-bold">랩플 로그인</h1>
+          <h1 className="text-2xl font-bold">로그인</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             AI 회의록 서비스에 오신 것을 환영합니다.
           </p>
@@ -51,7 +51,7 @@ export default function AuthScreen() {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none ring-primary focus:ring-2"
-              placeholder="name@company.com"
+              placeholder="이메일을 입력해주세요"
             />
           </div>
           <div>
@@ -69,15 +69,6 @@ export default function AuthScreen() {
           </div>
           <Button type="submit" disabled={loading} className="mt-2 w-full h-11">
             {loading ? "처리 중..." : "로그인"}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={loading}
-            onClick={handleSignUp}
-            className="w-full h-11"
-          >
-            이메일로 회원가입
           </Button>
         </form>
       </div>
