@@ -32,7 +32,7 @@ export default function Sidebar({
       <div className="flex items-center gap-3 px-2 pb-6">
         <div className="flex h-8 items-center gap-2">
           <img
-            src="/raple_icon.png"
+            src="/raple_pas.png"
             alt="랩플 로고"
             className="h-7 w-auto object-contain"
           />

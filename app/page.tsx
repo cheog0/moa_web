@@ -29,7 +29,6 @@ import CalendarView from "@/components/meeting/CalenderView";
 import ProjectTimeline from "@/components/meeting/ProjectTimeline";
 import InsightPanel from "@/components/insight/InsightPanel";
 
-// 💡 초를 제외하고 년, 월, 일, 시, 분까지만 깔끔하게 포맷하는 헬퍼 함수
 const formatMeetingDate = (dateString: string) => {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -121,7 +120,9 @@ export default function Page() {
       try {
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-        const res = await fetch(`${apiUrl}/api/meetings`);
+
+        // 💡 로그인한 유저의 ID를 파라미터로 명시적으로 전달하여 데이터 격리
+        const res = await fetch(`${apiUrl}/api/meetings?user_id=${userId}`);
         const data = await res.json();
         if (data.success) setDbMeetings(data.meetings);
       } catch (error) {
@@ -297,7 +298,6 @@ export default function Page() {
                     <h3 className="truncate text-sm font-semibold">
                       {meeting.title || "새 회의"}
                     </h3>
-                    {/* 💡 초가 제거된 날짜 포맷 적용 */}
                     <p className="mt-1 text-xs text-muted-foreground">
                       {formatMeetingDate(meeting.created_at)}
                     </p>
@@ -431,7 +431,6 @@ export default function Page() {
                         <h3 className="truncate text-sm font-semibold">
                           {meeting.title || "새 회의"}
                         </h3>
-                        {/* 💡 초가 제거된 날짜 포맷 적용 */}
                         <p className="mt-1 text-xs text-muted-foreground">
                           {formatMeetingDate(meeting.created_at)}
                         </p>

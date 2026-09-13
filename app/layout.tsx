@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/raple_icon.png",
+        url: "/raple_icon_.png",
         media: "(prefers-color-scheme: light)",
       },
       {
