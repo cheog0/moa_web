@@ -32,7 +32,7 @@ export default function InsightPanel({
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth(); // 0~11
 
-  // 1. 상단 통계 계산
+  // 1. 총 회의 수
   const totalMeetings = dbMeetings.length;
 
   // 이번 달 / 지난달 필터링
@@ -62,7 +62,37 @@ export default function InsightPanel({
         ? 100
         : 0;
 
-  // 2. 월별 회의 수 데이터 (최근 12개월)
+  // 2. 실제 녹음 시간 계산 (duration 컬럼: 초 단위 가정, 없으면 기본 0)
+  const totalDurationSeconds = dbMeetings.reduce(
+    (acc, m) => acc + (m.duration || 0),
+    0,
+  );
+  const totalHours = (totalDurationSeconds / 3600).toFixed(1); // 총 시간
+
+  const thisMonthDuration = thisMonthMeetings.reduce(
+    (acc, m) => acc + (m.duration || 0),
+    0,
+  );
+  const lastMonthDuration = lastMonthMeetings.reduce(
+    (acc, m) => acc + (m.duration || 0),
+    0,
+  );
+  const durationDiff =
+    lastMonthDuration > 0
+      ? Math.round(
+          ((thisMonthDuration - lastMonthDuration) / lastMonthDuration) * 100,
+        )
+      : thisMonthDuration > 0
+        ? 100
+        : 0;
+
+  // 3. 평균 회의 길이 (분 단위)
+  const avgDurationMinutes =
+    totalMeetings > 0
+      ? Math.round(totalDurationSeconds / totalMeetings / 60)
+      : 0;
+
+  // 4. 월별 회의 수 & 녹음 시간 데이터 (최근 12개월)
   const monthlyBarData = useMemo(() => {
     const data = [];
     for (let i = 11; i >= 0; i--) {
@@ -71,18 +101,26 @@ export default function InsightPanel({
       const m = d.getMonth();
       const label = `${m + 1}월`;
 
-      const count = dbMeetings.filter((meeting) => {
+      const monthMeetings = dbMeetings.filter((meeting) => {
         if (!meeting.created_at) return false;
         const md = new Date(meeting.created_at);
         return md.getFullYear() === y && md.getMonth() === m;
-      }).length;
+      });
 
-      data.push({ name: label, 회의수: count });
+      const count = monthMeetings.length;
+      const hours = Number(
+        (
+          monthMeetings.reduce((acc, curr) => acc + (curr.duration || 0), 0) /
+          3600
+        ).toFixed(1),
+      );
+
+      data.push({ name: label, 회의수: count, 녹음시간: hours });
     }
     return data;
   }, [dbMeetings, currentYear, currentMonth]);
 
-  // 3. 최근 회의 목록 (최대 5개 정렬)
+  // 5. 최근 회의 목록 (최대 5개 정렬)
   const recentMeetings = useMemo(() => {
     return [...dbMeetings]
       .sort(
@@ -92,16 +130,16 @@ export default function InsightPanel({
       .slice(0, 5);
   }, [dbMeetings]);
 
-  // 4. 요일별 활동 데이터
+  // 6. 요일별 활동 데이터 (실제 DB 생성일 기반)
   const dayActivityData = useMemo(() => {
     const counts: { [key: string]: number } = {
-      월: 12,
-      화: 18,
-      수: 22,
-      목: 15,
-      금: 10,
-      토: 3,
-      일: 2,
+      월: 0,
+      화: 0,
+      수: 0,
+      목: 0,
+      금: 0,
+      토: 0,
+      일: 0,
     };
     dbMeetings.forEach((m) => {
       if (!m.created_at) return;
@@ -113,7 +151,7 @@ export default function InsightPanel({
 
     return ["월", "화", "수", "목", "금", "토", "일"].map((d) => ({
       day: d,
-      count: counts[d] || 5,
+      count: counts[d] || 0,
     }));
   }, [dbMeetings]);
 
@@ -167,23 +205,43 @@ export default function InsightPanel({
             </span>
             <span className="text-xs text-muted-foreground">건</span>
           </div>
-          <div className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-emerald-500">
-            <TrendingUp className="size-3.5" />
-            <span>+{meetingDiff}% 지난달 대비</span>
+          <div
+            className={`mt-3 flex items-center gap-1.5 text-xs font-semibold ${meetingDiff >= 0 ? "text-emerald-500" : "text-rose-500"}`}
+          >
+            {meetingDiff >= 0 ? (
+              <TrendingUp className="size-3.5" />
+            ) : (
+              <TrendingDown className="size-3.5" />
+            )}
+            <span>
+              {meetingDiff >= 0 ? `+${meetingDiff}%` : `${meetingDiff}%`} 지난달
+              대비
+            </span>
           </div>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <div className="text-sm text-muted-foreground font-medium">
-            녹음 시간
+            총 녹음 시간
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold tracking-tight">468</span>
+            <span className="text-3xl font-extrabold tracking-tight">
+              {totalHours}
+            </span>
             <span className="text-xs text-muted-foreground">시간</span>
           </div>
-          <div className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-emerald-500">
-            <TrendingUp className="size-3.5" />
-            <span>+8.1% 지난달 대비</span>
+          <div
+            className={`mt-3 flex items-center gap-1.5 text-xs font-semibold ${durationDiff >= 0 ? "text-emerald-500" : "text-rose-500"}`}
+          >
+            {durationDiff >= 0 ? (
+              <TrendingUp className="size-3.5" />
+            ) : (
+              <TrendingDown className="size-3.5" />
+            )}
+            <span>
+              {durationDiff >= 0 ? `+${durationDiff}%` : `${durationDiff}%`}{" "}
+              지난달 대비
+            </span>
           </div>
         </div>
 
@@ -192,12 +250,13 @@ export default function InsightPanel({
             평균 회의 길이
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold tracking-tight">38</span>
+            <span className="text-3xl font-extrabold tracking-tight">
+              {avgDurationMinutes}
+            </span>
             <span className="text-xs text-muted-foreground">분</span>
           </div>
-          <div className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-rose-500">
-            <TrendingDown className="size-3.5" />
-            <span>-3.5% 지난달 대비</span>
+          <div className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+            <span>기록된 데이터 기준</span>
           </div>
         </div>
       </div>
@@ -314,14 +373,11 @@ export default function InsightPanel({
                     color: "hsl(var(--foreground))",
                     fontSize: "12px",
                   }}
-                  formatter={(value: any) => [
-                    `${Number(value) * 3} 시간`,
-                    "누적 시간",
-                  ]}
+                  formatter={(value: any) => [`${value} 시간`, "녹음 시간"]}
                 />
                 <Area
                   type="monotone"
-                  dataKey="회의수"
+                  dataKey="녹음시간"
                   stroke="hsl(var(--primary))"
                   strokeWidth={2.5}
                   fillOpacity={1}
@@ -345,32 +401,39 @@ export default function InsightPanel({
           </div>
 
           <div className="space-y-3 flex-1">
-            {recentMeetings.map((m) => (
-              <div
-                key={m.id}
-                onClick={() => onMeetingClick && onMeetingClick(m)}
-                className="group flex items-center justify-between p-3 rounded-xl border border-border/60 bg-muted/20 hover:bg-muted/60 hover:border-primary/40 transition-all cursor-pointer"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <FileText className="size-4" />
+            {recentMeetings.map((m) => {
+              const durationMin = Math.round((m.duration || 0) / 60);
+              return (
+                <div
+                  key={m.id}
+                  onClick={() => onMeetingClick && onMeetingClick(m)}
+                  className="group flex items-center justify-between p-3 rounded-xl border border-border/60 bg-muted/20 hover:bg-muted/60 hover:border-primary/40 transition-all cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <FileText className="size-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-semibold truncate group-hover:text-primary transition-colors">
+                        {m.title || "새 회의"}
+                      </h4>
+                      <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
+                        <span>{formatTimeAgo(m.created_at)}</span>
+                        {durationMin > 0 && (
+                          <>
+                            <span>·</span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="size-3" /> {durationMin}분
+                            </span>
+                          </>
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <h4 className="text-sm font-semibold truncate group-hover:text-primary transition-colors">
-                      {m.title || "새 회의"}
-                    </h4>
-                    <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
-                      <span>{formatTimeAgo(m.created_at)}</span>
-                      <span>·</span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="size-3" /> 35분
-                      </span>
-                    </p>
-                  </div>
+                  <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 shrink-0 ml-2" />
                 </div>
-                <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 shrink-0 ml-2" />
-              </div>
-            ))}
+              );
+            })}
 
             {recentMeetings.length === 0 && (
               <div className="py-12 text-center text-sm text-muted-foreground border border-dashed border-border rounded-xl">
@@ -384,7 +447,7 @@ export default function InsightPanel({
           </div>
         </div>
 
-        {/* 요일별 활동 바 (그라데이션 및 강조 효과 적용) */}
+        {/* 요일별 활동 바 */}
         <div className="rounded-2xl border border-border bg-card p-6 shadow-sm lg:col-span-7 flex flex-col justify-between">
           <div>
             <h3 className="text-base font-bold">요일별 활동</h3>
@@ -395,8 +458,11 @@ export default function InsightPanel({
 
           <div className="space-y-3.5 my-6">
             {dayActivityData.map((item, idx) => {
-              const percentage = Math.round((item.count / maxDayCount) * 100);
-              const isHighest = item.count === maxDayCount;
+              const percentage =
+                maxDayCount > 0
+                  ? Math.round((item.count / maxDayCount) * 100)
+                  : 0;
+              const isHighest = item.count > 0 && item.count === maxDayCount;
 
               return (
                 <div key={idx} className="flex items-center gap-4 text-sm">
@@ -412,13 +478,15 @@ export default function InsightPanel({
                           ? "bg-gradient-to-r from-primary/80 to-primary shadow-sm"
                           : "bg-primary/30"
                       }`}
-                      style={{ width: `${Math.max(percentage, 8)}%` }}
+                      style={{
+                        width: `${Math.max(percentage, item.count > 0 ? 8 : 2)}%`,
+                      }}
                     />
                   </div>
                   <span
                     className={`w-8 text-right text-xs font-bold ${isHighest ? "text-primary" : "text-muted-foreground"}`}
                   >
-                    {item.count}
+                    {item.count}건
                   </span>
                 </div>
               );
@@ -427,7 +495,9 @@ export default function InsightPanel({
 
           <div className="pt-4 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
             <span>가장 활발한 요일에 진한 그라데이션이 적용됩니다.</span>
-            <span className="font-semibold text-primary">생산성 분석 완료</span>
+            <span className="font-semibold text-primary">
+              실시간 데이터 연동
+            </span>
           </div>
         </div>
       </div>
