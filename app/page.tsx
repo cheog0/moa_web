@@ -238,12 +238,14 @@ export default function Page() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-white text-foreground print:block print:h-auto print:max-h-none print:overflow-visible print:bg-white">
+      {/* 💡 Sidebar에 session={session} 세션 데이터 정상 전달 */}
       <Sidebar
         currentView={currentView}
         onNavigate={(view) => setCurrentView(view)}
         onNew={() => setRecording(true)}
         onLogout={() => supabase.auth.signOut()}
         projects={dbProjects}
+        session={session}
       />
 
       <div className="min-w-0 flex-1 flex flex-col h-full overflow-y-auto print:hidden bg-white">

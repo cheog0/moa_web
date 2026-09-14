@@ -28,8 +28,11 @@ export default function Sidebar({
   projects?: any[];
   session?: any;
 }) {
-  const userEmail = session?.user?.email || "user@raple.com";
-  const userInitial = userEmail.charAt(0).toUpperCase();
+  // 💡 메인에서 전달받은 실제 로그인 유저 정보 우선 사용
+  const userEmail = session?.user?.email || "로그인 필요";
+  const userInitial = session?.user?.email
+    ? session.user.email.charAt(0).toUpperCase()
+    : "유";
 
   return (
     <aside
@@ -141,16 +144,16 @@ export default function Sidebar({
         </nav>
       </div>
 
-      {/* 🌟 하단 유저 프로필 및 로그아웃 영역 */}
+      {/* 🌟 하단 실제 세션 연동 유저 프로필 영역 */}
       <div className="flex flex-col gap-2.5 pt-3 border-t border-slate-100 mt-1 shrink-0">
         <div className="flex items-center justify-between gap-2 px-1">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-700 font-bold text-xs">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary font-bold text-xs shadow-sm">
               {userInitial}
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-xs font-bold text-foreground truncate">
-                {userEmail.split("@")[0]}
+                {session?.user?.email ? userEmail.split("@")[0] : "게스트"}
               </span>
               <span className="text-[10px] text-muted-foreground truncate">
                 {userEmail}
@@ -202,7 +205,7 @@ function NavItem({
       }`}
     >
       <Icon className="size-4 shrink-0" />
-      <span className="truncate text-xs">{label}</span>
+      <span className="truncate text-sm">{label}</span>
     </button>
   );
 }
