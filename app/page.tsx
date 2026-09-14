@@ -13,6 +13,7 @@ import {
   Calendar,
   List,
   Star,
+  Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -29,6 +30,7 @@ import CalendarView from "@/components/meeting/CalenderView";
 import ProjectTimeline from "@/components/meeting/ProjectTimeline";
 import InsightPanel from "@/components/insight/InsightPanel";
 
+// 💡 초를 제외하고 년, 월, 일, 시, 분까지만 깔끔하게 포맷하는 헬퍼 함수
 const formatMeetingDate = (dateString: string) => {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -57,7 +59,7 @@ function Stat({
   hint: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
+    <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Icon className="size-4" />
         {label}
@@ -121,7 +123,6 @@ export default function Page() {
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
-        // 💡 로그인한 유저의 ID를 파라미터로 명시적으로 전달하여 데이터 격리
         const res = await fetch(`${apiUrl}/api/meetings?user_id=${userId}`);
         const data = await res.json();
         if (data.success) setDbMeetings(data.meetings);
@@ -136,7 +137,7 @@ export default function Page() {
 
   if (loadingSession)
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-white">
         세션 확인 중...
       </div>
     );
@@ -236,7 +237,7 @@ export default function Page() {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground print:block print:h-auto print:max-h-none print:overflow-visible print:bg-white">
+    <div className="flex h-screen w-full overflow-hidden bg-white text-foreground print:block print:h-auto print:max-h-none print:overflow-visible print:bg-white">
       <Sidebar
         currentView={currentView}
         onNavigate={(view) => setCurrentView(view)}
@@ -245,8 +246,8 @@ export default function Page() {
         projects={dbProjects}
       />
 
-      <div className="min-w-0 flex-1 flex flex-col h-full overflow-y-auto print:hidden">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-border px-5 sm:px-8">
+      <div className="min-w-0 flex-1 flex flex-col h-full overflow-y-auto print:hidden bg-white">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-border pl-5 pr-6 sm:pl-8 sm:pr-10 bg-white">
           <div className="flex items-center gap-3">
             <button className="rounded-lg p-2 hover:bg-muted lg:hidden">
               <Menu className="size-5" />
@@ -264,8 +265,23 @@ export default function Page() {
               </div>
             )}
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-semibold">{session.user.email}</span>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => alert("새로운 알림이 없습니다.")}
+              className="relative rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              title="알림"
+            >
+              <Bell className="size-5" />
+            </button>
+
+            <div className="flex items-center">
+              <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary font-bold text-[11px] shadow-sm">
+                {session?.user?.email
+                  ? session.user.email.charAt(0).toUpperCase()
+                  : "유"}
+              </div>
+            </div>
           </div>
         </header>
 
@@ -276,7 +292,7 @@ export default function Page() {
         ) : currentView === "insight" ? (
           <InsightPanel dbMeetings={dbMeetings} />
         ) : currentView === "starred_meetings" ? (
-          <main className="mx-auto w-full max-w-6xl p-5 sm:p-8">
+          <main className="mx-auto w-full max-w-6xl p-5 sm:p-8 bg-white min-h-full">
             <div className="mb-8">
               <h1 className="text-2xl font-bold tracking-tight">즐겨찾기</h1>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -327,7 +343,7 @@ export default function Page() {
             </div>
           </main>
         ) : currentView === "new_project" ? (
-          <main className="mx-auto w-full max-w-6xl py-8">
+          <main className="mx-auto w-full max-w-6xl py-8 bg-white min-h-full">
             <ProjectTimeline
               key="new_project"
               dbMeetings={dbMeetings}
@@ -336,7 +352,7 @@ export default function Page() {
             />
           </main>
         ) : currentView.startsWith("project_") ? (
-          <main className="mx-auto w-full max-w-6xl py-8">
+          <main className="mx-auto w-full max-w-6xl py-8 bg-white min-h-full">
             <ProjectTimeline
               key={currentView}
               dbMeetings={dbMeetings}
@@ -350,7 +366,7 @@ export default function Page() {
             />
           </main>
         ) : currentView === "dashboard" ? (
-          <main className="mx-auto w-full max-w-6xl p-5 sm:p-8">
+          <main className="mx-auto w-full max-w-6xl p-5 sm:p-8 bg-white min-h-full">
             <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
               <div>
                 <p className="text-sm font-medium text-primary">
@@ -470,7 +486,7 @@ export default function Page() {
             </section>
           </main>
         ) : (
-          <main className="flex h-full items-center justify-center">
+          <main className="flex h-full items-center justify-center bg-white">
             <div className="text-center text-muted-foreground">
               <h3 className="text-lg font-bold text-foreground">
                 🚀 준비 중인 기능입니다
