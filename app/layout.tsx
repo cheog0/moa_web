@@ -10,19 +10,19 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/raple_icon_.png",
+        url: "/raple_pas.png",
         media: "(prefers-color-scheme: light)",
       },
       {
-        url: "/raple_icon.png",
+        url: "/raple_pas.png",
         media: "(prefers-color-scheme: dark)",
       },
       {
-        url: "/raple_icon.png",
+        url: "/raple_pas.png",
         type: "image/svg+xml",
       },
     ],
-    apple: "/raple_icon.png",
+    apple: "/raple_pas.png",
   },
 };
 
