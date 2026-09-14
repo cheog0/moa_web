@@ -89,6 +89,16 @@ export default function Page() {
   const [dbProjects, setDbProjects] = useState<any[]>([]);
   const [query, setQuery] = useState("");
 
+  // 💡 상단 정중앙에 나타나는 토스트 알림 상태
+  const [notification, setNotification] = useState<string | null>(null);
+
+  const triggerNotification = (msg: string) => {
+    setNotification(msg);
+    setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+  };
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -238,7 +248,18 @@ export default function Page() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-white text-foreground print:block print:h-auto print:max-h-none print:overflow-visible print:bg-white">
-      {/* 💡 Sidebar에 session={session} 세션 데이터 정상 전달 */}
+      {/* 💡 상단 정중앙에 나타나는 토스트 알림 영역 */}
+      {notification && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl border border-border bg-card px-5 py-3 shadow-lg animate-in fade-in slide-in-from-top-3 duration-200">
+          <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Bell className="size-3.5" />
+          </div>
+          <span className="text-xs font-semibold text-foreground">
+            {notification}
+          </span>
+        </div>
+      )}
+
       <Sidebar
         currentView={currentView}
         onNavigate={(view) => setCurrentView(view)}
@@ -269,8 +290,9 @@ export default function Page() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* 💡 상단 중앙 토스트 알림 트리거 */}
             <button
-              onClick={() => alert("새로운 알림이 없습니다.")}
+              onClick={() => triggerNotification("새로운 알림이 없습니다.")}
               className="relative rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               title="알림"
             >
