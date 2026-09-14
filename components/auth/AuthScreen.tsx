@@ -121,15 +121,6 @@ export default function AuthScreen() {
               "로그인"
             )}
           </Button>
-
-          <button
-            type="button"
-            onClick={handleSignUp}
-            disabled={loading}
-            className="w-full h-11 rounded-xl font-semibold border border-border bg-background hover:bg-muted transition-all text-sm text-foreground"
-          >
-            회원가입
-          </button>
         </form>
       </div>
     </div>
