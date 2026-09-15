@@ -314,7 +314,11 @@ export default function Page() {
         ) : currentView === "templates" ? (
           <TemplatePanel session={session} />
         ) : currentView === "insight" ? (
-          <InsightPanel dbMeetings={dbMeetings} />
+          /* 💡 인사이트 패널 최근 회의 클릭 핸들러 연동 완료 */
+          <InsightPanel
+            dbMeetings={dbMeetings}
+            onMeetingClick={handleOpenDetail}
+          />
         ) : currentView === "starred_meetings" ? (
           <main className="mx-auto w-full max-w-6xl p-5 sm:p-8 bg-white min-h-full">
             <div className="mb-8">
