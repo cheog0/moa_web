@@ -86,11 +86,15 @@ export default function InsightPanel({
         ? 100
         : 0;
 
-  // 3. 평균 회의 길이 (분 단위)
-  const avgDurationMinutes =
-    totalMeetings > 0
-      ? Math.round(totalDurationSeconds / totalMeetings / 60)
-      : 0;
+  // 3. 평균 회의 길이 (분 단위 - 각 회의별 분을 정확히 산출하여 평균 계산)
+  const avgDurationMinutes = useMemo(() => {
+    if (totalMeetings === 0) return 0;
+    const totalMinutes = dbMeetings.reduce(
+      (acc, m) => acc + (m.duration || 0) / 60,
+      0,
+    );
+    return Math.round(totalMinutes / totalMeetings);
+  }, [dbMeetings, totalMeetings]);
 
   // 4. 월별 회의 수 & 녹음 시간 데이터 (최근 12개월)
   const monthlyBarData = useMemo(() => {
