@@ -32,6 +32,12 @@ export default function InsightPanel({
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth(); // 0~11
 
+  // 💡 디버깅용: 실제 넘어오는 회의 데이터와 duration 값을 콘솔에서 확인합니다.
+  console.log(
+    "🔍 [InsightPanel] 받은 전체 미팅:",
+    dbMeetings.map((m) => ({ title: m.title, duration: m.duration })),
+  );
+
   // 1. 총 회의 수
   const totalMeetings = dbMeetings.length;
 
@@ -62,19 +68,19 @@ export default function InsightPanel({
         ? 100
         : 0;
 
-  // 2. 실제 녹음 시간 계산 (duration 컬럼: 초 단위 기준)
+  // 2. 실제 녹음 시간 계산 (초 단위 기준 합산)
   const totalDurationSeconds = dbMeetings.reduce(
-    (acc, m) => acc + (m.duration || 0),
+    (acc, m) => acc + (Number(m.duration) || 0),
     0,
   );
   const totalHours = (totalDurationSeconds / 3600).toFixed(1); // 총 시간
 
   const thisMonthDuration = thisMonthMeetings.reduce(
-    (acc, m) => acc + (m.duration || 0),
+    (acc, m) => acc + (Number(m.duration) || 0),
     0,
   );
   const lastMonthDuration = lastMonthMeetings.reduce(
-    (acc, m) => acc + (m.duration || 0),
+    (acc, m) => acc + (Number(m.duration) || 0),
     0,
   );
   const durationDiff =
@@ -86,15 +92,17 @@ export default function InsightPanel({
         ? 100
         : 0;
 
-  // 3. 평균 회의 길이 (분 단위 - 각 회의별 분을 정확히 산출하여 평균 계산)
+  // 3. 평균 회의 길이 (분 단위 - duration이 0보다 큰 데이터들만 대상으로 정확히 평균 산출)
   const avgDurationMinutes = useMemo(() => {
-    if (totalMeetings === 0) return 0;
-    const totalMinutes = dbMeetings.reduce(
-      (acc, m) => acc + (m.duration || 0) / 60,
+    const validMeetings = dbMeetings.filter((m) => Number(m.duration) > 0);
+    if (validMeetings.length === 0) return 0;
+
+    const totalMinutes = validMeetings.reduce(
+      (acc, m) => acc + Number(m.duration) / 60,
       0,
     );
-    return Math.round(totalMinutes / totalMeetings);
-  }, [dbMeetings, totalMeetings]);
+    return Math.round(totalMinutes / validMeetings.length);
+  }, [dbMeetings]);
 
   // 4. 월별 회의 수 & 녹음 시간 데이터 (최근 12개월)
   const monthlyBarData = useMemo(() => {
@@ -114,8 +122,10 @@ export default function InsightPanel({
       const count = monthMeetings.length;
       const hours = Number(
         (
-          monthMeetings.reduce((acc, curr) => acc + (curr.duration || 0), 0) /
-          3600
+          monthMeetings.reduce(
+            (acc, curr) => acc + (Number(curr.duration) || 0),
+            0,
+          ) / 3600
         ).toFixed(1),
       );
 
@@ -406,7 +416,7 @@ export default function InsightPanel({
 
           <div className="space-y-3 flex-1">
             {recentMeetings.map((m) => {
-              const durationMin = Math.round((m.duration || 0) / 60);
+              const durationMin = Math.round((Number(m.duration) || 0) / 60);
               return (
                 <div
                   key={m.id}
