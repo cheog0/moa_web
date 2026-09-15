@@ -1,0 +1,165 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { MeetingMinutes } from "@/lib/constants";
+import { downloadTranscriptFile, seekAudio } from "@/lib/download";
+
+export function useDetail({
+  minutes,
+  meeting,
+  onClose,
+  onUpdateTitle,
+  onUpdateMinutes,
+}: {
+  minutes?: MeetingMinutes;
+  meeting: any;
+  onClose: () => void;
+  onUpdateTitle: (id: string, newTitle: string) => void;
+  onUpdateMinutes: (
+    id: string,
+    updatedMinutes: Partial<MeetingMinutes>,
+  ) => void;
+}) {
+  const [tab, setTab] = useState<"minutes" | "transcript">("minutes");
+  const [meetingTitle, setMeetingTitle] = useState(meeting?.title || "새 회의");
+  const [summaryText, setSummaryText] = useState(minutes?.summary || "");
+  const [decisionsText, setDecisionsText] = useState(minutes?.decisions || "");
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
+    "idle",
+  );
+  const [printOptions, setPrintOptions] = useState({ decisions: true });
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTimeDisplay, setCurrentTimeDisplay] = useState("00:00");
+
+  const hasChanges =
+    meetingTitle !== (meeting?.title || "새 회의") ||
+    summaryText !== (minutes?.summary || "") ||
+    decisionsText !== (minutes?.decisions || "");
+
+  useEffect(() => {
+    if (hasChanges) setSaveStatus("idle");
+  }, [hasChanges]);
+
+  useEffect(() => {
+    if (minutes) {
+      setSummaryText(minutes.summary || "");
+      setDecisionsText(minutes.decisions || "");
+    }
+  }, [minutes]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+    const onTimeUpdate = () => {
+      const current = audio.currentTime;
+      const m = Math.floor(current / 60);
+      const s = Math.floor(current % 60);
+      setCurrentTimeDisplay(
+        `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`,
+      );
+    };
+    audio.addEventListener("play", onPlay);
+    audio.addEventListener("pause", onPause);
+    audio.addEventListener("timeupdate", onTimeUpdate);
+    return () => {
+      audio.removeEventListener("play", onPlay);
+      audio.removeEventListener("pause", onPause);
+      audio.removeEventListener("timeupdate", onTimeUpdate);
+    };
+  }, [meeting?.audio_url]);
+
+  const dateStr = meeting?.created_at
+    ? new Date(meeting.created_at).toLocaleDateString("ko-KR")
+    : new Date().toLocaleDateString("ko-KR");
+
+  const normalizedTranscript = useMemo(() => {
+    const t = minutes?.transcript;
+    if (typeof t === "string") {
+      try {
+        const parsed = JSON.parse(t);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {}
+    }
+    return t;
+  }, [minutes?.transcript]);
+
+  const persistChanges = () => {
+    if (!meeting?.id) return;
+    if (meetingTitle !== meeting.title) onUpdateTitle(meeting.id, meetingTitle);
+    if (
+      summaryText !== minutes?.summary ||
+      decisionsText !== minutes?.decisions
+    ) {
+      onUpdateMinutes(meeting.id, {
+        summary: summaryText,
+        decisions: decisionsText,
+      });
+    }
+  };
+
+  const handlePrintPDF = () => {
+    setTab("minutes");
+    setTimeout(() => window.print(), 100);
+  };
+
+  return {
+    tab,
+    setTab,
+    meetingTitle,
+    setMeetingTitle,
+    summaryText,
+    setSummaryText,
+    decisionsText,
+    setDecisionsText,
+    isPreviewMode,
+    setIsPreviewMode,
+    isDownloadOpen,
+    setIsDownloadOpen,
+    isDeleteModalOpen,
+    setIsDeleteModalOpen,
+    saveStatus,
+    printOptions,
+    setPrintOptions,
+    audioRef,
+    isPlaying,
+    currentTimeDisplay,
+    hasChanges,
+    dateStr,
+    normalizedTranscript,
+    hideUI: isPreviewMode ? "hidden" : "print:hidden",
+    showPrintBlock: isPreviewMode ? "block" : "hidden print:block",
+    handlePrintPDF,
+    handleManualSave: () => {
+      if (!meeting?.id || !hasChanges) return;
+      setSaveStatus("saving");
+      persistChanges();
+      setTimeout(() => setSaveStatus("saved"), 600);
+    },
+    handleSmartClose: () => {
+      if (hasChanges && meeting?.id) persistChanges();
+      onClose();
+    },
+    togglePlay: () => {
+      if (!audioRef.current) return;
+      if (isPlaying) audioRef.current.pause();
+      else audioRef.current.play();
+    },
+    handleSeek: (timeStr: string) => {
+      if (audioRef.current) seekAudio(audioRef.current, timeStr);
+    },
+    handleDownloadAudio: () => {
+      if (!meeting?.audio_url) return alert("다운로드할 음성 파일이 없습니다.");
+      try {
+        window.open(meeting.audio_url, "_blank");
+      } catch (e) {
+        alert("음성 다운로드에 실패했습니다.");
+      }
+    },
+    handleDownloadTranscript: () =>
+      downloadTranscriptFile(normalizedTranscript, meetingTitle),
+  };
+}
