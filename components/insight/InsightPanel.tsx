@@ -62,7 +62,7 @@ export default function InsightPanel({
         ? 100
         : 0;
 
-  // 2. 실제 녹음 시간 계산 (duration 컬럼: 초 단위 가정, 없으면 기본 0)
+  // 2. 실제 녹음 시간 계산 (duration 컬럼: 초 단위 기준)
   const totalDurationSeconds = dbMeetings.reduce(
     (acc, m) => acc + (m.duration || 0),
     0,
