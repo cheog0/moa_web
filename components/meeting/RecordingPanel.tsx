@@ -29,7 +29,6 @@ export default function RecordingPanel({
   const [seconds, setSeconds] = useState(0);
   const [liveMemo, setLiveMemo] = useState("");
 
-  // 💡 기본 추천 멤버를 모두 없애고 빈 배열로 초기화
   const [selectedAttendees, setSelectedAttendees] = useState<string[]>([]);
   const [customInput, setCustomInput] = useState("");
   const [isAddingCustom, setIsAddingCustom] = useState(false);
@@ -228,6 +227,9 @@ export default function RecordingPanel({
       formData.append("api_key", userSettings.api_key);
       formData.append("keywords", userSettings.keywords);
 
+      // 💡 녹음된 총 시간(초 단위)을 백엔드로 전송하도록 추가 완료
+      formData.append("duration", seconds.toString());
+
       const attendeesStr = selectedAttendees.join(", ");
       if (attendeesStr) {
         formData.append("attendees", attendeesStr);
@@ -319,14 +321,13 @@ export default function RecordingPanel({
                 />
               </div>
 
-              {/* 💡 추천 없이 빈 상태에서 시작하는 동적 참석자 추가 영역 */}
+              {/* 참석자 추가 영역 */}
               <div className="w-full mb-8 text-center">
                 <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-muted-foreground mb-3">
                   <Users className="size-3.5" /> 참석자 추가 (선택 사항)
                 </div>
 
                 <div className="flex flex-wrap items-center justify-center gap-2 min-h-[36px]">
-                  {/* 이미 추가된 참석자 칩들 */}
                   {selectedAttendees.map((name) => (
                     <span
                       key={name}
@@ -343,7 +344,6 @@ export default function RecordingPanel({
                     </span>
                   ))}
 
-                  {/* 직접 입력 인풋 또는 추가 버튼 */}
                   {isAddingCustom ? (
                     <input
                       type="text"
