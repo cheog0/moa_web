@@ -12,6 +12,7 @@ import {
   Folder,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import NavItem from "@/components/layout/NavItem";
 
 export default function Sidebar({
   currentView,
@@ -171,41 +172,5 @@ export default function Sidebar({
         </div>
       </div>
     </aside>
-  );
-}
-
-function NavItem({
-  icon: Icon,
-  label,
-  active,
-  onClick,
-  disabled = false,
-}: {
-  icon: any;
-  label: string;
-  active?: boolean;
-  onClick?: () => void;
-  disabled?: boolean;
-}) {
-  const handleClick = () => {
-    if (disabled) {
-      alert("🚀 곧 추가될 업데이트 준비 중인 기능입니다!");
-    } else if (onClick) {
-      onClick();
-    }
-  };
-
-  return (
-    <button
-      onClick={handleClick}
-      className={`flex items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-all ${
-        active
-          ? "bg-primary/10 font-semibold text-primary shadow-2xs"
-          : "text-muted-foreground hover:bg-slate-200/50 hover:text-foreground"
-      }`}
-    >
-      <Icon className="size-4 shrink-0" />
-      <span className="truncate text-sm">{label}</span>
-    </button>
   );
 }
