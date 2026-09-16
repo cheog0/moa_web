@@ -1,10 +1,13 @@
 import { Star } from "lucide-react";
 import ListItem from "@/components/dashboard/ListItem";
+import MeetingSearch from "@/components/dashboard/MeetingSearch";
 
 export default function Starred({
   meetings,
   onOpenDetail,
   onToggleStar,
+  query,
+  onQueryChange,
 }: {
   meetings: any[];
   onOpenDetail: (meeting: any) => void;
@@ -13,15 +16,18 @@ export default function Starred({
     id: string,
     currentStatus: boolean,
   ) => void;
+  query: string;
+  onQueryChange: (value: string) => void;
 }) {
   return (
     <main className="mx-auto w-full max-w-6xl p-5 sm:p-8 bg-white min-h-full">
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight">즐겨찾기</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           자주 찾는 회의록을 모아두었어요.
         </p>
       </div>
+      <MeetingSearch query={query} onQueryChange={onQueryChange} />
       <div className="flex flex-col gap-3">
         {meetings.map((meeting) => (
           <ListItem

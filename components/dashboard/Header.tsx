@@ -1,16 +1,14 @@
-import { Bell, Menu, Search } from "lucide-react";
+import { Bell, ChevronRight, Menu } from "lucide-react";
 
 export default function Header({
-  currentView,
-  query,
-  onQueryChange,
+  sectionLabel,
+  pageLabel,
   email,
   onNotify,
   onMenuOpen,
 }: {
-  currentView: string;
-  query: string;
-  onQueryChange: (value: string) => void;
+  sectionLabel: string;
+  pageLabel: string;
   email?: string;
   onNotify: () => void;
   onMenuOpen: () => void;
@@ -27,18 +25,16 @@ export default function Header({
         >
           <Menu className="size-5" />
         </button>
-        {(currentView === "dashboard" ||
-          currentView === "starred_meetings") && (
-          <div className="relative hidden sm:block">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={query}
-              onChange={(e) => onQueryChange(e.target.value)}
-              placeholder="회의 검색..."
-              className="h-9 w-64 rounded-lg border border-input bg-transparent pl-9 pr-3 text-sm outline-none ring-primary focus:ring-2"
-            />
-          </div>
-        )}
+        <nav
+          className="flex min-w-0 items-center gap-1.5 text-xs"
+          aria-label="현재 위치"
+        >
+          <span className="truncate text-muted-foreground">{sectionLabel}</span>
+          <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/50" />
+          <span className="truncate font-semibold text-foreground">
+            {pageLabel}
+          </span>
+        </nav>
       </div>
       <div className="flex items-center gap-3">
         <button

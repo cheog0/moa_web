@@ -74,6 +74,32 @@ export default function Page() {
     }
   }
 
+  const breadcrumb =
+    currentView === "dashboard"
+      ? ["워크스페이스", "대시보드"]
+      : currentView === "insight"
+        ? ["워크스페이스", "인사이트"]
+        : currentView === "starred_meetings"
+          ? ["회의 관리", "즐겨찾기"]
+          : currentView === "templates"
+            ? ["회의 관리", "맞춤 템플릿"]
+            : currentView === "settings"
+              ? ["시스템", "설정"]
+              : currentView === "trash"
+                ? ["시스템", "휴지통"]
+                : currentView === "new_project"
+                  ? ["타임라인", "새 타임라인"]
+                  : currentView.startsWith("project_")
+                    ? [
+                        "타임라인",
+                        workspace.dbProjects.find(
+                          (project) =>
+                            project.id ===
+                            currentView.replace("project_", ""),
+                        )?.name || "프로젝트",
+                      ]
+                    : ["워크스페이스", "대시보드"];
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-white text-foreground print:block print:h-auto print:max-h-none print:overflow-visible print:bg-white">
       {notification && <Notice message={notification} />}
@@ -89,9 +115,8 @@ export default function Page() {
       />
       <div className="min-w-0 flex-1 flex flex-col h-full overflow-y-auto print:hidden bg-white">
         <Header
-          currentView={currentView}
-          query={query}
-          onQueryChange={setQuery}
+          sectionLabel={breadcrumb[0]}
+          pageLabel={breadcrumb[1]}
           email={session.user.email}
           onNotify={() => triggerNotification("새로운 알림이 없습니다.")}
           onMenuOpen={() => setMobileMenuOpen(true)}
@@ -110,6 +135,8 @@ export default function Page() {
             meetings={starredMeetings}
             onOpenDetail={workspace.handleOpenDetail}
             onToggleStar={workspace.handleToggleStar}
+            query={query}
+            onQueryChange={setQuery}
           />
         ) : currentView === "trash" ? (
           <Trash
@@ -151,6 +178,8 @@ export default function Page() {
             onNewRecording={() => setRecording(true)}
             onOpenDetail={workspace.handleOpenDetail}
             onToggleStar={workspace.handleToggleStar}
+            query={query}
+            onQueryChange={setQuery}
           />
         ) : (
           <main className="flex h-full items-center justify-center bg-white">

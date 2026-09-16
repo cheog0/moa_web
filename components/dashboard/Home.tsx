@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import CalendarView from "@/components/meeting/CalenderView";
 import Stat from "@/components/dashboard/Stat";
 import ListItem from "@/components/dashboard/ListItem";
+import MeetingSearch from "@/components/dashboard/MeetingSearch";
 
 export default function Home({
   meetings,
@@ -14,6 +15,8 @@ export default function Home({
   onNewRecording,
   onOpenDetail,
   onToggleStar,
+  query,
+  onQueryChange,
 }: {
   meetings: any[];
   totalMeetings: number;
@@ -28,6 +31,8 @@ export default function Home({
     id: string,
     currentStatus: boolean,
   ) => void;
+  query: string;
+  onQueryChange: (value: string) => void;
 }) {
   return (
     <main className="mx-auto w-full max-w-6xl p-5 sm:p-8 bg-white min-h-full">
@@ -68,23 +73,52 @@ export default function Home({
       </div>
 
       <section className="mt-10">
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between gap-4">
           <h2 className="text-lg font-bold">기록된 회의</h2>
-          <div className="flex items-center rounded-lg border border-border bg-muted/30 p-1">
+          <div className="relative flex items-center rounded-lg bg-muted/40 p-1">
+            <span
+              aria-hidden="true"
+              className={`pointer-events-none absolute inset-y-1 left-1 w-[calc(50%_-_4px)] rounded-md bg-primary/12 shadow-[0_1px_4px_rgba(37,99,235,0.12)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                dashboardMode === "calendar" ? "translate-x-full" : ""
+              }`}
+            />
             <button
               onClick={() => onDashboardModeChange("list")}
-              className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-semibold transition-colors ${dashboardMode === "list" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              aria-pressed={dashboardMode === "list"}
+              className={`relative z-10 flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-semibold transition-colors duration-200 ${
+                dashboardMode === "list"
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
-              <List className="size-4" /> 리스트
+              <List
+                className={`size-4 transition-transform duration-300 ${
+                  dashboardMode === "list" ? "scale-105" : ""
+                }`}
+              />{" "}
+              리스트
             </button>
             <button
               onClick={() => onDashboardModeChange("calendar")}
-              className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-semibold transition-colors ${dashboardMode === "calendar" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              aria-pressed={dashboardMode === "calendar"}
+              className={`relative z-10 flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-semibold transition-colors duration-200 ${
+                dashboardMode === "calendar"
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
-              <Calendar className="size-4" /> 캘린더
+              <Calendar
+                className={`size-4 transition-transform duration-300 ${
+                  dashboardMode === "calendar" ? "scale-105" : ""
+                }`}
+              />{" "}
+              캘린더
             </button>
           </div>
         </div>
+        {dashboardMode === "list" && (
+          <MeetingSearch query={query} onQueryChange={onQueryChange} />
+        )}
 
         {dashboardMode === "calendar" ? (
           <CalendarView meetings={meetings} onMeetingClick={onOpenDetail} />
