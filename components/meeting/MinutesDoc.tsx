@@ -105,7 +105,7 @@ export default function MinutesDoc({
             <div>
               <h3
                 className={cn(
-                  "mb-2 flex items-center gap-2 text-lg font-bold text-gray-900",
+                  "mb-4 flex items-center gap-2 text-lg font-bold text-gray-900",
                   darkDoc && whenDark(theme, "text-zinc-50"),
                 )}
               >
