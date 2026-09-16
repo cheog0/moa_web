@@ -152,7 +152,7 @@ export default function ItemList({
                         onChange={(e) =>
                           onUpdateDate(meeting.id, e.target.value)
                         }
-                        className="cursor-pointer bg-transparent font-mono text-[9px] leading-none text-slate-500 outline-none transition-colors hover:text-sky-600 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-datetime-edit]:text-[9px]"
+                        className="cursor-pointer bg-transparent font-mono text-[10px] leading-none text-slate-500 outline-none transition-colors hover:text-sky-600 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-datetime-edit]:text-[10px]"
                       />
                       {meeting.id === latestMeetingId && (
                         <span className="rounded-full bg-sky-50 px-2 py-0.5 font-mono text-[9px] font-bold tracking-wider text-sky-600">
