@@ -141,7 +141,12 @@ export default function TimelineHeader({
             ) : (
               <Trash2 className="size-[18px] transition-transform duration-300 group-hover/delete:-rotate-6 group-hover/delete:scale-110" />
             )}
-            <span className="max-w-0 overflow-hidden text-[11px] font-semibold opacity-0 transition-all duration-300 group-hover/delete:max-w-9 group-hover/delete:opacity-100">
+            <span
+              className={cn(
+                "max-w-0 overflow-hidden text-[11px] font-semibold opacity-0 transition-all duration-300 group-hover/delete:max-w-9 group-hover/delete:opacity-100",
+                whenDark(theme, "font-bold"),
+              )}
+            >
               {isDeleting ? "삭제 중" : "삭제"}
             </span>
           </Button>
