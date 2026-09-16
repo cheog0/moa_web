@@ -63,7 +63,7 @@ export default function Sidebar({
       <aside
         id="mobile-sidebar"
         style={{ backgroundColor: "#FBFCFF" }}
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col justify-between border-r border-slate-100 px-3.5 py-4 text-sm shadow-xl transition-transform duration-200 select-none print:hidden lg:static lg:z-auto lg:translate-x-0 lg:shadow-none ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col justify-between px-3.5 py-4 text-sm shadow-xl transition-transform duration-200 select-none after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-px after:bg-slate-200/70 after:blur-[0.3px] print:hidden lg:relative lg:z-auto lg:translate-x-0 lg:shadow-none ${
           mobileOpen
             ? "visible translate-x-0"
             : "invisible -translate-x-full lg:visible"
