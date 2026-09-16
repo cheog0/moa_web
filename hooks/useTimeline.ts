@@ -6,8 +6,15 @@ export function useTimeline(
   projectId?: string,
   onSaveSuccess?: () => void,
   onDeleteSuccess?: () => void,
+  initialName?: string,
+  initialStatus?: string,
 ) {
-  const data = useTimelineData(dbMeetings, projectId);
+  const data = useTimelineData(
+    dbMeetings,
+    projectId,
+    initialName,
+    initialStatus,
+  );
 
   const handleOpenModal = () => {
     if (!data.projectName.trim()) {

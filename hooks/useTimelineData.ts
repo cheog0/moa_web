@@ -2,9 +2,16 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { TimelineItem, ToastConfig } from "@/lib/timeline";
 
-export function useTimelineData(dbMeetings: any[], projectId?: string) {
-  const [projectName, setProjectName] = useState("");
-  const [projectStatus, setProjectStatus] = useState("진행 중");
+export function useTimelineData(
+  dbMeetings: any[],
+  projectId?: string,
+  initialName?: string,
+  initialStatus?: string,
+) {
+  const [projectName, setProjectName] = useState(initialName || "");
+  const [projectStatus, setProjectStatus] = useState(
+    initialStatus || "진행 중",
+  );
   const [isEditing, setIsEditing] = useState(!projectId);
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
   const [isLoadingProject, setIsLoadingProject] = useState(Boolean(projectId));

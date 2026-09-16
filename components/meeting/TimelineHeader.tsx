@@ -82,7 +82,7 @@ export default function TimelineHeader({
           <span className="text-sm text-muted-foreground">타임라인</span>
         </div>
         <div className="flex items-center gap-2 group">
-          {isLoading ? (
+          {isLoading && !projectName ? (
             <div className="h-8 w-48 animate-pulse rounded-md bg-slate-200" />
           ) : isEditing ? (
             <input

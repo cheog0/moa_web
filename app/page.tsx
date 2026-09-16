@@ -83,6 +83,13 @@ export default function Page() {
     }
   }
 
+  const currentProjectId = currentView.startsWith("project_")
+    ? currentView.replace("project_", "")
+    : undefined;
+  const currentProject = currentProjectId
+    ? workspace.dbProjects.find((project) => project.id === currentProjectId)
+    : undefined;
+
   const breadcrumb =
     currentView === "dashboard"
       ? ["워크스페이스", "대시보드"]
@@ -98,15 +105,8 @@ export default function Page() {
                 ? ["시스템", "휴지통"]
                 : currentView === "new_project"
                   ? ["타임라인", "새 타임라인"]
-                  : currentView.startsWith("project_")
-                    ? [
-                        "타임라인",
-                        workspace.dbProjects.find(
-                          (project) =>
-                            project.id ===
-                            currentView.replace("project_", ""),
-                        )?.name || "프로젝트",
-                      ]
+                  : currentProjectId
+                    ? ["타임라인", currentProject?.name || "프로젝트"]
                     : ["워크스페이스", "대시보드"];
 
   return (
@@ -188,7 +188,9 @@ export default function Page() {
             <ProjectTimeline
               key={currentView}
               dbMeetings={activeMeetings}
-              projectId={currentView.replace("project_", "")}
+              projectId={currentProjectId}
+              initialName={currentProject?.name}
+              initialStatus={currentProject?.status}
               onSaveSuccess={workspace.fetchProjects}
               onDeleteSuccess={() => {
                 workspace.fetchProjects();

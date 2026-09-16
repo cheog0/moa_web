@@ -16,18 +16,24 @@ export default function ProjectTimeline({
   onSaveSuccess,
   onDeleteSuccess,
   onMeetingClick,
+  initialName,
+  initialStatus,
 }: {
   dbMeetings?: any[];
   projectId?: string;
   onSaveSuccess?: () => void;
   onDeleteSuccess?: () => void;
   onMeetingClick?: (meeting: any) => void;
+  initialName?: string;
+  initialStatus?: string;
 }) {
   const timeline = useTimeline(
     dbMeetings,
     projectId,
     onSaveSuccess,
     onDeleteSuccess,
+    initialName,
+    initialStatus,
   );
   const filteredMeetings = dbMeetings.filter((m) =>
     (m.title || "새 회의")
