@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { TimelineItem } from "@/lib/timeline";
 import { useTheme } from "@/hooks/useTheme";
-import { whenDark } from "@/lib/theme";
+import { whenDark, whenDarkValue } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 export function EmptyState({ onOpenModal }: { onOpenModal: () => void }) {
@@ -139,10 +139,15 @@ export default function ItemList({
               </div>
             )}
             <article className="group relative mb-2 pl-8 sm:pl-10 animate-in slide-in-from-left-2 duration-300">
-              <span className="absolute -left-[9px] top-7 flex size-[17px] items-center justify-center rounded-full bg-white">
+              <span
+                className={cn(
+                  "absolute -left-[9px] top-7 flex size-[17px] items-center justify-center rounded-full bg-white",
+                  whenDark(theme, "bg-zinc-950"),
+                )}
+              >
                 <CheckCircle2
                   className="size-[17px] text-sky-500"
-                  fill="#e0f2fe"
+                  fill={whenDarkValue(theme, "#082f49", "#e0f2fe")}
                 />
               </span>
 

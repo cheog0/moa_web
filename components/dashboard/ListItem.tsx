@@ -1,5 +1,10 @@
+"use client";
+
 import { ChevronRight, FileText, Star } from "lucide-react";
 import { formatMeetingDate } from "@/lib/dates";
+import { useTheme } from "@/hooks/useTheme";
+import { whenDark } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 export default function ListItem({
   meeting,
@@ -17,13 +22,19 @@ export default function ListItem({
   alwaysFilledStar?: boolean;
 }) {
   const filled = alwaysFilledStar || meeting.is_starred;
+  const { theme } = useTheme();
 
   return (
     <div
       onClick={() => onOpen(meeting)}
       className="group flex w-full items-center gap-4 rounded-xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm cursor-pointer"
     >
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-500">
+      <div
+        className={cn(
+          "flex size-10 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-500",
+          whenDark(theme, "bg-sky-500/15 text-sky-400"),
+        )}
+      >
         <FileText className="size-5" />
       </div>
       <div className="min-w-0 flex-1">
