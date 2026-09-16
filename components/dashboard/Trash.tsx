@@ -107,10 +107,20 @@ export default function Trash({
                 총 {meetings.length}개의 기록
               </p>
             </div>
-            <p className="hidden font-mono text-[10px] uppercase tracking-[0.18em] text-slate-400 sm:block">
+            <p
+              className={cn(
+                "hidden font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-600 sm:block",
+                whenDark(theme, "text-zinc-300"),
+              )}
+            >
               Deleted at
             </p>
-            <p className="text-right font-mono text-[10px] uppercase tracking-[0.18em] text-slate-400">
+            <p
+              className={cn(
+                "text-right font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-600",
+                whenDark(theme, "text-zinc-300"),
+              )}
+            >
               최근 삭제순
             </p>
           </div>
@@ -146,7 +156,12 @@ export default function Trash({
 
               <div className="flex items-center gap-2 px-2 sm:px-0">
                 <span className="size-1.5 rounded-full bg-rose-400" />
-                <p className="text-xs text-slate-500">
+                <p
+                  className={cn(
+                    "text-xs text-slate-600",
+                    whenDark(theme, "text-zinc-300"),
+                  )}
+                >
                   {formatMeetingDate(meeting.deleted_at)}
                 </p>
               </div>
