@@ -133,7 +133,12 @@ export default function ItemList({
                     whenDark(theme, "border-zinc-950 bg-zinc-100"),
                   )}
                 />
-                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                <p
+                  className={cn(
+                    "font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400",
+                    whenDark(theme, "text-zinc-300"),
+                  )}
+                >
                   {getMonthLabel(meeting.date)}
                 </p>
               </div>
@@ -175,7 +180,12 @@ export default function ItemList({
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
                     <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                      <Calendar className="size-3 text-slate-400" />
+                      <Calendar
+                        className={cn(
+                          "size-3 text-slate-400",
+                          whenDark(theme, "text-zinc-300"),
+                        )}
+                      />
                       <input
                         type="date"
                         value={meeting.date}
@@ -183,7 +193,13 @@ export default function ItemList({
                         onChange={(e) =>
                           onUpdateDate(meeting.id, e.target.value)
                         }
-                        className="cursor-pointer bg-transparent font-mono text-[10px] leading-none text-slate-500 outline-none transition-colors hover:text-sky-600 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-datetime-edit]:text-[10px]"
+                        className={cn(
+                          "cursor-pointer bg-transparent font-mono text-[10px] leading-none text-slate-500 outline-none transition-colors hover:text-sky-600 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-datetime-edit]:text-[10px]",
+                          whenDark(
+                            theme,
+                            "text-zinc-200 hover:text-sky-400 [&::-webkit-datetime-edit]:text-zinc-200",
+                          ),
+                        )}
                       />
                       {meeting.id === latestMeetingId && (
                         <span className="rounded-full bg-sky-50 px-2 py-0.5 font-mono text-[9px] font-bold tracking-wider text-sky-600">
