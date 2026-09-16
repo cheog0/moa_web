@@ -29,7 +29,10 @@ export async function transcribeRecording({
   formData.append("engine", userSettings.ai_engine);
   formData.append("api_key", userSettings.api_key);
   formData.append("keywords", userSettings.keywords);
-  formData.append("duration", seconds.toString());
+  formData.append(
+    "duration",
+    String(Math.max(0, Math.round(Number(seconds) || 0))),
+  );
 
   const attendeesStr = attendees.join(", ");
   if (attendeesStr) formData.append("attendees", attendeesStr);

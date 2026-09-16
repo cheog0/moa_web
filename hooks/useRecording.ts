@@ -26,6 +26,16 @@ export function useRecording(
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  const elapsedMsRef = useRef(0);
+  const runningSinceRef = useRef<number | null>(null);
+
+  const getElapsedSeconds = () => {
+    let ms = elapsedMsRef.current;
+    if (runningSinceRef.current != null) {
+      ms += Date.now() - runningSinceRef.current;
+    }
+    return Math.max(0, Math.round(ms / 1000));
+  };
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -58,7 +68,7 @@ export function useRecording(
 
   useEffect(() => {
     if (status !== "recording") return;
-    const timer = setInterval(() => setSeconds((prev) => prev + 1), 1000);
+    const timer = setInterval(() => setSeconds(getElapsedSeconds()), 250);
     const keepAlive = setInterval(() => {
       fetch(`${getApiUrl()}/api/meetings`).catch(() => {});
     }, 10 * 60 * 1000);
@@ -99,6 +109,8 @@ export function useRecording(
           audioChunksRef.current.push(event.data);
       };
       recorder.start(1000);
+      elapsedMsRef.current = 0;
+      runningSinceRef.current = Date.now();
       setSeconds(0);
       setStatus("recording");
     } catch (error) {
@@ -109,6 +121,12 @@ export function useRecording(
   const handleFinish = async () => {
     const recorder = mediaRecorderRef.current;
     if (!recorder || status === "processing") return;
+    if (runningSinceRef.current != null) {
+      elapsedMsRef.current += Date.now() - runningSinceRef.current;
+      runningSinceRef.current = null;
+    }
+    const durationSeconds = Math.max(0, Math.round(elapsedMsRef.current / 1000));
+    setSeconds(durationSeconds);
     setStatus("processing");
     const audioBlob = await new Promise<Blob | null>((resolve) => {
       recorder.onstop = () =>
@@ -128,6 +146,8 @@ export function useRecording(
     }
     if (!audioBlob || audioBlob.size === 0) {
       alert("녹음된 음성이 없습니다.");
+      elapsedMsRef.current = 0;
+      runningSinceRef.current = null;
       setStatus("ready");
       setSeconds(0);
       return;
@@ -136,7 +156,7 @@ export function useRecording(
       const result = await transcribeRecording({
         audioBlob,
         userSettings,
-        seconds,
+        seconds: durationSeconds,
         attendees: selectedAttendees,
         liveMemo,
       });
@@ -151,10 +171,16 @@ export function useRecording(
     if (status === "paused") {
       if (mediaRecorderRef.current?.state === "paused") {
         mediaRecorderRef.current.resume();
+        runningSinceRef.current = Date.now();
         setStatus("recording");
       }
     } else if (mediaRecorderRef.current?.state === "recording") {
       mediaRecorderRef.current.pause();
+      if (runningSinceRef.current != null) {
+        elapsedMsRef.current += Date.now() - runningSinceRef.current;
+        runningSinceRef.current = null;
+      }
+      setSeconds(getElapsedSeconds());
       setStatus("paused");
     }
   };
