@@ -59,7 +59,7 @@ export default function Home({
           onClick={onNewRecording}
           className="h-8 w-full shadow-sm sm:w-auto"
         >
-          <Plus className="size-4" />
+          <Plus className="size-3.5" />
           <span className="text-[13px] leading-none">새 회의 시작</span>
         </Button>
       </div>
