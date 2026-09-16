@@ -6,7 +6,6 @@ import AuthScreen from "@/components/auth/AuthScreen";
 import Sidebar from "@/components/layout/Sidebar";
 import SettingsPanel from "@/components/settings/SettingsPanel";
 import TemplatePanel from "@/components/settings/TemplatePanel";
-import ManualPanel from "@/components/settings/ManualPanel";
 import RecordingPanel from "@/components/meeting/RecordingPanel";
 import DetailPanel from "@/components/meeting/DetailPanel";
 import ProjectTimeline from "@/components/meeting/ProjectTimeline";
@@ -100,9 +99,7 @@ export default function Page() {
           ? ["회의 관리", "즐겨찾기"]
           : currentView === "templates"
             ? ["회의 관리", "맞춤 템플릿"]
-            : currentView === "manuals"
-              ? ["회의 관리", "업무 매뉴얼"]
-              : currentView === "settings"
+            : currentView === "settings"
               ? ["시스템", "설정"]
               : currentView === "trash"
                 ? ["시스템", "휴지통"]
@@ -148,8 +145,6 @@ export default function Page() {
           <SettingsPanel session={session} />
         ) : currentView === "templates" ? (
           <TemplatePanel session={session} />
-        ) : currentView === "manuals" ? (
-          <ManualPanel session={session} />
         ) : currentView === "insight" ? (
           <InsightPanel
             dbMeetings={activeMeetings}

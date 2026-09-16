@@ -7,14 +7,12 @@ import {
   ChevronRight,
   History,
   Link as LinkIcon,
-  ListChecks,
   Loader2,
   Plus,
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TimelineItem } from "@/lib/timeline";
-import { splitDecisions } from "@/lib/decisions";
 import { useTheme } from "@/hooks/useTheme";
 import { whenDark, whenDarkValue } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -104,8 +102,6 @@ export default function ItemList({
     return gap > 0 ? `${gap}일` : null;
   };
 
-  const getDecisionCount = (decisions?: string) => splitDecisions(decisions).length;
-
   return (
     <div className="relative ml-3 border-l border-slate-200 py-2 sm:ml-7">
       {visibleItems.map((meeting, index) => {
@@ -116,7 +112,6 @@ export default function ItemList({
         const dayGap = previousMeeting
           ? getDayGap(previousMeeting.date, meeting.date)
           : null;
-        const decisionCount = getDecisionCount(meeting.decisions);
 
         return (
           <Fragment key={meeting.id}>
@@ -210,14 +205,6 @@ export default function ItemList({
                     >
                       {meeting.title}
                     </h3>
-                    {decisionCount > 0 && (
-                    <div className="mt-2 flex items-center gap-3">
-                      <span className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600">
-                        <ListChecks className="size-3.5" />
-                        결정 사항 {decisionCount}건
-                      </span>
-                    </div>
-                    )}
                   </div>
                   <div className="flex self-stretch flex-col items-center justify-between">
                     <button

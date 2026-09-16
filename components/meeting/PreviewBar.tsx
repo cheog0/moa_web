@@ -7,20 +7,14 @@ import { whenDark } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 export default function PreviewBar({
-  includeDecisions,
   includeActionItems,
-  showDecisionsToggle = true,
   showActionItemsToggle = true,
-  onToggleDecisions,
   onToggleActionItems,
   onBack,
   onPrint,
 }: {
-  includeDecisions: boolean;
   includeActionItems: boolean;
-  showDecisionsToggle?: boolean;
   showActionItemsToggle?: boolean;
-  onToggleDecisions: (checked: boolean) => void;
   onToggleActionItems: (checked: boolean) => void;
   onBack: () => void;
   onPrint: () => void;
@@ -34,19 +28,8 @@ export default function PreviewBar({
           <Eye className="size-5 text-sky-400" />
           <span className="hidden sm:inline">PDF 미리보기</span>
         </div>
-        {(showDecisionsToggle || showActionItemsToggle) && (
+        {showActionItemsToggle && (
           <div className="hidden sm:block h-4 w-px bg-zinc-600" />
-        )}
-        {showDecisionsToggle && (
-          <label className="flex items-center gap-1.5 text-sm text-zinc-300 hover:text-white cursor-pointer transition-colors">
-            <input
-              type="checkbox"
-              checked={includeDecisions}
-              onChange={(e) => onToggleDecisions(e.target.checked)}
-              className="size-4 rounded border-zinc-500 bg-zinc-700 text-sky-500 focus:ring-sky-500 focus:ring-offset-zinc-800 cursor-pointer"
-            />
-            결정된 사항 포함
-          </label>
         )}
         {showActionItemsToggle && (
           <label className="flex items-center gap-1.5 text-sm text-zinc-300 hover:text-white cursor-pointer transition-colors">

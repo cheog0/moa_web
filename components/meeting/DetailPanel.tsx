@@ -10,6 +10,7 @@ import TranscriptList from "@/components/meeting/TranscriptList";
 import StatusToast from "@/components/meeting/StatusToast";
 import { useDetail } from "@/hooks/useDetail";
 import { ToastConfig } from "@/lib/timeline";
+import { cn } from "@/lib/utils";
 
 export default function DetailPanel({
   onClose,
@@ -47,7 +48,7 @@ export default function DetailPanel({
 
   return (
     <div
-      className="fixed inset-0 z-30 flex justify-end bg-foreground/25 backdrop-blur-sm print:static print:block print:h-auto print:min-h-0 print:overflow-visible print:bg-white print:backdrop-blur-none"
+      className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 p-3 backdrop-blur-sm sm:p-6 print:static print:block print:h-auto print:min-h-0 print:overflow-visible print:bg-white print:p-0 print:backdrop-blur-none"
       onClick={detail.handleSmartClose}
     >
       <style>{`
@@ -61,7 +62,10 @@ export default function DetailPanel({
         }
       `}</style>
       <div
-        className={`flex h-full w-full max-w-4xl flex-col overflow-hidden border-l border-border shadow-2xl print:block print:h-auto print:min-h-0 print:max-h-none print:w-full print:max-w-none print:overflow-visible print:border-none print:shadow-none print:bg-white ${detail.isPreviewMode ? "bg-zinc-100" : "bg-background"}`}
+        className={cn(
+          "flex h-[min(94dvh,calc(100vh-1.5rem))] w-full max-w-[1280px] flex-col overflow-hidden rounded-2xl border border-border shadow-2xl print:block print:h-auto print:min-h-0 print:max-h-none print:w-full print:max-w-none print:overflow-visible print:rounded-none print:border-none print:shadow-none print:bg-white",
+          detail.isPreviewMode ? "bg-zinc-100" : "bg-background",
+        )}
         onClick={(e) => e.stopPropagation()}
       >
         {meeting?.audio_url && (
@@ -73,16 +77,8 @@ export default function DetailPanel({
         )}
         {detail.isPreviewMode ? (
           <PreviewBar
-            includeDecisions={detail.printOptions.decisions}
             includeActionItems={detail.printOptions.actionItems}
-            showDecisionsToggle={Boolean(detail.decisionsText?.trim())}
             showActionItemsToggle={detail.actionItems.length > 0}
-            onToggleDecisions={(checked) =>
-              detail.setPrintOptions((prev) => ({
-                ...prev,
-                decisions: checked,
-              }))
-            }
             onToggleActionItems={(checked) =>
               detail.setPrintOptions((prev) => ({
                 ...prev,
@@ -158,8 +154,11 @@ export default function DetailPanel({
           </button>
         </div>
         <main
-          className={`mx-auto min-h-0 w-full max-w-3xl flex-1 overflow-y-auto ${detail.isPreviewMode ? "p-8" : "p-6 sm:p-12"} print:block print:max-w-none print:h-auto print:min-h-0 print:max-h-none print:overflow-visible print:py-[15mm] print:px-[20mm] print:m-0`}
+          className="min-h-0 w-full flex-1 overflow-y-auto print:block print:h-auto print:min-h-0 print:max-h-none print:overflow-visible"
         >
+          <div
+            className={`mx-auto w-full ${detail.isPreviewMode ? "max-w-4xl p-8" : "p-6 sm:px-10 sm:py-10"} print:max-w-none print:py-[15mm] print:px-[20mm] print:m-0`}
+          >
           {detail.tab === "minutes" ? (
             <MinutesDoc
               meetingTitle={detail.meetingTitle}
@@ -167,18 +166,13 @@ export default function DetailPanel({
               dateStr={detail.dateStr}
               minutes={minutes}
               summaryText={detail.summaryText}
-              decisionsText={detail.decisionsText}
               actionItems={detail.actionItems}
-              replyDraft={detail.replyDraft}
               onSummaryChange={detail.setSummaryText}
-              onDecisionsChange={detail.setDecisionsText}
               onToggleActionItem={detail.toggleActionItem}
-              onReplyDraftChange={detail.setReplyDraft}
               onSeek={detail.handleSeek}
               hideUI={detail.hideUI}
               showPrintBlock={detail.showPrintBlock}
               isPreviewMode={detail.isPreviewMode}
-              includeDecisions={detail.printOptions.decisions}
               includeActionItems={detail.printOptions.actionItems}
             />
           ) : (
@@ -190,6 +184,7 @@ export default function DetailPanel({
               />
             </div>
           )}
+          </div>
         </main>
       </div>
       {toast && <StatusToast toast={toast} />}

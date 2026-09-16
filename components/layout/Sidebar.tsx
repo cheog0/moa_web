@@ -8,7 +8,6 @@ import {
   LineChart,
   Star,
   FileEdit,
-  BookOpen,
   Trash2,
   Folder,
   X,
@@ -173,12 +172,6 @@ export default function Sidebar({
               label="맞춤 템플릿"
               active={currentView === "templates"}
               onClick={() => handleNavigate("templates")}
-            />
-            <NavItem
-              icon={BookOpen}
-              label="업무 매뉴얼"
-              active={currentView === "manuals"}
-              onClick={() => handleNavigate("manuals")}
             />
           </div>
 
