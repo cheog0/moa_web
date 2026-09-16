@@ -53,7 +53,7 @@ export default function DetailHeader({
   onDelete?: () => void;
 }) {
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border bg-background/95 px-6 py-3 backdrop-blur print:hidden">
+    <header className="flex shrink-0 items-center justify-between gap-4 border-b border-border bg-background/95 px-6 py-3 backdrop-blur print:hidden">
       <div className="flex items-center gap-3 w-0 flex-1 min-w-0">
         <button onClick={onClose} className="rounded-lg p-2 hover:bg-muted shrink-0">
           <X className="size-4" />

@@ -15,7 +15,7 @@ export default function PreviewBar({
   onPrint: () => void;
 }) {
   return (
-    <div className="sticky top-0 z-20 flex items-center justify-between bg-zinc-800 px-6 py-4 text-white shadow-md print:hidden">
+    <div className="flex shrink-0 items-center justify-between bg-zinc-800 px-6 py-4 text-white shadow-md print:hidden">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
         <div className="flex items-center gap-2 font-semibold">
           <Eye className="size-5 text-sky-400" />

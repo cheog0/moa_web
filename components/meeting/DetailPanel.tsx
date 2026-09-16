@@ -50,7 +50,7 @@ export default function DetailPanel({
         }
       `}</style>
       <div
-        className={`flex h-full w-full max-w-4xl flex-col overflow-y-auto border-l border-border shadow-2xl print:block print:h-auto print:min-h-0 print:max-h-none print:w-full print:max-w-none print:overflow-visible print:border-none print:shadow-none print:bg-white ${detail.isPreviewMode ? "bg-zinc-100" : "bg-background"}`}
+        className={`flex h-full w-full max-w-4xl flex-col overflow-hidden border-l border-border shadow-2xl print:block print:h-auto print:min-h-0 print:max-h-none print:w-full print:max-w-none print:overflow-visible print:border-none print:shadow-none print:bg-white ${detail.isPreviewMode ? "bg-zinc-100" : "bg-background"}`}
         onClick={(e) => e.stopPropagation()}
       >
         {meeting?.audio_url && (
@@ -108,7 +108,7 @@ export default function DetailPanel({
           />
         )}
         <div
-          className={`flex border-b border-border px-6 pt-4 ${detail.hideUI}`}
+          className={`flex shrink-0 border-b border-border bg-background px-6 pt-4 ${detail.hideUI}`}
         >
           <button
             onClick={() => detail.setTab("minutes")}
@@ -124,7 +124,7 @@ export default function DetailPanel({
           </button>
         </div>
         <main
-          className={`mx-auto w-full max-w-3xl ${detail.isPreviewMode ? "p-8" : "p-6 sm:p-12"} print:block print:max-w-none print:h-auto print:min-h-0 print:max-h-none print:overflow-visible print:py-[15mm] print:px-[20mm] print:m-0`}
+          className={`mx-auto min-h-0 w-full max-w-3xl flex-1 overflow-y-auto ${detail.isPreviewMode ? "p-8" : "p-6 sm:p-12"} print:block print:max-w-none print:h-auto print:min-h-0 print:max-h-none print:overflow-visible print:py-[15mm] print:px-[20mm] print:m-0`}
         >
           {detail.tab === "minutes" ? (
             <MinutesDoc
