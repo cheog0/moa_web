@@ -38,7 +38,7 @@ export default function Trash({
     >
       <div className="mx-auto w-full max-w-6xl">
         <header className="relative overflow-hidden border-b border-slate-200 pb-10">
-          <div className="absolute right-0 top-1 font-mono text-5xl font-bold leading-none tracking-[-0.06em] text-slate-100 sm:text-7xl">
+          <div className="absolute right-0 top-5 font-mono text-3xl font-bold leading-none tracking-[-0.04em] text-slate-100 sm:text-5xl">
             {String(meetings.length).padStart(2, "0")}
           </div>
           <div className="relative">
