@@ -75,6 +75,8 @@ export default function DetailPanel({
           <PreviewBar
             includeDecisions={detail.printOptions.decisions}
             includeActionItems={detail.printOptions.actionItems}
+            showDecisionsToggle={Boolean(detail.decisionsText?.trim())}
+            showActionItemsToggle={detail.actionItems.length > 0}
             onToggleDecisions={(checked) =>
               detail.setPrintOptions((prev) => ({
                 ...prev,

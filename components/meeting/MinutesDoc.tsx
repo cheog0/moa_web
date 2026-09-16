@@ -1,10 +1,12 @@
 "use client";
 
-import { Check, Clock3, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { Check, Clock3, Pencil, Sparkles } from "lucide-react";
 import { MeetingMinutes } from "@/lib/constants";
 import { ActionItem } from "@/lib/actionItems";
 import { joinDecisions, splitDecisions } from "@/lib/decisions";
 import FollowUpSection from "@/components/meeting/FollowUpSection";
+import MarkdownBody from "@/components/meeting/MarkdownBody";
 import { useTheme } from "@/hooks/useTheme";
 import { whenDark } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -51,6 +53,7 @@ export default function MinutesDoc({
   const { theme } = useTheme();
   const darkDoc = !isPreviewMode;
   const decisionItems = splitDecisions(decisionsText);
+  const [isEditingSummary, setIsEditingSummary] = useState(false);
 
   return (
     <div
@@ -100,35 +103,54 @@ export default function MinutesDoc({
         {minutes ? (
           <div className="flex flex-col gap-8 text-base leading-relaxed">
             <div>
-              <h3
-                className={cn(
-                  "mb-2 flex items-center gap-2 text-lg font-bold text-gray-900",
-                  darkDoc && whenDark(theme, "text-zinc-50"),
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <h3
+                  className={cn(
+                    "flex items-center gap-2 text-lg font-bold text-gray-900",
+                    darkDoc && whenDark(theme, "text-zinc-50"),
+                  )}
+                >
+                  <Sparkles className="size-5 text-blue-500" /> 회의 요약 및 내용
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingSummary((open) => !open)}
+                  className={cn(
+                    `inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 ${hideUI}`,
+                    darkDoc &&
+                      whenDark(theme, "hover:bg-zinc-800 hover:text-zinc-100"),
+                  )}
+                >
+                  <Pencil className="size-3.5" />
+                  {isEditingSummary ? "미리보기" : "원문 편집"}
+                </button>
+              </div>
+              <div className={hideUI}>
+                {isEditingSummary ? (
+                  <textarea
+                    value={summaryText}
+                    onChange={(e) => onSummaryChange(e.target.value)}
+                    className={cn(
+                      "w-full min-h-[400px] resize-y rounded-lg border border-slate-200 p-3 font-mono text-sm leading-relaxed text-gray-800 outline-none focus:border-primary",
+                      darkDoc &&
+                        whenDark(
+                          theme,
+                          "border-zinc-700 bg-zinc-950 text-zinc-200",
+                        ),
+                    )}
+                  />
+                ) : (
+                  <MarkdownBody markdown={summaryText} darkDoc={darkDoc} />
                 )}
-              >
-                <Sparkles className="size-5 text-blue-500" /> 회의 요약 및 내용
-              </h3>
-              <textarea
-                value={summaryText}
-                onChange={(e) => onSummaryChange(e.target.value)}
-                className={cn(
-                  `w-full min-h-[400px] resize-y rounded-lg border border-transparent p-3 text-base leading-relaxed text-gray-800 transition-colors hover:border-gray-200 focus:border-primary focus:outline-none ${hideUI}`,
-                  darkDoc &&
-                    whenDark(
-                      theme,
-                      "text-zinc-200 hover:border-zinc-700",
-                    ),
-                )}
-              />
-              <div
-                className={`${showPrintBlock} whitespace-pre-wrap pb-4 pt-2 text-base leading-relaxed text-black`}
-              >
-                {summaryText || "내용이 없습니다."}
+              </div>
+              <div className={`${showPrintBlock} pb-4 pt-2`}>
+                <MarkdownBody markdown={summaryText} darkDoc={false} />
               </div>
             </div>
-            <div
-              className={`${!includeDecisions ? "print:hidden" : ""} ${!includeDecisions && isPreviewMode ? "hidden" : ""}`}
-            >
+            {decisionItems.length > 0 && (
+              <div
+                className={`${!includeDecisions ? "print:hidden" : ""} ${!includeDecisions && isPreviewMode ? "hidden" : ""}`}
+              >
               <h3
                 className={cn(
                   "mb-3 flex items-center gap-2 text-lg font-bold text-gray-900",
@@ -137,77 +159,53 @@ export default function MinutesDoc({
               >
                 <Check className="size-5 text-green-500" /> 결정된 사항
               </h3>
-              {decisionItems.length > 0 ? (
-                <>
-                  <ol className={`flex flex-col gap-2 ${hideUI}`}>
-                    {decisionItems.map((item, index) => (
-                      <li
-                        key={`${index}-${item.slice(0, 12)}`}
-                        className={cn(
-                          "flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50/70 px-3 py-2.5",
-                          darkDoc &&
-                            whenDark(
-                              theme,
-                              "border-emerald-900/40 bg-emerald-950/20",
-                            ),
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-[11px] font-bold text-white",
-                            darkDoc &&
-                              whenDark(theme, "bg-emerald-500 text-emerald-950"),
-                          )}
-                        >
-                          {index + 1}
-                        </span>
-                        <textarea
-                          value={item}
-                          rows={Math.min(6, Math.max(2, Math.ceil(item.length / 48)))}
-                          onChange={(e) => {
-                            const next = [...decisionItems];
-                            next[index] = e.target.value;
-                            onDecisionsChange(joinDecisions(next));
-                          }}
-                          className={cn(
-                            "min-h-[44px] w-full resize-y bg-transparent text-sm font-medium leading-relaxed text-slate-800 outline-none",
-                            darkDoc && whenDark(theme, "text-zinc-100"),
-                          )}
-                        />
-                      </li>
-                    ))}
-                  </ol>
-                  <ol
-                    className={`${showPrintBlock} list-decimal space-y-2 pl-5 text-base leading-relaxed text-black`}
-                  >
-                    {decisionItems.map((item, index) => (
-                      <li key={`print-${index}`}>{item}</li>
-                    ))}
-                  </ol>
-                </>
-              ) : (
-                <>
-                  <textarea
-                    value={decisionsText}
-                    onChange={(e) => onDecisionsChange(e.target.value)}
-                    placeholder="결정된 사항을 한 줄에 하나씩 적어 주세요."
+              <ol className={`flex flex-col gap-2 ${hideUI}`}>
+                {decisionItems.map((item, index) => (
+                  <li
+                    key={`${index}-${item.slice(0, 12)}`}
                     className={cn(
-                      `w-full min-h-[80px] resize-y rounded-lg border border-transparent p-3 text-base leading-relaxed text-gray-800 transition-colors hover:border-gray-200 focus:border-primary focus:outline-none ${hideUI}`,
+                      "flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50/70 px-3 py-2.5",
                       darkDoc &&
                         whenDark(
                           theme,
-                          "text-zinc-200 hover:border-zinc-700",
+                          "border-emerald-900/40 bg-emerald-950/20",
                         ),
                     )}
-                  />
-                  <div
-                    className={`${showPrintBlock} pt-2 text-base leading-relaxed text-black`}
                   >
-                    결정된 사항이 없습니다.
-                  </div>
-                </>
-              )}
-            </div>
+                    <span
+                      className={cn(
+                        "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-[11px] font-bold text-white",
+                        darkDoc &&
+                          whenDark(theme, "bg-emerald-500 text-emerald-950"),
+                      )}
+                    >
+                      {index + 1}
+                    </span>
+                    <textarea
+                      value={item}
+                      rows={Math.min(6, Math.max(2, Math.ceil(item.length / 48)))}
+                      onChange={(e) => {
+                        const next = [...decisionItems];
+                        next[index] = e.target.value;
+                        onDecisionsChange(joinDecisions(next));
+                      }}
+                      className={cn(
+                        "min-h-[44px] w-full resize-y bg-transparent text-sm font-medium leading-relaxed text-slate-800 outline-none",
+                        darkDoc && whenDark(theme, "text-zinc-100"),
+                      )}
+                    />
+                  </li>
+                ))}
+              </ol>
+              <ol
+                className={`${showPrintBlock} list-decimal space-y-2 pl-5 text-base leading-relaxed text-black`}
+              >
+                {decisionItems.map((item, index) => (
+                  <li key={`print-${index}`}>{item}</li>
+                ))}
+              </ol>
+              </div>
+            )}
             <FollowUpSection
               actionItems={actionItems}
               replyDraft={replyDraft}

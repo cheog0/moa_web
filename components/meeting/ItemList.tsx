@@ -210,18 +210,14 @@ export default function ItemList({
                     >
                       {meeting.title}
                     </h3>
+                    {decisionCount > 0 && (
                     <div className="mt-2 flex items-center gap-3">
-                      <span
-                        className={`flex items-center gap-1.5 text-[11px] ${
-                          decisionCount > 0
-                            ? "font-semibold text-emerald-600"
-                            : "text-slate-400"
-                        }`}
-                      >
+                      <span className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600">
                         <ListChecks className="size-3.5" />
                         결정 사항 {decisionCount}건
                       </span>
                     </div>
+                    )}
                   </div>
                   <div className="flex self-stretch flex-col items-center justify-between">
                     <button
