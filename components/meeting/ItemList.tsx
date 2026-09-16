@@ -81,7 +81,7 @@ export default function ItemList({
       (new Date(currentDate).getTime() - new Date(previousDate).getTime()) /
         (1000 * 60 * 60 * 24),
     );
-    return gap > 0 ? `${gap}일 후` : null;
+    return gap > 0 ? `${gap}일` : null;
   };
 
   const getDecisionCount = (decisions?: string) => {
