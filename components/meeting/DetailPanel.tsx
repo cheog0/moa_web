@@ -162,7 +162,7 @@ export default function DetailPanel({
               </span>
               을(를) 정말 삭제하시겠습니까?
               <br />
-              삭제된 데이터는 복구할 수 없습니다.
+              삭제된 회의록은 휴지통에서 복원할 수 있습니다.
             </>
           }
           onCancel={() => detail.setIsDeleteModalOpen(false)}

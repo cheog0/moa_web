@@ -10,6 +10,7 @@ import {
   FileEdit,
   Trash2,
   Folder,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NavItem from "@/components/layout/NavItem";
@@ -21,6 +22,8 @@ export default function Sidebar({
   onLogout,
   projects = [],
   session,
+  mobileOpen = false,
+  onMobileClose,
 }: {
   currentView: string;
   onNavigate: (view: string) => void;
@@ -28,6 +31,8 @@ export default function Sidebar({
   onLogout: () => void;
   projects?: any[];
   session?: any;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }) {
   // 💡 메인에서 전달받은 실제 로그인 유저 정보 우선 사용
   const userEmail = session?.user?.email || "로그인 필요";
@@ -35,15 +40,39 @@ export default function Sidebar({
     ? session.user.email.charAt(0).toUpperCase()
     : "유";
 
+  const handleNavigate = (view: string) => {
+    onNavigate(view);
+    onMobileClose?.();
+  };
+
+  const handleNew = () => {
+    onNew();
+    onMobileClose?.();
+  };
+
   return (
-    <aside
-      style={{ backgroundColor: "#FBFCFF" }}
-      className="hidden w-64 shrink-0 flex-col border-r border-slate-100 px-3.5 py-4 lg:flex print:hidden justify-between select-none text-sm"
-    >
+    <>
+      {mobileOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 z-40 bg-slate-950/30 lg:hidden print:hidden"
+          onClick={onMobileClose}
+          aria-label="메뉴 닫기"
+        />
+      )}
+      <aside
+        id="mobile-sidebar"
+        style={{ backgroundColor: "#FBFCFF" }}
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col justify-between border-r border-slate-100 px-3.5 py-4 text-sm shadow-xl transition-transform duration-200 select-none print:hidden lg:static lg:z-auto lg:translate-x-0 lg:shadow-none ${
+          mobileOpen
+            ? "visible translate-x-0"
+            : "invisible -translate-x-full lg:visible"
+        }`}
+      >
       {/* 🚀 상단 로고, 새 회의 버튼, 네비게이션 영역 */}
       <div className="flex flex-col gap-4 overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {/* 로고 영역 */}
-        <div className="flex items-center gap-2.5 px-2 pb-1">
+        <div className="flex items-center justify-between gap-2.5 px-2 pb-1">
           <div className="flex h-7 items-center gap-2">
             <img
               src="/raple_pas.png"
@@ -54,11 +83,19 @@ export default function Sidebar({
               Raple
             </span>
           </div>
+          <button
+            type="button"
+            onClick={onMobileClose}
+            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted lg:hidden"
+            aria-label="메뉴 닫기"
+          >
+            <X className="size-5" />
+          </button>
         </div>
 
         {/* 새 회의 시작 버튼 */}
         <Button
-          onClick={onNew}
+          onClick={handleNew}
           className="w-full justify-center gap-2 shadow-sm rounded-lg h-10 text-xs font-semibold"
         >
           <Plus className="size-4" />새 회의 시작
@@ -74,13 +111,13 @@ export default function Sidebar({
               icon={LayoutDashboard}
               label="대시보드"
               active={currentView === "dashboard"}
-              onClick={() => onNavigate("dashboard")}
+              onClick={() => handleNavigate("dashboard")}
             />
             <NavItem
               icon={LineChart}
               label="인사이트"
               active={currentView === "insight"}
-              onClick={() => onNavigate("insight")}
+              onClick={() => handleNavigate("insight")}
             />
           </div>
 
@@ -98,7 +135,7 @@ export default function Sidebar({
                 icon={Folder}
                 label={project.name}
                 active={currentView === `project_${project.id}`}
-                onClick={() => onNavigate(`project_${project.id}`)}
+                onClick={() => handleNavigate(`project_${project.id}`)}
               />
             ))}
 
@@ -106,7 +143,7 @@ export default function Sidebar({
               icon={Plus}
               label="새 타임라인 생성"
               active={currentView === "new_project"}
-              onClick={() => onNavigate("new_project")}
+              onClick={() => handleNavigate("new_project")}
             />
           </div>
 
@@ -119,13 +156,13 @@ export default function Sidebar({
               icon={Star}
               label="즐겨찾기"
               active={currentView === "starred_meetings"}
-              onClick={() => onNavigate("starred_meetings")}
+              onClick={() => handleNavigate("starred_meetings")}
             />
             <NavItem
               icon={FileEdit}
               label="맞춤 템플릿"
               active={currentView === "templates"}
-              onClick={() => onNavigate("templates")}
+              onClick={() => handleNavigate("templates")}
             />
           </div>
 
@@ -138,9 +175,14 @@ export default function Sidebar({
               icon={Settings}
               label="설정"
               active={currentView === "settings"}
-              onClick={() => onNavigate("settings")}
+              onClick={() => handleNavigate("settings")}
             />
-            <NavItem icon={Trash2} label="휴지통" disabled />
+            <NavItem
+              icon={Trash2}
+              label="휴지통"
+              active={currentView === "trash"}
+              onClick={() => handleNavigate("trash")}
+            />
           </div>
         </nav>
       </div>
@@ -171,6 +213,7 @@ export default function Sidebar({
           </button>
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

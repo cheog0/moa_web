@@ -30,7 +30,23 @@ export function useWorkspace(userId?: string, recording?: boolean) {
       try {
         const res = await fetch(`${getApiUrl()}/api/meetings?user_id=${userId}`);
         const data = await res.json();
-        if (data.success) setDbMeetings(data.meetings);
+        if (data.success) {
+          const { data: deletionStates } = await supabase
+            .from("meetings")
+            .select("id, deleted_at");
+          const deletedAtById = new Map(
+            deletionStates?.map((meeting) => [
+              meeting.id,
+              meeting.deleted_at,
+            ]) ?? [],
+          );
+          setDbMeetings(
+            data.meetings.map((meeting: any) => ({
+              ...meeting,
+              deleted_at: deletedAtById.get(meeting.id) ?? null,
+            })),
+          );
+        }
       } catch (error) {
         console.error("회의 목록 로드 실패", error);
       }
@@ -90,10 +106,39 @@ export function useWorkspace(userId?: string, recording?: boolean) {
   };
 
   const handleDeleteMeeting = async (id: string) => {
+    const deletedAt = new Date().toISOString();
+    const { error } = await supabase
+      .from("meetings")
+      .update({ deleted_at: deletedAt })
+      .eq("id", id);
+    if (!error) {
+      setDbMeetings((prev) =>
+        prev.map((meeting) =>
+          meeting.id === id ? { ...meeting, deleted_at: deletedAt } : meeting,
+        ),
+      );
+      setDetail(false);
+    }
+  };
+
+  const handleRestoreMeeting = async (id: string) => {
+    const { error } = await supabase
+      .from("meetings")
+      .update({ deleted_at: null })
+      .eq("id", id);
+    if (!error) {
+      setDbMeetings((prev) =>
+        prev.map((meeting) =>
+          meeting.id === id ? { ...meeting, deleted_at: null } : meeting,
+        ),
+      );
+    }
+  };
+
+  const handlePermanentlyDeleteMeeting = async (id: string) => {
     const { error } = await supabase.from("meetings").delete().eq("id", id);
     if (!error) {
-      setDbMeetings((prev) => prev.filter((m) => m.id !== id));
-      setDetail(false);
+      setDbMeetings((prev) => prev.filter((meeting) => meeting.id !== id));
     }
   };
 
@@ -125,6 +170,8 @@ export function useWorkspace(userId?: string, recording?: boolean) {
     handleToggleStar,
     handleUpdateMinutes,
     handleDeleteMeeting,
+    handleRestoreMeeting,
+    handlePermanentlyDeleteMeeting,
     handleOpenDetail,
   };
 }

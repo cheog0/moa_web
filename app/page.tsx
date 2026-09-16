@@ -12,6 +12,7 @@ import ProjectTimeline from "@/components/meeting/ProjectTimeline";
 import InsightPanel from "@/components/insight/InsightPanel";
 import Home from "@/components/dashboard/Home";
 import Starred from "@/components/dashboard/Starred";
+import Trash from "@/components/dashboard/Trash";
 import Header from "@/components/dashboard/Header";
 import Notice from "@/components/dashboard/Notice";
 import { useAuthSession } from "@/hooks/useAuthSession";
@@ -26,6 +27,7 @@ export default function Page() {
   const [recording, setRecording] = useState(false);
   const [query, setQuery] = useState("");
   const [notification, setNotification] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const workspace = useWorkspace(session?.user?.id, recording);
 
@@ -43,21 +45,27 @@ export default function Page() {
   }
   if (!session) return <AuthScreen />;
 
-  const filtered = workspace.dbMeetings.filter(
+  const activeMeetings = workspace.dbMeetings.filter(
+    (meeting) => !meeting.deleted_at,
+  );
+  const deletedMeetings = workspace.dbMeetings.filter(
+    (meeting) => meeting.deleted_at,
+  );
+  const filtered = activeMeetings.filter(
     (m) => m.title && m.title.includes(query),
   );
   const starredMeetings = filtered.filter((m) => m.is_starred);
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
-  const thisMonthMeetings = workspace.dbMeetings.filter((m) => {
+  const thisMonthMeetings = activeMeetings.filter((m) => {
     if (!m.created_at) return false;
     const d = new Date(m.created_at);
     return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
   }).length;
 
   let lastMeetingDateStr = "기록 없음";
-  if (workspace.dbMeetings.length > 0) {
-    const latest = [...workspace.dbMeetings].sort(
+  if (activeMeetings.length > 0) {
+    const latest = [...activeMeetings].sort(
       (a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     )[0];
@@ -76,6 +84,8 @@ export default function Page() {
         onLogout={() => supabase.auth.signOut()}
         projects={workspace.dbProjects}
         session={session}
+        mobileOpen={mobileMenuOpen}
+        onMobileClose={() => setMobileMenuOpen(false)}
       />
       <div className="min-w-0 flex-1 flex flex-col h-full overflow-y-auto print:hidden bg-white">
         <Header
@@ -84,6 +94,7 @@ export default function Page() {
           onQueryChange={setQuery}
           email={session.user.email}
           onNotify={() => triggerNotification("새로운 알림이 없습니다.")}
+          onMenuOpen={() => setMobileMenuOpen(true)}
         />
         {currentView === "settings" ? (
           <SettingsPanel session={session} />
@@ -91,7 +102,7 @@ export default function Page() {
           <TemplatePanel session={session} />
         ) : currentView === "insight" ? (
           <InsightPanel
-            dbMeetings={workspace.dbMeetings}
+            dbMeetings={activeMeetings}
             onMeetingClick={workspace.handleOpenDetail}
           />
         ) : currentView === "starred_meetings" ? (
@@ -100,11 +111,17 @@ export default function Page() {
             onOpenDetail={workspace.handleOpenDetail}
             onToggleStar={workspace.handleToggleStar}
           />
+        ) : currentView === "trash" ? (
+          <Trash
+            meetings={deletedMeetings}
+            onRestore={workspace.handleRestoreMeeting}
+            onPermanentlyDelete={workspace.handlePermanentlyDeleteMeeting}
+          />
         ) : currentView === "new_project" ? (
           <main className="mx-auto w-full max-w-6xl py-8 bg-white min-h-full">
             <ProjectTimeline
               key="new_project"
-              dbMeetings={workspace.dbMeetings}
+              dbMeetings={activeMeetings}
               onSaveSuccess={workspace.fetchProjects}
               onMeetingClick={workspace.handleOpenDetail}
             />
@@ -113,7 +130,7 @@ export default function Page() {
           <main className="mx-auto w-full max-w-6xl py-8 bg-white min-h-full">
             <ProjectTimeline
               key={currentView}
-              dbMeetings={workspace.dbMeetings}
+              dbMeetings={activeMeetings}
               projectId={currentView.replace("project_", "")}
               onSaveSuccess={workspace.fetchProjects}
               onDeleteSuccess={() => {
@@ -126,7 +143,7 @@ export default function Page() {
         ) : currentView === "dashboard" ? (
           <Home
             meetings={filtered}
-            totalMeetings={workspace.dbMeetings.length}
+            totalMeetings={activeMeetings.length}
             thisMonthMeetings={thisMonthMeetings}
             lastMeetingDateStr={lastMeetingDateStr}
             dashboardMode={dashboardMode}

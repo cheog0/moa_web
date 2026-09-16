@@ -6,17 +6,25 @@ export default function Header({
   onQueryChange,
   email,
   onNotify,
+  onMenuOpen,
 }: {
   currentView: string;
   query: string;
   onQueryChange: (value: string) => void;
   email?: string;
   onNotify: () => void;
+  onMenuOpen: () => void;
 }) {
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-border pl-5 pr-6 sm:pl-8 sm:pr-10 bg-white">
       <div className="flex items-center gap-3">
-        <button className="rounded-lg p-2 hover:bg-muted lg:hidden">
+        <button
+          type="button"
+          onClick={onMenuOpen}
+          className="rounded-lg p-2 hover:bg-muted lg:hidden"
+          aria-label="메뉴 열기"
+          aria-controls="mobile-sidebar"
+        >
           <Menu className="size-5" />
         </button>
         {(currentView === "dashboard" ||
