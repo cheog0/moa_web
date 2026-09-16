@@ -101,34 +101,44 @@ export default function TimelineHeader({
           )}
         </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div
+        className={`items-center gap-2 ${
+          !canDelete && items.length === 0 ? "hidden" : "flex"
+        }`}
+      >
         {canDelete && (
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={onDelete}
             disabled={isSaving || isDeleting}
-            className="text-rose-500 border-rose-200 hover:bg-rose-50 hover:text-rose-600 shadow-sm h-10 animate-in fade-in"
+            className="group/delete h-10 w-10 gap-0 overflow-hidden rounded-xl border border-slate-200 bg-white px-0 text-rose-500 shadow-sm transition-[width,gap,color,background-color,border-color,box-shadow] duration-300 hover:w-[70px] hover:gap-1 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 hover:shadow-[0_6px_18px_rgba(244,63,94,0.12)] animate-in fade-in"
+            title="타임라인 삭제"
+            aria-label="타임라인 삭제"
           >
             {isDeleting ? (
-              <Loader2 className="mr-1.5 size-4 animate-spin" />
+              <Loader2 className="size-[18px] animate-spin" />
             ) : (
-              <Trash2 className="size-4 mr-1.5" />
+              <Trash2 className="size-[18px] transition-transform duration-300 group-hover/delete:-rotate-6 group-hover/delete:scale-110" />
             )}
-            {isDeleting ? "삭제 중..." : "삭제"}
+            <span className="max-w-0 overflow-hidden text-[11px] font-semibold opacity-0 transition-all duration-300 group-hover/delete:max-w-9 group-hover/delete:opacity-100">
+              {isDeleting ? "삭제 중" : "삭제"}
+            </span>
           </Button>
         )}
         {items.length > 0 && (
           <Button
             onClick={onSave}
             disabled={isSaving || isDeleting}
-            className="bg-slate-900 hover:bg-slate-800 text-white shadow-sm h-10 px-6 rounded-lg font-semibold animate-in fade-in"
+            className="group/save h-10 w-10 gap-0 overflow-hidden rounded-xl border border-slate-200 bg-white px-0 text-slate-950 shadow-sm transition-[width,gap,color,background-color,border-color,box-shadow] duration-300 hover:w-[92px] hover:gap-1 hover:border-slate-300 hover:bg-slate-50 hover:shadow-[0_6px_18px_rgba(15,23,42,0.1)] animate-in fade-in"
           >
             {isSaving ? (
-              <Loader2 className="mr-2 size-4 animate-spin" />
+              <Loader2 className="size-[18px] animate-spin" />
             ) : (
-              <Save className="mr-2 size-4" />
+              <Save className="size-[18px] transition-transform duration-300 group-hover/save:-rotate-6 group-hover/save:scale-110" />
             )}
-            {isSaving ? "저장 중..." : "저장하기"}
+            <span className="max-w-0 overflow-hidden text-[11px] font-semibold opacity-0 transition-all duration-300 group-hover/save:max-w-16 group-hover/save:opacity-100">
+              {isSaving ? "저장 중..." : "저장하기"}
+            </span>
           </Button>
         )}
       </div>
