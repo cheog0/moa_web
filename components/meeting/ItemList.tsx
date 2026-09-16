@@ -1,11 +1,13 @@
 "use client";
 
+import { Fragment } from "react";
 import {
   Calendar,
   CheckCircle2,
   ChevronRight,
   History,
   Link as LinkIcon,
+  ListChecks,
   Loader2,
   Plus,
   Trash2,
@@ -62,71 +64,148 @@ export default function ItemList({
   onRemove: (id: string) => void;
   onOpenModal: () => void;
 }) {
+  const latestMeetingId = items.reduce(
+    (latest, item) =>
+      !latest || new Date(item.date) > new Date(latest.date) ? item : latest,
+    null as TimelineItem | null,
+  )?.id;
+
+  const getMonthLabel = (date: string) =>
+    new Date(`${date}T00:00:00`).toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+    });
+
+  const getDayGap = (previousDate: string, currentDate: string) => {
+    const gap = Math.round(
+      (new Date(currentDate).getTime() - new Date(previousDate).getTime()) /
+        (1000 * 60 * 60 * 24),
+    );
+    return gap > 0 ? `${gap}일 후` : null;
+  };
+
+  const getDecisionCount = (decisions?: string) => {
+    if (!decisions?.trim()) return 0;
+    return Math.max(
+      decisions
+        .split("\n")
+        .map((line) => line.replace(/^[-*•\d.)\s]+/, "").trim())
+        .filter(Boolean).length,
+      1,
+    );
+  };
+
   return (
-    <div className="relative ml-4 sm:ml-8 border-l-2 border-sky-100 py-4">
-      {items.map((meeting) => (
-        <div
-          key={meeting.id}
-          className="relative mb-8 pl-8 sm:pl-10 group animate-in slide-in-from-left-2 duration-300"
-        >
-          <span className="absolute -left-[13px] top-1 flex size-6 items-center justify-center bg-background">
-            <CheckCircle2
-              className="size-6 text-sky-500 drop-shadow-sm"
-              fill="#e0f2fe"
-            />
-          </span>
-          <div
-            onClick={() => {
-              const originalMeeting = dbMeetings.find(
-                (m) => m.id === meeting.id,
-              );
-              if (onMeetingClick && originalMeeting)
-                onMeetingClick(originalMeeting);
-            }}
-            className="rounded-2xl border bg-white border-border p-4 transition-all hover:shadow-md cursor-pointer hover:border-sky-300 group/card"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
-              <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                <Calendar className="size-4 ml-1 text-muted-foreground" />
-                <input
-                  type="date"
-                  value={meeting.date}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => onUpdateDate(meeting.id, e.target.value)}
-                  className="bg-transparent outline-none text-slate-600 font-medium cursor-pointer px-1 py-1 rounded-md hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-sky-500/30 transition-all [&::-webkit-calendar-picker-indicator]:hidden"
-                />
+    <div className="relative ml-3 border-l border-slate-200 py-2 sm:ml-7">
+      {items.map((meeting, index) => {
+        const previousMeeting = items[index - 1];
+        const showMonth =
+          index === 0 ||
+          getMonthLabel(previousMeeting.date) !== getMonthLabel(meeting.date);
+        const dayGap = previousMeeting
+          ? getDayGap(previousMeeting.date, meeting.date)
+          : null;
+        const decisionCount = getDecisionCount(meeting.decisions);
+
+        return (
+          <Fragment key={meeting.id}>
+            {showMonth && (
+              <div className="relative mb-2 pl-8 pt-2 sm:pl-10">
+                <span className="absolute -left-1.5 top-5 size-3 rounded-full border-[3px] border-white bg-slate-900" />
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                  {getMonthLabel(meeting.date)}
+                </p>
               </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemove(meeting.id);
+            )}
+            <article className="group relative mb-2 pl-8 sm:pl-10 animate-in slide-in-from-left-2 duration-300">
+              <span className="absolute -left-[9px] top-7 flex size-[17px] items-center justify-center rounded-full bg-white">
+                <CheckCircle2
+                  className="size-[17px] text-sky-500"
+                  fill="#e0f2fe"
+                />
+              </span>
+
+              {dayGap && (
+                <span className="absolute -left-3.5 -top-1 bg-white px-1 font-mono text-[9px] text-slate-400">
+                  +{dayGap}
+                </span>
+              )}
+
+              <div
+                onClick={() => {
+                  const originalMeeting = dbMeetings.find(
+                    (m) => m.id === meeting.id,
+                  );
+                  if (onMeetingClick && originalMeeting)
+                    onMeetingClick(originalMeeting);
                 }}
-                className="p-1.5 text-muted-foreground hover:text-rose-500 hover:bg-rose-50 rounded-md transition-colors"
-                title="타임라인에서 제외"
+                className="cursor-pointer border-b border-slate-200 px-1 py-3.5 transition-colors hover:border-sky-300 sm:px-3"
               >
-                <Trash2 className="size-4" />
-              </button>
-            </div>
-            <div className="flex items-center justify-between pr-2">
-              <h3 className="text-lg font-bold text-foreground truncate pl-1">
-                {meeting.title}
-              </h3>
-              <ChevronRight className="size-5 text-sky-500 opacity-0 group-hover/card:opacity-100 transition-all -translate-x-2 group-hover/card:translate-x-0" />
-            </div>
-          </div>
-        </div>
-      ))}
-      <div className="relative pl-8 sm:pl-10 mt-4">
-        <span className="absolute -left-[11px] top-2 flex size-5 items-center justify-center bg-background rounded-full border-2 border-slate-200" />
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                      <Calendar className="size-3 text-slate-400" />
+                      <input
+                        type="date"
+                        value={meeting.date}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) =>
+                          onUpdateDate(meeting.id, e.target.value)
+                        }
+                        className="cursor-pointer bg-transparent font-mono text-[9px] leading-none text-slate-500 outline-none transition-colors hover:text-sky-600 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-datetime-edit]:text-[9px]"
+                      />
+                      {meeting.id === latestMeetingId && (
+                        <span className="rounded-full bg-sky-50 px-2 py-0.5 font-mono text-[9px] font-bold tracking-wider text-sky-600">
+                          LATEST
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="truncate text-base font-bold tracking-tight text-slate-900 transition-colors group-hover:text-sky-700">
+                      {meeting.title}
+                    </h3>
+                    <div className="mt-2 flex items-center gap-3">
+                      <span
+                        className={`flex items-center gap-1.5 text-[11px] ${
+                          decisionCount > 0
+                            ? "font-semibold text-emerald-600"
+                            : "text-slate-400"
+                        }`}
+                      >
+                        <ListChecks className="size-3.5" />
+                        결정 사항 {decisionCount}건
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex self-stretch flex-col items-center justify-between">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRemove(meeting.id);
+                      }}
+                      className="rounded-md p-2 text-slate-300 transition-colors hover:bg-rose-50 hover:text-rose-500"
+                      title="타임라인에서 제외"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                    <ChevronRight className="mb-1 size-4 -translate-x-1 text-slate-300 opacity-0 transition-all group-hover:translate-x-0 group-hover:text-sky-500 group-hover:opacity-100" />
+                  </div>
+                </div>
+              </div>
+            </article>
+          </Fragment>
+        );
+      })}
+      <div className="relative mt-5 pl-8 sm:pl-10">
+        <span className="absolute -left-[7px] top-4 size-3.5 rounded-full border-2 border-slate-300 bg-white" />
         <Button
           variant="ghost"
           onClick={onOpenModal}
-          className="text-muted-foreground hover:text-sky-600 border border-dashed border-border hover:border-sky-300 w-full justify-start py-6 rounded-xl"
+          className="h-12 w-full justify-start rounded-xl border border-dashed border-slate-300 px-4 text-slate-500 hover:border-sky-400 hover:bg-sky-50/50 hover:text-sky-600"
         >
           <Plus className="mr-2 size-4" /> 다음 회의 연결하기
         </Button>
       </div>
-      <div className="absolute -bottom-4 -left-[1px] h-10 w-0.5 bg-gradient-to-b from-sky-100 to-transparent" />
+      <div className="absolute -bottom-4 -left-px h-10 w-px bg-gradient-to-b from-slate-200 to-transparent" />
     </div>
   );
 }

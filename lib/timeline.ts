@@ -2,6 +2,7 @@ export type TimelineItem = {
   id: string;
   date: string;
   title: string;
+  decisions?: string;
 };
 
 export type ToastConfig = {

@@ -95,6 +95,49 @@ export function useTimelineData(dbMeetings: any[], projectId?: string) {
     );
   }, [dbMeetings]);
 
+  const timelineMeetingIds = timelineItems
+    .map((item) => item.id)
+    .sort()
+    .join(",");
+
+  useEffect(() => {
+    if (!timelineMeetingIds) return;
+    let isCancelled = false;
+
+    const fetchMeetingHighlights = async () => {
+      const { data, error } = await supabase
+        .from("meeting_minutes")
+        .select("meeting_id, decisions")
+        .in("meeting_id", timelineMeetingIds.split(","));
+
+      if (error) {
+        console.error("회의 요약을 불러오지 못했습니다.", error);
+        return;
+      }
+      if (isCancelled || !data) return;
+
+      const highlightsByMeetingId = new Map(
+        data.map((minutes) => [minutes.meeting_id, minutes]),
+      );
+      setTimelineItems((previousItems) =>
+        previousItems.map((item) => {
+          const highlights = highlightsByMeetingId.get(item.id);
+          return highlights
+            ? {
+                ...item,
+                decisions: highlights.decisions || "",
+              }
+            : item;
+        }),
+      );
+    };
+
+    fetchMeetingHighlights();
+    return () => {
+      isCancelled = true;
+    };
+  }, [timelineMeetingIds]);
+
   return {
     projectName,
     setProjectName,
