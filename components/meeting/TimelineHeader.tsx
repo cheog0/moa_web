@@ -66,7 +66,17 @@ export default function TimelineHeader({
                 <option value="진행 중">진행 중</option>
                 <option value="완료">완료됨</option>
               </select>
-              <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 size-3 -translate-y-1/2 text-current opacity-60" />
+              <ChevronDown
+                className={cn(
+                  "pointer-events-none absolute right-2.5 top-1/2 size-3 -translate-y-1/2 text-current opacity-60",
+                  whenDark(
+                    theme,
+                    projectStatus === "완료"
+                      ? "text-emerald-700"
+                      : "text-sky-700",
+                  ),
+                )}
+              />
             </div>
           )}
           <span className="text-sm text-muted-foreground">타임라인</span>

@@ -129,7 +129,7 @@ export default function Page() {
       />
       <div
         className={cn(
-          "min-w-0 flex-1 flex flex-col h-full overflow-y-auto print:hidden bg-white",
+          "min-w-0 flex-1 flex flex-col h-full overflow-hidden print:hidden bg-white",
           whenDark(theme, "bg-zinc-950"),
         )}
       >
@@ -140,6 +140,7 @@ export default function Page() {
           onNotify={() => triggerNotification("새로운 알림이 없습니다.")}
           onMenuOpen={() => setMobileMenuOpen(true)}
         />
+        <div className="min-h-0 flex-1 overflow-y-auto">
         {currentView === "settings" ? (
           <SettingsPanel session={session} />
         ) : currentView === "templates" ? (
@@ -225,6 +226,7 @@ export default function Page() {
             </div>
           </main>
         )}
+        </div>
       </div>
       {recording && (
         <RecordingPanel
