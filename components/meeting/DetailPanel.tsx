@@ -74,8 +74,18 @@ export default function DetailPanel({
         {detail.isPreviewMode ? (
           <PreviewBar
             includeDecisions={detail.printOptions.decisions}
+            includeActionItems={detail.printOptions.actionItems}
             onToggleDecisions={(checked) =>
-              detail.setPrintOptions({ decisions: checked })
+              detail.setPrintOptions((prev) => ({
+                ...prev,
+                decisions: checked,
+              }))
+            }
+            onToggleActionItems={(checked) =>
+              detail.setPrintOptions((prev) => ({
+                ...prev,
+                actionItems: checked,
+              }))
             }
             onBack={() => detail.setIsPreviewMode(false)}
             onPrint={detail.handlePrintPDF}
@@ -156,12 +166,18 @@ export default function DetailPanel({
               minutes={minutes}
               summaryText={detail.summaryText}
               decisionsText={detail.decisionsText}
+              actionItems={detail.actionItems}
+              replyDraft={detail.replyDraft}
               onSummaryChange={detail.setSummaryText}
               onDecisionsChange={detail.setDecisionsText}
+              onToggleActionItem={detail.toggleActionItem}
+              onReplyDraftChange={detail.setReplyDraft}
+              onSeek={detail.handleSeek}
               hideUI={detail.hideUI}
               showPrintBlock={detail.showPrintBlock}
               isPreviewMode={detail.isPreviewMode}
               includeDecisions={detail.printOptions.decisions}
+              includeActionItems={detail.printOptions.actionItems}
             />
           ) : (
             <div className="flex flex-col gap-2 py-7 print:py-[15mm] print:px-[20mm]">

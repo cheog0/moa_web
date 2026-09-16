@@ -3,6 +3,8 @@ import { supabase } from "@/lib/supabase";
 import { getApiUrl } from "@/lib/api";
 import { transcribeRecording } from "@/lib/transcribe";
 import { MeetingMinutes } from "@/lib/constants";
+import { parseMinutesPayload } from "@/lib/actionItems";
+import { normalizeManuals, ReplyManual } from "@/lib/manuals";
 
 export function useRecording(
   onComplete: (minutes: MeetingMinutes, newId?: string) => void,
@@ -22,6 +24,7 @@ export function useRecording(
     api_key: "",
     keywords: "기획",
     custom_template: "",
+    manuals: [] as ReplyManual[],
   });
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -57,6 +60,7 @@ export function useRecording(
             ? data.keywords.join(",")
             : "기획",
           custom_template: data.custom_template || "",
+          manuals: normalizeManuals(data.reply_manuals),
         });
       }
     };
@@ -160,7 +164,10 @@ export function useRecording(
         attendees: selectedAttendees,
         liveMemo,
       });
-      onComplete(result.minutes, result.meeting_id);
+      onComplete(
+        parseMinutesPayload(result.minutes) ?? result.minutes,
+        result.meeting_id,
+      );
     } catch (error: any) {
       alert(error.message);
       setStatus("ready");

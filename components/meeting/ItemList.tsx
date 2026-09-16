@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TimelineItem } from "@/lib/timeline";
+import { splitDecisions } from "@/lib/decisions";
 import { useTheme } from "@/hooks/useTheme";
 import { whenDark, whenDarkValue } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -103,16 +104,7 @@ export default function ItemList({
     return gap > 0 ? `${gap}일` : null;
   };
 
-  const getDecisionCount = (decisions?: string) => {
-    if (!decisions?.trim()) return 0;
-    return Math.max(
-      decisions
-        .split("\n")
-        .map((line) => line.replace(/^[-*•\d.)\s]+/, "").trim())
-        .filter(Boolean).length,
-      1,
-    );
-  };
+  const getDecisionCount = (decisions?: string) => splitDecisions(decisions).length;
 
   return (
     <div className="relative ml-3 border-l border-slate-200 py-2 sm:ml-7">

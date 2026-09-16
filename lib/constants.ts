@@ -1,7 +1,10 @@
+import type { ActionItem } from "@/lib/actionItems";
+
 export type MeetingMinutes = {
   summary: string;
   decisions: string;
-  action_items: { task: string; assignee: string }[] | string;
+  action_items?: ActionItem[] | string[] | string;
+  reply_draft?: string;
   transcript: { time: string; speaker: string; text: string }[] | string;
 };
 

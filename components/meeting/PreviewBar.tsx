@@ -8,12 +8,16 @@ import { cn } from "@/lib/utils";
 
 export default function PreviewBar({
   includeDecisions,
+  includeActionItems,
   onToggleDecisions,
+  onToggleActionItems,
   onBack,
   onPrint,
 }: {
   includeDecisions: boolean;
+  includeActionItems: boolean;
   onToggleDecisions: (checked: boolean) => void;
+  onToggleActionItems: (checked: boolean) => void;
   onBack: () => void;
   onPrint: () => void;
 }) {
@@ -35,6 +39,15 @@ export default function PreviewBar({
             className="size-4 rounded border-zinc-500 bg-zinc-700 text-sky-500 focus:ring-sky-500 focus:ring-offset-zinc-800 cursor-pointer"
           />
           결정된 사항 포함
+        </label>
+        <label className="flex items-center gap-1.5 text-sm text-zinc-300 hover:text-white cursor-pointer transition-colors">
+          <input
+            type="checkbox"
+            checked={includeActionItems}
+            onChange={(e) => onToggleActionItems(e.target.checked)}
+            className="size-4 rounded border-zinc-500 bg-zinc-700 text-sky-500 focus:ring-sky-500 focus:ring-offset-zinc-800 cursor-pointer"
+          />
+          후속 조치 포함
         </label>
       </div>
       <div className="flex gap-2">

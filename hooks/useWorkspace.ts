@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { MeetingMinutes } from "@/lib/constants";
 import { getApiUrl } from "@/lib/api";
+import { parseMinutesPayload } from "@/lib/actionItems";
 
 export function useWorkspace(userId?: string, recording?: boolean) {
   const [dbMeetings, setDbMeetings] = useState<any[]>([]);
@@ -118,12 +119,20 @@ export function useWorkspace(userId?: string, recording?: boolean) {
     meetingId: string,
     updatedMinutes: Partial<MeetingMinutes>,
   ) => {
+    const payload: Record<string, unknown> = {};
+    if (updatedMinutes.summary !== undefined)
+      payload.summary = updatedMinutes.summary;
+    if (updatedMinutes.decisions !== undefined)
+      payload.decisions = updatedMinutes.decisions;
+    if (updatedMinutes.action_items !== undefined)
+      payload.action_items = updatedMinutes.action_items;
+    if (updatedMinutes.reply_draft !== undefined)
+      payload.reply_draft = updatedMinutes.reply_draft;
+    if (Object.keys(payload).length === 0) return;
+
     const { error } = await supabase
       .from("meeting_minutes")
-      .update({
-        summary: updatedMinutes.summary,
-        decisions: updatedMinutes.decisions,
-      })
+      .update(payload)
       .eq("meeting_id", meetingId);
     if (!error) {
       setGeneratedMinutes((prev) =>
@@ -185,7 +194,11 @@ export function useWorkspace(userId?: string, recording?: boolean) {
         `${getApiUrl()}/api/meetings/${meeting.id}/minutes`,
       );
       const data = await res.json();
-      if (data.success) setGeneratedMinutes(data.minutes);
+      if (data.success) {
+        setGeneratedMinutes(
+          parseMinutesPayload(data.minutes) ?? data.minutes,
+        );
+      }
     } catch (error) {
       console.error(error);
     }

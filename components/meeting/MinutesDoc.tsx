@@ -2,6 +2,9 @@
 
 import { Check, Clock3, Sparkles } from "lucide-react";
 import { MeetingMinutes } from "@/lib/constants";
+import { ActionItem } from "@/lib/actionItems";
+import { joinDecisions, splitDecisions } from "@/lib/decisions";
+import FollowUpSection from "@/components/meeting/FollowUpSection";
 import { useTheme } from "@/hooks/useTheme";
 import { whenDark } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -13,12 +16,18 @@ export default function MinutesDoc({
   minutes,
   summaryText,
   decisionsText,
+  actionItems,
+  replyDraft,
   onSummaryChange,
   onDecisionsChange,
+  onToggleActionItem,
+  onReplyDraftChange,
+  onSeek,
   hideUI,
   showPrintBlock,
   isPreviewMode,
   includeDecisions,
+  includeActionItems,
 }: {
   meetingTitle: string;
   onTitleChange: (value: string) => void;
@@ -26,15 +35,22 @@ export default function MinutesDoc({
   minutes?: MeetingMinutes;
   summaryText: string;
   decisionsText: string;
+  actionItems: ActionItem[];
+  replyDraft: string;
   onSummaryChange: (value: string) => void;
   onDecisionsChange: (value: string) => void;
+  onToggleActionItem: (id: string) => void;
+  onReplyDraftChange: (value: string) => void;
+  onSeek?: (timeStr: string) => void;
   hideUI: string;
   showPrintBlock: string;
   isPreviewMode: boolean;
   includeDecisions: boolean;
+  includeActionItems: boolean;
 }) {
   const { theme } = useTheme();
   const darkDoc = !isPreviewMode;
+  const decisionItems = splitDecisions(decisionsText);
 
   return (
     <div
@@ -115,30 +131,94 @@ export default function MinutesDoc({
             >
               <h3
                 className={cn(
-                  "mb-2 flex items-center gap-2 text-lg font-bold text-gray-900",
+                  "mb-3 flex items-center gap-2 text-lg font-bold text-gray-900",
                   darkDoc && whenDark(theme, "text-zinc-50"),
                 )}
               >
                 <Check className="size-5 text-green-500" /> 결정된 사항
               </h3>
-              <textarea
-                value={decisionsText}
-                onChange={(e) => onDecisionsChange(e.target.value)}
-                className={cn(
-                  `w-full min-h-[80px] resize-y rounded-lg border border-transparent p-3 text-base leading-relaxed text-gray-800 transition-colors hover:border-gray-200 focus:border-primary focus:outline-none ${hideUI}`,
-                  darkDoc &&
-                    whenDark(
-                      theme,
-                      "text-zinc-200 hover:border-zinc-700",
-                    ),
-                )}
-              />
-              <div
-                className={`${showPrintBlock} whitespace-pre-wrap pt-2 text-base leading-relaxed text-black`}
-              >
-                {decisionsText || "결정된 사항이 없습니다."}
-              </div>
+              {decisionItems.length > 0 ? (
+                <>
+                  <ol className={`flex flex-col gap-2 ${hideUI}`}>
+                    {decisionItems.map((item, index) => (
+                      <li
+                        key={`${index}-${item.slice(0, 12)}`}
+                        className={cn(
+                          "flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50/70 px-3 py-2.5",
+                          darkDoc &&
+                            whenDark(
+                              theme,
+                              "border-emerald-900/40 bg-emerald-950/20",
+                            ),
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-[11px] font-bold text-white",
+                            darkDoc &&
+                              whenDark(theme, "bg-emerald-500 text-emerald-950"),
+                          )}
+                        >
+                          {index + 1}
+                        </span>
+                        <textarea
+                          value={item}
+                          rows={Math.min(6, Math.max(2, Math.ceil(item.length / 48)))}
+                          onChange={(e) => {
+                            const next = [...decisionItems];
+                            next[index] = e.target.value;
+                            onDecisionsChange(joinDecisions(next));
+                          }}
+                          className={cn(
+                            "min-h-[44px] w-full resize-y bg-transparent text-sm font-medium leading-relaxed text-slate-800 outline-none",
+                            darkDoc && whenDark(theme, "text-zinc-100"),
+                          )}
+                        />
+                      </li>
+                    ))}
+                  </ol>
+                  <ol
+                    className={`${showPrintBlock} list-decimal space-y-2 pl-5 text-base leading-relaxed text-black`}
+                  >
+                    {decisionItems.map((item, index) => (
+                      <li key={`print-${index}`}>{item}</li>
+                    ))}
+                  </ol>
+                </>
+              ) : (
+                <>
+                  <textarea
+                    value={decisionsText}
+                    onChange={(e) => onDecisionsChange(e.target.value)}
+                    placeholder="결정된 사항을 한 줄에 하나씩 적어 주세요."
+                    className={cn(
+                      `w-full min-h-[80px] resize-y rounded-lg border border-transparent p-3 text-base leading-relaxed text-gray-800 transition-colors hover:border-gray-200 focus:border-primary focus:outline-none ${hideUI}`,
+                      darkDoc &&
+                        whenDark(
+                          theme,
+                          "text-zinc-200 hover:border-zinc-700",
+                        ),
+                    )}
+                  />
+                  <div
+                    className={`${showPrintBlock} pt-2 text-base leading-relaxed text-black`}
+                  >
+                    결정된 사항이 없습니다.
+                  </div>
+                </>
+              )}
             </div>
+            <FollowUpSection
+              actionItems={actionItems}
+              replyDraft={replyDraft}
+              onToggleItem={onToggleActionItem}
+              onReplyDraftChange={onReplyDraftChange}
+              onSeek={onSeek}
+              hideUI={hideUI}
+              showPrintBlock={showPrintBlock}
+              isPreviewMode={isPreviewMode}
+              includeActionItems={includeActionItems}
+            />
           </div>
         ) : (
           <div className="py-20 text-center text-gray-400">

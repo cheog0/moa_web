@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MeetingMinutes } from "@/lib/constants";
+import { ActionItem, normalizeActionItems } from "@/lib/actionItems";
 import { downloadTranscriptFile, seekAudio } from "@/lib/download";
 
 export function useDetail({
@@ -22,21 +23,36 @@ export function useDetail({
   const [meetingTitle, setMeetingTitle] = useState(meeting?.title || "새 회의");
   const [summaryText, setSummaryText] = useState(minutes?.summary || "");
   const [decisionsText, setDecisionsText] = useState(minutes?.decisions || "");
+  const [actionItems, setActionItems] = useState<ActionItem[]>(() =>
+    normalizeActionItems(minutes?.action_items),
+  );
+  const [replyDraft, setReplyDraft] = useState(minutes?.reply_draft || "");
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
     "idle",
   );
-  const [printOptions, setPrintOptions] = useState({ decisions: true });
+  const [printOptions, setPrintOptions] = useState({
+    decisions: true,
+    actionItems: true,
+  });
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTimeDisplay, setCurrentTimeDisplay] = useState("00:00");
 
+  const loadedActionItems = useMemo(
+    () => normalizeActionItems(minutes?.action_items),
+    [minutes],
+  );
+  const loadedReplyDraft = minutes?.reply_draft || "";
+
   const hasChanges =
     meetingTitle !== (meeting?.title || "새 회의") ||
     summaryText !== (minutes?.summary || "") ||
-    decisionsText !== (minutes?.decisions || "");
+    decisionsText !== (minutes?.decisions || "") ||
+    JSON.stringify(actionItems) !== JSON.stringify(loadedActionItems) ||
+    replyDraft !== loadedReplyDraft;
 
   useEffect(() => {
     if (hasChanges) setSaveStatus("idle");
@@ -46,6 +62,8 @@ export function useDetail({
     if (minutes) {
       setSummaryText(minutes.summary || "");
       setDecisionsText(minutes.decisions || "");
+      setActionItems(normalizeActionItems(minutes.action_items));
+      setReplyDraft(minutes.reply_draft || "");
     }
   }, [minutes]);
 
@@ -92,11 +110,15 @@ export function useDetail({
     if (meetingTitle !== meeting.title) onUpdateTitle(meeting.id, meetingTitle);
     if (
       summaryText !== minutes?.summary ||
-      decisionsText !== minutes?.decisions
+      decisionsText !== minutes?.decisions ||
+      JSON.stringify(actionItems) !== JSON.stringify(loadedActionItems) ||
+      replyDraft !== loadedReplyDraft
     ) {
       onUpdateMinutes(meeting.id, {
         summary: summaryText,
         decisions: decisionsText,
+        action_items: actionItems,
+        reply_draft: replyDraft,
       });
     }
   };
@@ -115,6 +137,16 @@ export function useDetail({
     setSummaryText,
     decisionsText,
     setDecisionsText,
+    actionItems,
+    replyDraft,
+    setReplyDraft,
+    toggleActionItem: (id: string) => {
+      setActionItems((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, done: !item.done } : item,
+        ),
+      );
+    },
     isPreviewMode,
     setIsPreviewMode,
     isDownloadOpen,
