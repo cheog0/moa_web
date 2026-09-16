@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { MeetingMinutes } from "@/lib/constants";
 import { getApiUrl } from "@/lib/api";
 import { parseMinutesPayload } from "@/lib/actionItems";
+import { deleteMeetingAudio } from "@/lib/meetings";
 
 export function useWorkspace(userId?: string, recording?: boolean) {
   const [dbMeetings, setDbMeetings] = useState<any[]>([]);
@@ -174,6 +175,8 @@ export function useWorkspace(userId?: string, recording?: boolean) {
   };
 
   const handlePermanentlyDeleteMeeting = async (id: string) => {
+    const meeting = dbMeetings.find((item) => item.id === id);
+    await deleteMeetingAudio(id, meeting?.audio_url);
     await supabase.from("project_meetings").delete().eq("meeting_id", id);
     const { error } = await supabase.from("meetings").delete().eq("id", id);
     if (!error) {
