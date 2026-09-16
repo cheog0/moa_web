@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Gowun_Dodum } from "next/font/google";
+import { Noto_Sans_KR } from "next/font/google";
 import {
   MoreHorizontal,
   RotateCcw,
@@ -10,8 +10,8 @@ import {
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { formatMeetingDate } from "@/lib/dates";
 
-const roundedFont = Gowun_Dodum({
-  weight: "400",
+const uiFont = Noto_Sans_KR({
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   display: "swap",
 });
@@ -34,7 +34,7 @@ export default function Trash({
 
   return (
     <main
-      className={`${roundedFont.className} min-h-full w-full bg-[linear-gradient(180deg,#fafbff_0px,#ffffff_240px)] px-5 py-10 sm:px-10 lg:px-14 lg:py-14`}
+      className={`${uiFont.className} min-h-full w-full bg-[linear-gradient(180deg,#fafbff_0px,#ffffff_240px)] px-5 py-10 sm:px-10 lg:px-14 lg:py-14`}
     >
       <div className="mx-auto w-full max-w-6xl">
         <header className="relative overflow-hidden border-b border-slate-200 pb-10">
@@ -46,7 +46,7 @@ export default function Trash({
               <span className="size-1.5 rounded-full bg-primary shadow-[0_0_0_4px_rgba(59,130,246,0.1)]" />
               Archive / Trash
             </div>
-            <h1 className="text-3xl font-semibold tracking-[-0.03em] text-slate-950 sm:text-4xl">
+            <h1 className="text-2xl font-semibold tracking-[-0.02em] text-slate-950 sm:text-3xl">
               삭제된 회의록
             </h1>
             <p className="mt-4 max-w-lg text-sm leading-6 text-slate-500">
