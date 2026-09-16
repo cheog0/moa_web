@@ -2,6 +2,9 @@
 
 import { Download, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/hooks/useTheme";
+import { whenDark } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 export default function PreviewBar({
   includeDecisions,
@@ -14,6 +17,8 @@ export default function PreviewBar({
   onBack: () => void;
   onPrint: () => void;
 }) {
+  const { theme } = useTheme();
+
   return (
     <div className="flex shrink-0 items-center justify-between bg-zinc-800 px-6 py-4 text-white shadow-md print:hidden">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
@@ -37,7 +42,10 @@ export default function PreviewBar({
           variant="secondary"
           size="sm"
           onClick={onBack}
-          className="text-black"
+          className={cn(
+            "text-black",
+            whenDark(theme, "bg-zinc-100 text-zinc-950 hover:bg-white"),
+          )}
         >
           돌아가기
         </Button>

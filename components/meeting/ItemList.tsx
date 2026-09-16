@@ -147,7 +147,12 @@ export default function ItemList({
               </span>
 
               {dayGap && (
-                <span className="absolute -left-4 -top-1 bg-white px-1 font-mono text-[11px] font-bold text-slate-500">
+                <span
+                  className={cn(
+                    "absolute -left-4 -top-1 bg-white px-1 font-mono text-[11px] font-bold text-slate-500",
+                    whenDark(theme, "bg-transparent px-0 text-white"),
+                  )}
+                >
                   +{dayGap}
                 </span>
               )}
