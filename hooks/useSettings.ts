@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+const MAX_KEYWORDS = 100;
+
 export function useSettings(userId: string) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -27,11 +29,12 @@ export function useSettings(userId: string) {
         setAiEngine(data.ai_engine || "gemini");
         setApiKey(data.api_key || "");
         setKeywords(
-          Array.isArray(data.keywords)
+          (Array.isArray(data.keywords)
             ? data.keywords
             : data.keywords
               ? data.keywords.split(",")
-              : [],
+              : []
+          ).slice(0, MAX_KEYWORDS),
         );
       }
       setLoading(false);
@@ -48,8 +51,8 @@ export function useSettings(userId: string) {
         .eq("user_id", userId)
         .maybeSingle();
       const payload = existing
-        ? { ...existing, ai_engine: aiEngine, api_key: apiKey, keywords }
-        : { user_id: userId, ai_engine: aiEngine, api_key: apiKey, keywords };
+        ? { ...existing, ai_engine: aiEngine, api_key: apiKey, keywords: keywords.slice(0, MAX_KEYWORDS) }
+        : { user_id: userId, ai_engine: aiEngine, api_key: apiKey, keywords: keywords.slice(0, MAX_KEYWORDS) };
       const { error } = await supabase.from("user_settings").upsert(payload);
       if (error) throw error;
       setToast({ type: "success", msg: "설정이 안전하게 저장되었습니다." });
@@ -68,6 +71,12 @@ export function useSettings(userId: string) {
       return;
     e.preventDefault();
     if (!newKeyword.trim()) return;
+    if (keywords.length >= MAX_KEYWORDS) {
+      setErrorMsg("키워드는 최대 100개까지 등록할 수 있습니다.");
+      if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+      errorTimeoutRef.current = setTimeout(() => setErrorMsg(""), 3000);
+      return;
+    }
     const inputKeywords = newKeyword
       .split(",")
       .map((k) => k.trim())
@@ -90,8 +99,15 @@ export function useSettings(userId: string) {
     } else {
       setErrorMsg("");
     }
-    if (uniqueNewKeywords.length > 0) {
-      setKeywords([...keywords, ...uniqueNewKeywords]);
+    const remaining = MAX_KEYWORDS - keywords.length;
+    const acceptedKeywords = uniqueNewKeywords.slice(0, remaining);
+    if (uniqueNewKeywords.length > remaining) {
+      setErrorMsg("키워드는 최대 100개까지 등록할 수 있습니다.");
+      if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+      errorTimeoutRef.current = setTimeout(() => setErrorMsg(""), 3000);
+    }
+    if (acceptedKeywords.length > 0) {
+      setKeywords([...keywords, ...acceptedKeywords]);
     }
     setNewKeyword("");
   };

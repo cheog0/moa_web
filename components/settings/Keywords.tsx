@@ -59,6 +59,7 @@ export default function Keywords({
           onChange={(e) => onNewKeywordChange(e.target.value)}
           onKeyDown={onAdd}
           placeholder="예: 업무, 계약"
+          disabled={keywords.length >= 100}
           className={cn(
             "h-10 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-slate-400",
             whenDark(
@@ -70,6 +71,7 @@ export default function Keywords({
         <Button
           onClick={onAdd}
           variant="outline"
+          disabled={keywords.length >= 100}
           className={cn(
             "h-10 border-slate-200 bg-white px-3 text-slate-700 hover:bg-slate-50 hover:text-slate-900",
             whenDark(

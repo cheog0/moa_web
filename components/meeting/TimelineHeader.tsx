@@ -126,7 +126,13 @@ export default function TimelineHeader({
             variant="ghost"
             onClick={onDelete}
             disabled={isSaving || isDeleting}
-            className="group/delete h-10 w-10 gap-0 overflow-hidden rounded-xl border border-slate-200 bg-white px-0 text-rose-500 shadow-sm transition-[width,gap,color,background-color,border-color,box-shadow] duration-300 hover:w-[70px] hover:gap-1 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 hover:shadow-[0_6px_18px_rgba(244,63,94,0.12)] animate-in fade-in"
+            className={cn(
+              "group/delete h-10 w-10 gap-0 overflow-hidden rounded-xl border border-slate-200 bg-white px-0 text-rose-500 shadow-sm transition-[width,gap,color,background-color,border-color,box-shadow] duration-300 hover:w-[70px] hover:gap-1 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 hover:shadow-[0_6px_18px_rgba(244,63,94,0.12)] animate-in fade-in",
+              whenDark(
+                theme,
+                "border-zinc-700 bg-zinc-900 hover:border-rose-400/40 hover:bg-rose-500/10",
+              ),
+            )}
             title="타임라인 삭제"
             aria-label="타임라인 삭제"
           >

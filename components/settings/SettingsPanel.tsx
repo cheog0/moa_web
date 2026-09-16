@@ -189,14 +189,24 @@ export default function SettingsPanel({ session }: { session: any }) {
           </div>
 
           <div className="px-5 py-5">
-            <p
-              className={cn(
-                "text-sm font-semibold text-slate-900",
-                whenDark(theme, "text-zinc-100"),
-              )}
-            >
-              자동 적용 키워드
-            </p>
+            <div className="flex items-center justify-between gap-3">
+              <p
+                className={cn(
+                  "text-sm font-semibold text-slate-900",
+                  whenDark(theme, "text-zinc-100"),
+                )}
+              >
+                자동 적용 키워드
+              </p>
+              <p
+                className={cn(
+                  "text-xs tabular-nums text-slate-400",
+                  whenDark(theme, "text-zinc-500"),
+                )}
+              >
+                {settings.keywords.length}/100
+              </p>
+            </div>
             <p
               className={cn(
                 "mt-1 text-xs leading-5 text-slate-500",
