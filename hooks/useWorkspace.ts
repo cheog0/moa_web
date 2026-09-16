@@ -10,6 +10,9 @@ export function useWorkspace(userId?: string, recording?: boolean) {
     useState<MeetingMinutes | null>(null);
   const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
   const [detail, setDetail] = useState(false);
+  const [timelineLinks, setTimelineLinks] = useState<Record<string, string[]>>(
+    {},
+  );
 
   const fetchProjects = async () => {
     try {
@@ -17,7 +20,31 @@ export function useWorkspace(userId?: string, recording?: boolean) {
         .from("projects")
         .select("*")
         .order("created_at", { ascending: false });
-      if (data) setDbProjects(data);
+      if (!data) return;
+      setDbProjects(data);
+
+      const projectIds = data.map((project) => project.id);
+      if (projectIds.length === 0) {
+        setTimelineLinks({});
+        return;
+      }
+
+      const { data: links } = await supabase
+        .from("project_meetings")
+        .select("meeting_id, project_id")
+        .in("project_id", projectIds);
+      const nameById = new Map(
+        data.map((project) => [project.id, project.name as string]),
+      );
+      const next: Record<string, string[]> = {};
+      for (const row of links ?? []) {
+        const name = nameById.get(row.project_id);
+        if (!name) continue;
+        const names = next[row.meeting_id] ?? [];
+        if (!names.includes(name)) names.push(name);
+        next[row.meeting_id] = names;
+      }
+      setTimelineLinks(next);
     } catch (error) {
       console.error("프로젝트 로드 실패", error);
     }
@@ -106,6 +133,8 @@ export function useWorkspace(userId?: string, recording?: boolean) {
   };
 
   const handleDeleteMeeting = async (id: string) => {
+    if (timelineLinks[id]?.length) return;
+
     const deletedAt = new Date().toISOString();
     const { error } = await supabase
       .from("meetings")
@@ -136,9 +165,15 @@ export function useWorkspace(userId?: string, recording?: boolean) {
   };
 
   const handlePermanentlyDeleteMeeting = async (id: string) => {
+    await supabase.from("project_meetings").delete().eq("meeting_id", id);
     const { error } = await supabase.from("meetings").delete().eq("id", id);
     if (!error) {
       setDbMeetings((prev) => prev.filter((meeting) => meeting.id !== id));
+      setTimelineLinks((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
     }
   };
 
@@ -173,5 +208,6 @@ export function useWorkspace(userId?: string, recording?: boolean) {
     handleRestoreMeeting,
     handlePermanentlyDeleteMeeting,
     handleOpenDetail,
+    timelineLinks,
   };
 }

@@ -1,12 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { MeetingMinutes } from "@/lib/constants";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import PreviewBar from "@/components/meeting/PreviewBar";
 import DetailHeader from "@/components/meeting/DetailHeader";
 import MinutesDoc from "@/components/meeting/MinutesDoc";
 import TranscriptList from "@/components/meeting/TranscriptList";
+import StatusToast from "@/components/meeting/StatusToast";
 import { useDetail } from "@/hooks/useDetail";
+import { ToastConfig } from "@/lib/timeline";
 
 export default function DetailPanel({
   onClose,
@@ -15,6 +18,7 @@ export default function DetailPanel({
   onUpdateTitle,
   onUpdateMinutes,
   onDelete,
+  linkedTimelineNames = [],
 }: {
   onClose: () => void;
   minutes?: MeetingMinutes;
@@ -25,7 +29,9 @@ export default function DetailPanel({
     updatedMinutes: Partial<MeetingMinutes>,
   ) => void;
   onDelete: (id: string) => void;
+  linkedTimelineNames?: string[];
 }) {
+  const [toast, setToast] = useState<ToastConfig | null>(null);
   const detail = useDetail({
     minutes,
     meeting,
@@ -33,6 +39,11 @@ export default function DetailPanel({
     onUpdateTitle,
     onUpdateMinutes,
   });
+
+  const showWarning = (message: string) => {
+    setToast({ message, type: "warning" });
+    window.setTimeout(() => setToast(null), 3000);
+  };
 
   return (
     <div
@@ -87,9 +98,7 @@ export default function DetailPanel({
               detail.setIsPreviewMode(true);
               detail.setIsDownloadOpen(false);
             }}
-            onToggleDownload={() =>
-              detail.setIsDownloadOpen((open) => !open)
-            }
+            onToggleDownload={() => detail.setIsDownloadOpen((open) => !open)}
             onDownloadAudio={() => {
               detail.handleDownloadAudio();
               detail.setIsDownloadOpen(false);
@@ -103,7 +112,20 @@ export default function DetailPanel({
               detail.handlePrintPDF();
             }}
             onDelete={
-              meeting?.id ? () => detail.setIsDeleteModalOpen(true) : undefined
+              meeting?.id
+                ? () => {
+                    if (linkedTimelineNames.length > 0) {
+                      const [firstName] = linkedTimelineNames;
+                      showWarning(
+                        linkedTimelineNames.length === 1
+                          ? `'${firstName}' 타임라인에서 먼저 제외해주세요.`
+                          : "연결된 타임라인에서 먼저 제외해주세요.",
+                      );
+                      return;
+                    }
+                    detail.setIsDeleteModalOpen(true);
+                  }
+                : undefined
             }
           />
         )}
@@ -152,6 +174,7 @@ export default function DetailPanel({
           )}
         </main>
       </div>
+      {toast && <StatusToast toast={toast} />}
       {detail.isDeleteModalOpen && (
         <ConfirmDialog
           title="회의록 삭제"

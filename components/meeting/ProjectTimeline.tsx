@@ -41,11 +41,15 @@ export default function ProjectTimeline({
       .includes(timeline.searchQuery.toLowerCase()),
   );
 
+  const visibleItems = timeline.timelineItems.filter((item) =>
+    dbMeetings.some((meeting) => meeting.id === item.id && !meeting.deleted_at),
+  );
+
   return (
     <div className="relative mx-auto w-full max-w-4xl p-6 sm:p-10 animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-screen">
       <TimelineHeader
         isLoading={timeline.isLoadingProject}
-        items={timeline.timelineItems}
+        items={visibleItems}
         projectStatus={timeline.projectStatus}
         onStatusChange={timeline.setProjectStatus}
         isEditing={timeline.isEditing}
@@ -64,11 +68,11 @@ export default function ProjectTimeline({
       />
       {timeline.isLoadingProject ? (
         <LoadingState />
-      ) : timeline.timelineItems.length === 0 ? (
+      ) : visibleItems.length === 0 ? (
         <EmptyState onOpenModal={timeline.handleOpenModal} />
       ) : (
         <ItemList
-          items={timeline.timelineItems}
+          items={visibleItems}
           dbMeetings={dbMeetings}
           onMeetingClick={onMeetingClick}
           onUpdateDate={(id, date) =>

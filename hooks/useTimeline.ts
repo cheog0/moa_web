@@ -45,10 +45,10 @@ export function useTimeline(
   };
 
   const handleRemoveMeeting = (idToRemove: string) => {
-    if (
-      (projectId || data.createdProjectId) &&
-      data.timelineItems.length === 1
-    ) {
+    const visibleCount = data.timelineItems.filter((item) =>
+      dbMeetings.some((meeting) => meeting.id === item.id && !meeting.deleted_at),
+    ).length;
+    if ((projectId || data.createdProjectId) && visibleCount === 1) {
       data.showToast(
         "최소 1개의 회의가 필요합니다. 전체 삭제는 상단의 [삭제] 버튼을 이용해주세요.",
         "warning",
@@ -70,7 +70,10 @@ export function useTimeline(
       data.setIsEditing(true);
       return;
     }
-    if (data.timelineItems.length === 0) return;
+    const activeItems = data.timelineItems.filter((item) =>
+      dbMeetings.some((meeting) => meeting.id === item.id && !meeting.deleted_at),
+    );
+    if (activeItems.length === 0) return;
     data.setIsSaving(true);
     try {
       const savedId = await saveTimeline({
@@ -78,9 +81,10 @@ export function useTimeline(
         createdProjectId: data.createdProjectId,
         projectName: data.projectName,
         projectStatus: data.projectStatus,
-        timelineItems: data.timelineItems,
+        timelineItems: activeItems,
       });
       data.setCreatedProjectId(savedId);
+      data.setTimelineItems(activeItems);
       data.showToast(`'${data.projectName}' 타임라인이 저장되었습니다.`);
       onSaveSuccess?.();
     } catch (error: any) {

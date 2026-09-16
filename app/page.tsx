@@ -252,6 +252,11 @@ export default function Page() {
           onUpdateTitle={workspace.handleUpdateTitle}
           onUpdateMinutes={workspace.handleUpdateMinutes}
           onDelete={workspace.handleDeleteMeeting}
+          linkedTimelineNames={
+            workspace.selectedMeeting?.id
+              ? workspace.timelineLinks[workspace.selectedMeeting.id] ?? []
+              : []
+          }
         />
       )}
     </div>

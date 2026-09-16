@@ -80,7 +80,10 @@ export default function ItemList({
   onOpenModal: () => void;
 }) {
   const { theme } = useTheme();
-  const latestMeetingId = items.reduce(
+  const visibleItems = items.filter((item) =>
+    dbMeetings.some((meeting) => meeting.id === item.id && !meeting.deleted_at),
+  );
+  const latestMeetingId = visibleItems.reduce(
     (latest, item) =>
       !latest || new Date(item.date) > new Date(latest.date) ? item : latest,
     null as TimelineItem | null,
@@ -113,8 +116,8 @@ export default function ItemList({
 
   return (
     <div className="relative ml-3 border-l border-slate-200 py-2 sm:ml-7">
-      {items.map((meeting, index) => {
-        const previousMeeting = items[index - 1];
+      {visibleItems.map((meeting, index) => {
+        const previousMeeting = visibleItems[index - 1];
         const showMonth =
           index === 0 ||
           getMonthLabel(previousMeeting.date) !== getMonthLabel(meeting.date);
