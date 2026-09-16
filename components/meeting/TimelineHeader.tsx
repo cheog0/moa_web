@@ -41,7 +41,7 @@ export default function TimelineHeader({
   const { theme } = useTheme();
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 border-b border-border pb-6">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 border-b border-border pb-3">
       <div>
         <div className="flex items-center gap-3 mb-2">
           {isLoading ? (
