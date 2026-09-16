@@ -90,7 +90,7 @@ export default function Trash({
         <section className="pt-10">
           <div
             className={cn(
-              "grid grid-cols-[1fr_auto] items-end border-b-2 border-slate-950 pb-3 sm:grid-cols-[minmax(0,1fr)_210px_160px]",
+              "grid grid-cols-[1fr_auto] items-end border-b-2 border-slate-950 pb-3 sm:grid-cols-[minmax(0,1fr)_210px_48px]",
               whenDark(theme, "border-zinc-100"),
             )}
           >
@@ -98,14 +98,24 @@ export default function Trash({
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-400">
                 Records
               </p>
-              <p
-                className={cn(
-                  "mt-1 text-sm font-semibold text-slate-900",
-                  whenDark(theme, "text-zinc-100"),
-                )}
-              >
-                총 {meetings.length}개의 기록
-              </p>
+              <div className="mt-1 flex items-baseline gap-2.5">
+                <p
+                  className={cn(
+                    "text-sm font-semibold text-slate-900",
+                    whenDark(theme, "text-zinc-100"),
+                  )}
+                >
+                  총 {meetings.length}개의 기록
+                </p>
+                <p
+                  className={cn(
+                    "font-mono text-[10px] font-semibold tracking-[0.18em] text-slate-600",
+                    whenDark(theme, "text-zinc-300"),
+                  )}
+                >
+                  최근 삭제순
+                </p>
+              </div>
             </div>
             <p
               className={cn(
@@ -115,21 +125,13 @@ export default function Trash({
             >
               Deleted at
             </p>
-            <p
-              className={cn(
-                "text-right font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-600",
-                whenDark(theme, "text-zinc-300"),
-              )}
-            >
-              최근 삭제순
-            </p>
           </div>
 
           {sortedMeetings.map((meeting, index) => (
             <div
               key={meeting.id}
               className={cn(
-                "group relative grid gap-3 border-b border-slate-200 py-3.5 transition-colors duration-300 hover:bg-slate-50/70 sm:grid-cols-[minmax(0,1fr)_210px_160px] sm:items-center sm:gap-0 sm:py-4",
+                "group relative grid gap-3 border-b border-slate-200 py-3.5 transition-colors duration-300 hover:bg-slate-50/70 sm:grid-cols-[minmax(0,1fr)_210px_48px] sm:items-center sm:gap-0 sm:py-4",
                 whenDark(theme, "border-zinc-800 hover:bg-zinc-900"),
               )}
             >
@@ -166,23 +168,12 @@ export default function Trash({
                 </p>
               </div>
 
-              <div className="flex items-center justify-end gap-1 px-2 sm:px-0 sm:pr-2">
-                <button
-                  type="button"
-                  className={cn(
-                    "group/restore flex h-9 items-center gap-2 px-3 text-xs font-semibold text-slate-600 transition-colors hover:text-primary",
-                    whenDark(theme, "text-zinc-300"),
-                  )}
-                  onClick={() => onRestore(meeting.id)}
-                >
-                  <RotateCcw className="size-3.5 transition-transform duration-300 group-hover/restore:-rotate-45" />
-                  복원
-                </button>
+              <div className="flex items-center justify-end px-2 sm:px-0 sm:pr-2">
                 <div className="relative">
                   <button
                     type="button"
                     className={cn(
-                      "flex size-9 items-center justify-center text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900",
+                      "flex size-8 items-center justify-center text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900",
                       whenDark(theme, "hover:bg-zinc-800 hover:text-zinc-100"),
                     )}
                     onClick={() =>
@@ -202,22 +193,44 @@ export default function Trash({
                         onClick={() => setOpenMenuId(null)}
                         aria-label="메뉴 닫기"
                       />
-                      <button
-                        type="button"
+                      <div
                         className={cn(
-                          "absolute right-0 top-10 z-20 whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-xs font-semibold text-rose-600 shadow-[0_16px_40px_rgba(15,23,42,0.12)] transition-colors hover:bg-rose-50",
-                          whenDark(
-                            theme,
-                            "border-zinc-700 bg-zinc-900 hover:bg-rose-500/10",
-                          ),
+                          "absolute right-0 top-9 z-20 min-w-[7.5rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-[0_16px_40px_rgba(15,23,42,0.12)]",
+                          whenDark(theme, "border-zinc-700 bg-zinc-900"),
                         )}
-                        onClick={() => {
-                          setDeleteTarget(meeting);
-                          setOpenMenuId(null);
-                        }}
                       >
-                        영구 삭제
-                      </button>
+                        <button
+                          type="button"
+                          className={cn(
+                            "flex w-full items-center gap-2 px-3 py-1.5 text-left text-[11px] font-medium text-slate-600 transition-colors hover:bg-slate-50",
+                            whenDark(
+                              theme,
+                              "text-zinc-200 hover:bg-zinc-800",
+                            ),
+                          )}
+                          onClick={() => {
+                            onRestore(meeting.id);
+                            setOpenMenuId(null);
+                          }}
+                        >
+                          <RotateCcw className="size-3" />
+                          복원
+                        </button>
+                        <button
+                          type="button"
+                          className={cn(
+                            "flex w-full items-center gap-2 px-3 py-1.5 text-left text-[11px] font-medium text-rose-600 transition-colors hover:bg-rose-50",
+                            whenDark(theme, "hover:bg-rose-500/10"),
+                          )}
+                          onClick={() => {
+                            setDeleteTarget(meeting);
+                            setOpenMenuId(null);
+                          }}
+                        >
+                          <Trash2 className="size-3" />
+                          영구 삭제
+                        </button>
+                      </div>
                     </>
                   )}
                 </div>
