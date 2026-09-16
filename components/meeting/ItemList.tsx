@@ -111,7 +111,7 @@ export default function ItemList({
           <Fragment key={meeting.id}>
             {showMonth && (
               <div className="relative mb-2 pl-8 pt-2 sm:pl-10">
-                <span className="absolute -left-1.5 top-5 size-3 rounded-full border-[3px] border-white bg-slate-900" />
+                <span className="absolute -left-1.5 top-2.5 size-3 rounded-full border-[3px] border-white bg-slate-900" />
                 <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
                   {getMonthLabel(meeting.date)}
                 </p>
