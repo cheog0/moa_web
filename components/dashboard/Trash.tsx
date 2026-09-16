@@ -98,24 +98,14 @@ export default function Trash({
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-400">
                 Records
               </p>
-              <div className="mt-1 flex items-baseline gap-2.5">
-                <p
-                  className={cn(
-                    "text-sm font-semibold text-slate-900",
-                    whenDark(theme, "text-zinc-100"),
-                  )}
-                >
-                  총 {meetings.length}개의 기록
-                </p>
-                <p
-                  className={cn(
-                    "font-mono text-[10px] font-semibold tracking-[0.18em] text-slate-600",
-                    whenDark(theme, "text-zinc-300"),
-                  )}
-                >
-                  최근 삭제순
-                </p>
-              </div>
+              <p
+                className={cn(
+                  "mt-1 text-sm font-semibold text-slate-900",
+                  whenDark(theme, "text-zinc-100"),
+                )}
+              >
+                총 {meetings.length}개의 기록
+              </p>
             </div>
             <p
               className={cn(
