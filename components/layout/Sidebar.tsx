@@ -14,6 +14,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NavItem from "@/components/layout/NavItem";
+import { useTheme } from "@/hooks/useTheme";
+import { whenDark, whenDarkValue } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 export default function Sidebar({
   currentView,
@@ -49,6 +52,7 @@ export default function Sidebar({
     onNew();
     onMobileClose?.();
   };
+  const { theme } = useTheme();
 
   return (
     <>
@@ -62,12 +66,17 @@ export default function Sidebar({
       )}
       <aside
         id="mobile-sidebar"
-        style={{ backgroundColor: "#FBFCFF" }}
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col justify-between px-3.5 py-4 text-sm shadow-xl transition-transform duration-200 select-none after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-px after:bg-slate-200/70 after:blur-[0.3px] print:hidden lg:relative lg:z-auto lg:translate-x-0 lg:shadow-none ${
+        style={{
+          backgroundColor: whenDarkValue(theme, "#18181b", "#FBFCFF"),
+        }}
+        className={cn(
+          `fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col justify-between px-3.5 py-4 text-sm shadow-xl transition-transform duration-200 select-none after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-px after:bg-slate-200/70 after:blur-[0.3px] print:hidden lg:relative lg:z-auto lg:translate-x-0 lg:shadow-none ${
           mobileOpen
             ? "visible translate-x-0"
             : "invisible -translate-x-full lg:visible"
-        }`}
+        }`,
+          whenDark(theme, "after:bg-zinc-700 text-zinc-100"),
+        )}
       >
       {/* 🚀 상단 로고, 새 회의 버튼, 네비게이션 영역 */}
       <div className="flex flex-col gap-4 overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
@@ -188,7 +197,12 @@ export default function Sidebar({
       </div>
 
       {/* 🌟 하단 실제 세션 연동 유저 프로필 영역 */}
-      <div className="flex flex-col gap-2.5 pt-3 border-t border-slate-100 mt-1 shrink-0">
+      <div
+        className={cn(
+          "flex flex-col gap-2.5 pt-3 border-t border-slate-100 mt-1 shrink-0",
+          whenDark(theme, "border-zinc-800"),
+        )}
+      >
         <div className="flex items-center justify-between gap-2 px-1">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary font-bold text-xs shadow-sm">
@@ -206,7 +220,10 @@ export default function Sidebar({
 
           <button
             onClick={onLogout}
-            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-rose-50 hover:text-rose-600"
+            className={cn(
+              "rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-rose-50 hover:text-rose-600",
+              whenDark(theme, "hover:bg-rose-500/15 hover:text-rose-400"),
+            )}
             title="로그아웃"
           >
             <LogOut className="size-4" />

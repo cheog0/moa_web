@@ -3,6 +3,9 @@
 import { ChevronDown, Loader2, Pencil, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TimelineItem } from "@/lib/timeline";
+import { useTheme } from "@/hooks/useTheme";
+import { whenDark } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 export default function TimelineHeader({
   isLoading,
@@ -35,6 +38,8 @@ export default function TimelineHeader({
   onDelete: () => void;
   onSave: () => void;
 }) {
+  const { theme } = useTheme();
+
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 border-b border-border pb-6">
       <div>
@@ -129,7 +134,13 @@ export default function TimelineHeader({
           <Button
             onClick={onSave}
             disabled={isSaving || isDeleting}
-            className="group/save h-10 w-10 gap-0 overflow-hidden rounded-xl border border-slate-200 bg-white px-0 text-slate-950 shadow-sm transition-[width,gap,color,background-color,border-color,box-shadow] duration-300 hover:w-[92px] hover:gap-1 hover:border-slate-300 hover:bg-slate-100 hover:shadow-[0_6px_18px_rgba(15,23,42,0.1)] animate-in fade-in"
+          className={cn(
+            "group/save h-10 w-10 gap-0 overflow-hidden rounded-xl border border-slate-200 bg-white px-0 text-slate-950 shadow-sm transition-[width,gap,color,background-color,border-color,box-shadow] duration-300 hover:w-[92px] hover:gap-1 hover:border-slate-300 hover:bg-slate-100 hover:shadow-[0_6px_18px_rgba(15,23,42,0.1)] animate-in fade-in",
+            whenDark(
+              theme,
+              "border-zinc-700 bg-zinc-900 text-zinc-100 hover:border-zinc-500 hover:bg-zinc-800",
+            ),
+          )}
           >
             {isSaving ? (
               <Loader2 className="size-[18px] animate-spin" />

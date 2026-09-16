@@ -1,4 +1,9 @@
+"use client";
+
 import { Bell, ChevronRight, Menu } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
+import { whenDark } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 export default function Header({
   sectionLabel,
@@ -13,8 +18,15 @@ export default function Header({
   onNotify: () => void;
   onMenuOpen: () => void;
 }) {
+  const { theme } = useTheme();
+
   return (
-    <header className="relative flex h-16 shrink-0 items-center justify-between bg-white pl-5 pr-6 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-slate-200/70 after:blur-[0.3px] sm:pl-8 sm:pr-10">
+    <header
+      className={cn(
+        "relative flex h-16 shrink-0 items-center justify-between bg-white pl-5 pr-6 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-slate-200/70 after:blur-[0.3px] sm:pl-8 sm:pr-10",
+        whenDark(theme, "bg-zinc-950 after:bg-zinc-800"),
+      )}
+    >
       <div className="flex items-center gap-3">
         <button
           type="button"

@@ -1,9 +1,14 @@
+"use client";
+
 import { BookOpen, Clock3, Plus, Sparkles, Calendar, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CalendarView from "@/components/meeting/CalenderView";
 import Stat from "@/components/dashboard/Stat";
 import ListItem from "@/components/dashboard/ListItem";
 import MeetingSearch from "@/components/dashboard/MeetingSearch";
+import { useTheme } from "@/hooks/useTheme";
+import { whenDark } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 export default function Home({
   meetings,
@@ -34,8 +39,15 @@ export default function Home({
   query: string;
   onQueryChange: (value: string) => void;
 }) {
+  const { theme } = useTheme();
+
   return (
-    <main className="mx-auto w-full max-w-6xl p-5 sm:p-8 bg-white min-h-full">
+    <main
+      className={cn(
+        "mx-auto w-full max-w-6xl p-5 sm:p-8 bg-white min-h-full",
+        whenDark(theme, "bg-zinc-950"),
+      )}
+    >
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
         <div>
           <p className="text-sm font-medium text-primary">오늘의 회의를</p>

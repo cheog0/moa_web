@@ -2,6 +2,9 @@
 
 import { Check, ChevronDown } from "lucide-react";
 import { Select } from "@base-ui/react/select";
+import { useTheme } from "@/hooks/useTheme";
+import { whenDark } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 export const ENGINES = [
   {
@@ -33,6 +36,8 @@ export default function EngineSelect({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const { theme } = useTheme();
+
   return (
     <Select.Root
       value={value}
@@ -45,9 +50,18 @@ export default function EngineSelect({
       }))}
       modal={false}
     >
-      <Select.Trigger className="flex h-10 w-full items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 text-left text-sm text-slate-900 outline-none transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:border-slate-400 data-[popup-open]:border-slate-400 data-[popup-open]:bg-slate-50">
+      <Select.Trigger className={cn(
+        "flex h-10 w-full items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 text-left text-sm text-slate-900 outline-none transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:border-slate-400 data-[popup-open]:border-slate-400 data-[popup-open]:bg-slate-50",
+        whenDark(
+          theme,
+          "border-zinc-700 bg-zinc-950 text-zinc-100 hover:border-zinc-500 hover:bg-zinc-900 data-[popup-open]:border-zinc-500 data-[popup-open]:bg-zinc-900",
+        ),
+      )}>
         <Select.Value className="min-w-0 truncate font-medium" />
-        <Select.Icon className="flex shrink-0 text-slate-400 transition-transform duration-200 data-[open]:rotate-180">
+        <Select.Icon className={cn(
+          "flex shrink-0 text-slate-400 transition-transform duration-200 data-[open]:rotate-180",
+          whenDark(theme, "text-zinc-400"),
+        )}>
           <ChevronDown className="size-4" />
         </Select.Icon>
       </Select.Trigger>
@@ -57,24 +71,41 @@ export default function EngineSelect({
           sideOffset={6}
           alignItemWithTrigger={false}
         >
-          <Select.Popup className="w-[var(--anchor-width)] origin-[var(--transform-origin)] overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-[0_12px_32px_rgba(15,23,42,0.12)] outline-none transition-[transform,opacity] duration-150 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
+          <Select.Popup className={cn(
+            "w-[var(--anchor-width)] origin-[var(--transform-origin)] overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-[0_12px_32px_rgba(15,23,42,0.12)] outline-none transition-[transform,opacity] duration-150 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0",
+            whenDark(theme, "border-zinc-700 bg-zinc-900 shadow-black/40"),
+          )}>
             <Select.List>
               {ENGINES.map((engine) => (
                 <Select.Item
                   key={engine.id}
                   value={engine.id}
                   label={engine.name}
-                  className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-slate-900 outline-none select-none data-[highlighted]:bg-slate-50 data-[selected]:bg-slate-100"
+                  className={cn(
+                    "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-slate-900 outline-none select-none data-[highlighted]:bg-slate-50 data-[selected]:bg-slate-100",
+                    whenDark(
+                      theme,
+                      "text-zinc-100 data-[highlighted]:bg-zinc-800 data-[selected]:bg-zinc-800",
+                    ),
+                  )}
                 >
                   <div className="min-w-0 flex-1">
                     <Select.ItemText className="block text-sm font-medium">
                       {engine.name}
                     </Select.ItemText>
-                    <p className="mt-0.5 text-[11px] text-slate-500">
+                    <p
+                      className={cn(
+                        "mt-0.5 text-[11px] text-slate-500",
+                        whenDark(theme, "text-zinc-400"),
+                      )}
+                    >
                       {engine.hint}
                     </p>
                   </div>
-                  <Select.ItemIndicator className="flex size-4 shrink-0 items-center justify-center text-slate-900">
+                  <Select.ItemIndicator className={cn(
+                    "flex size-4 shrink-0 items-center justify-center text-slate-900",
+                    whenDark(theme, "text-zinc-100"),
+                  )}>
                     <Check className="size-3.5" />
                   </Select.ItemIndicator>
                 </Select.Item>

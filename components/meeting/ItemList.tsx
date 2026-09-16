@@ -14,14 +14,29 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TimelineItem } from "@/lib/timeline";
+import { useTheme } from "@/hooks/useTheme";
+import { whenDark } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 export function EmptyState({ onOpenModal }: { onOpenModal: () => void }) {
+  const { theme } = useTheme();
+
   return (
-    <div className="mt-12 flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 px-6 py-24 text-center transition-all hover:bg-slate-50">
+    <div
+      className={cn(
+        "mt-12 flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 px-6 py-24 text-center transition-all hover:bg-slate-50",
+        whenDark(theme, "border-zinc-700 bg-zinc-900/50 hover:bg-zinc-900"),
+      )}
+    >
       <div className="mb-6 flex size-20 items-center justify-center rounded-full bg-sky-100 text-sky-500 shadow-sm">
         <History className="size-10" />
       </div>
-      <h2 className="mb-3 text-xl font-bold text-slate-900">
+      <h2
+        className={cn(
+          "mb-3 text-xl font-bold text-slate-900",
+          whenDark(theme, "text-zinc-50"),
+        )}
+      >
         첫 번째 회의를 연동해주세요
       </h2>
       <p className="mb-8 max-w-md text-sm leading-relaxed text-slate-500">
@@ -64,6 +79,7 @@ export default function ItemList({
   onRemove: (id: string) => void;
   onOpenModal: () => void;
 }) {
+  const { theme } = useTheme();
   const latestMeetingId = items.reduce(
     (latest, item) =>
       !latest || new Date(item.date) > new Date(latest.date) ? item : latest,
@@ -111,7 +127,12 @@ export default function ItemList({
           <Fragment key={meeting.id}>
             {showMonth && (
               <div className="relative mb-2 pl-8 pt-2 sm:pl-10">
-                <span className="absolute -left-1.5 top-2.5 size-3 rounded-full border-[3px] border-white bg-slate-900" />
+                <span
+                  className={cn(
+                    "absolute -left-1.5 top-2.5 size-3 rounded-full border-[3px] border-white bg-slate-900",
+                    whenDark(theme, "border-zinc-950 bg-zinc-100"),
+                  )}
+                />
                 <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
                   {getMonthLabel(meeting.date)}
                 </p>
@@ -160,7 +181,12 @@ export default function ItemList({
                         </span>
                       )}
                     </div>
-                    <h3 className="truncate text-base font-bold tracking-tight text-slate-900 transition-colors group-hover:text-sky-700">
+                    <h3
+                      className={cn(
+                        "truncate text-base font-bold tracking-tight text-slate-900 transition-colors group-hover:text-sky-700",
+                        whenDark(theme, "text-zinc-50 group-hover:text-sky-400"),
+                      )}
+                    >
                       {meeting.title}
                     </h3>
                     <div className="mt-2 flex items-center gap-3">
@@ -182,7 +208,10 @@ export default function ItemList({
                         e.stopPropagation();
                         onRemove(meeting.id);
                       }}
-                      className="rounded-md p-2 text-slate-300 transition-colors hover:bg-rose-50 hover:text-rose-500"
+                      className={cn(
+                        "rounded-md p-2 text-slate-300 transition-colors hover:bg-rose-50 hover:text-rose-500",
+                        whenDark(theme, "hover:bg-rose-500/10"),
+                      )}
                       title="타임라인에서 제외"
                     >
                       <Trash2 className="size-4" />
@@ -200,7 +229,10 @@ export default function ItemList({
         <Button
           variant="ghost"
           onClick={onOpenModal}
-          className="h-12 w-full justify-start rounded-xl border border-dashed border-slate-300 px-4 text-slate-500 hover:border-sky-400 hover:bg-sky-50/50 hover:text-sky-600"
+          className={cn(
+            "h-12 w-full justify-start rounded-xl border border-dashed border-slate-300 px-4 text-slate-500 hover:border-sky-400 hover:bg-sky-50/50 hover:text-sky-600",
+            whenDark(theme, "hover:bg-sky-500/10"),
+          )}
         >
           <Plus className="mr-2 size-4" /> 다음 회의 연결하기
         </Button>

@@ -15,11 +15,15 @@ import {
   TEMPLATE_SALES,
   TEMPLATE_SCRUM,
 } from "@/lib/constants";
+import { useTheme } from "@/hooks/useTheme";
+import { whenDark } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 export default function TemplatePanel({ session }: { session: any }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [customTemplate, setCustomTemplate] = useState("");
+  const { theme } = useTheme();
 
   const [toast, setToast] = useState<{
     type: "success" | "error";
@@ -120,41 +124,73 @@ export default function TemplatePanel({ session }: { session: any }) {
         <div className="mb-4 flex flex-wrap gap-2">
           <button
             onClick={() => setCustomTemplate(TEMPLATE_SALES)}
-            className={`rounded-full border px-4 py-1.5 text-xs transition-all ${
-              customTemplate === TEMPLATE_SALES
-                ? "bg-blue-100 border-blue-200 text-blue-700 font-bold shadow-sm"
-                : "bg-blue-50/50 border-transparent text-blue-600/70 hover:bg-blue-50 hover:text-blue-600 font-semibold"
-            }`}
+            className={cn(
+              `rounded-full border px-4 py-1.5 text-xs transition-all ${
+                customTemplate === TEMPLATE_SALES
+                  ? "bg-blue-100 border-blue-200 text-blue-700 font-bold shadow-sm"
+                  : "bg-blue-50/50 border-transparent text-blue-600/70 hover:bg-blue-50 hover:text-blue-600 font-semibold"
+              }`,
+              whenDark(
+                theme,
+                customTemplate === TEMPLATE_SALES
+                  ? "border-blue-400/30 bg-blue-500/20 text-blue-200 shadow-none"
+                  : "border-transparent bg-blue-500/10 text-blue-300 hover:bg-blue-500/20 hover:text-blue-200",
+              ),
+            )}
           >
             영업 미팅
           </button>
           <button
             onClick={() => setCustomTemplate(TEMPLATE_SCRUM)}
-            className={`rounded-full border px-4 py-1.5 text-xs transition-all ${
-              customTemplate === TEMPLATE_SCRUM
-                ? "bg-emerald-100 border-emerald-200 text-emerald-700 font-bold shadow-sm"
-                : "bg-emerald-50/50 border-transparent text-emerald-600/70 hover:bg-emerald-50 hover:text-emerald-600 font-semibold"
-            }`}
+            className={cn(
+              `rounded-full border px-4 py-1.5 text-xs transition-all ${
+                customTemplate === TEMPLATE_SCRUM
+                  ? "bg-emerald-100 border-emerald-200 text-emerald-700 font-bold shadow-sm"
+                  : "bg-emerald-50/50 border-transparent text-emerald-600/70 hover:bg-emerald-50 hover:text-emerald-600 font-semibold"
+              }`,
+              whenDark(
+                theme,
+                customTemplate === TEMPLATE_SCRUM
+                  ? "border-emerald-400/30 bg-emerald-500/20 text-emerald-200 shadow-none"
+                  : "border-transparent bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 hover:text-emerald-200",
+              ),
+            )}
           >
             데일리 스크럼
           </button>
           <button
             onClick={() => setCustomTemplate(TEMPLATE_BASIC)}
-            className={`rounded-full border px-4 py-1.5 text-xs transition-all ${
-              customTemplate === TEMPLATE_BASIC
-                ? "bg-slate-200 border-slate-300 text-slate-800 font-bold shadow-sm"
-                : "bg-slate-100 border-transparent text-slate-600/70 hover:bg-slate-200/50 hover:text-slate-700 font-semibold"
-            }`}
+            className={cn(
+              `rounded-full border px-4 py-1.5 text-xs transition-all ${
+                customTemplate === TEMPLATE_BASIC
+                  ? "bg-slate-200 border-slate-300 text-slate-800 font-bold shadow-sm"
+                  : "bg-slate-100 border-transparent text-slate-600/70 hover:bg-slate-200/50 hover:text-slate-700 font-semibold"
+              }`,
+              whenDark(
+                theme,
+                customTemplate === TEMPLATE_BASIC
+                  ? "border-zinc-600 bg-zinc-700 text-zinc-100 shadow-none"
+                  : "border-transparent bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100",
+              ),
+            )}
           >
             기본 회의
           </button>
           <button
             onClick={() => setCustomTemplate("")}
-            className={`rounded-full border px-4 py-1.5 text-xs transition-all ml-auto ${
-              customTemplate === ""
-                ? "bg-slate-100 border-slate-300 text-slate-700 font-bold shadow-sm"
-                : "bg-white border-border text-muted-foreground hover:bg-slate-50 font-semibold"
-            }`}
+            className={cn(
+              `rounded-full border px-4 py-1.5 text-xs transition-all ml-auto ${
+                customTemplate === ""
+                  ? "bg-slate-100 border-slate-300 text-slate-700 font-bold shadow-sm"
+                  : "bg-white border-border text-muted-foreground hover:bg-slate-50 font-semibold"
+              }`,
+              whenDark(
+                theme,
+                customTemplate === ""
+                  ? "border-zinc-600 bg-zinc-700 text-zinc-100 shadow-none"
+                  : "border-zinc-700 bg-transparent text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200",
+              ),
+            )}
           >
             비우기
           </button>

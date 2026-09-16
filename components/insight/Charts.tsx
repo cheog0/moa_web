@@ -11,6 +11,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useTheme } from "@/hooks/useTheme";
+import { whenDarkValue } from "@/lib/theme";
 
 const tooltipStyle = {
   backgroundColor: "hsl(var(--card))",
@@ -20,11 +22,28 @@ const tooltipStyle = {
   fontSize: "12px",
 };
 
+const darkTooltipStyle = {
+  backgroundColor: "var(--card)",
+  borderColor: "var(--border)",
+  borderRadius: "0.75rem",
+  color: "var(--foreground)",
+  fontSize: "12px",
+};
+
 export default function Charts({
   monthlyBarData,
 }: {
   monthlyBarData: { name: string; 회의수: number; 녹음시간: number }[];
 }) {
+  const { theme } = useTheme();
+  const grid = whenDarkValue(theme, "var(--border)", "hsl(var(--border))");
+  const axis = whenDarkValue(
+    theme,
+    "var(--muted-foreground)",
+    "hsl(var(--muted-foreground))",
+  );
+  const fill = whenDarkValue(theme, "var(--primary)", "hsl(var(--primary))");
+  const tooltip = whenDarkValue(theme, darkTooltipStyle, tooltipStyle);
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
@@ -43,30 +62,30 @@ export default function Charts({
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
-                stroke="hsl(var(--border))"
+                stroke={grid}
                 opacity={0.4}
               />
               <XAxis
                 dataKey="name"
-                stroke="hsl(var(--muted-foreground))"
+                stroke={axis}
                 fontSize={11}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
-                stroke="hsl(var(--muted-foreground))"
+                stroke={axis}
                 fontSize={11}
                 tickLine={false}
                 axisLine={false}
                 allowDecimals={false}
               />
               <Tooltip
-                contentStyle={tooltipStyle}
+                contentStyle={tooltip}
                 formatter={(value: any) => [`${value}건`, "회의 수"]}
               />
               <Bar
                 dataKey="회의수"
-                fill="hsl(var(--primary))"
+                fill={fill}
                 radius={[4, 4, 0, 0]}
                 opacity={0.85}
               />
@@ -91,12 +110,12 @@ export default function Charts({
                 <linearGradient id="colorTime" x1="0" y1="0" x2="0" y2="1">
                   <stop
                     offset="5%"
-                    stopColor="hsl(var(--primary))"
+                    stopColor={fill}
                     stopOpacity={0.4}
                   />
                   <stop
                     offset="95%"
-                    stopColor="hsl(var(--primary))"
+                    stopColor={fill}
                     stopOpacity={0}
                   />
                 </linearGradient>
@@ -104,30 +123,30 @@ export default function Charts({
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
-                stroke="hsl(var(--border))"
+                stroke={grid}
                 opacity={0.4}
               />
               <XAxis
                 dataKey="name"
-                stroke="hsl(var(--muted-foreground))"
+                stroke={axis}
                 fontSize={11}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
-                stroke="hsl(var(--muted-foreground))"
+                stroke={axis}
                 fontSize={11}
                 tickLine={false}
                 axisLine={false}
               />
               <Tooltip
-                contentStyle={tooltipStyle}
+                contentStyle={tooltip}
                 formatter={(value: any) => [`${value} 시간`, "녹음 시간"]}
               />
               <Area
                 type="monotone"
                 dataKey="녹음시간"
-                stroke="hsl(var(--primary))"
+                stroke={fill}
                 strokeWidth={2.5}
                 fillOpacity={1}
                 fill="url(#colorTime)"

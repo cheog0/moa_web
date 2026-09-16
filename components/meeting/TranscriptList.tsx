@@ -1,6 +1,9 @@
 "use client";
 
 import { Play } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
+import { whenDark } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 export default function TranscriptList({
   transcript,
@@ -11,6 +14,8 @@ export default function TranscriptList({
   isPreviewMode: boolean;
   onSeek: (time: string) => void;
 }) {
+  const { theme } = useTheme();
+
   if (!transcript) {
     return (
       <div className="text-center text-sm text-muted-foreground">
@@ -43,7 +48,10 @@ export default function TranscriptList({
         <div
           key={idx}
           onClick={() => onSeek(t.time || "00:00")}
-          className="group flex gap-4 cursor-pointer rounded-xl p-3 transition-colors hover:bg-sky-50 print:break-inside-avoid print:py-2 print:hover:bg-transparent"
+          className={cn(
+            "group flex gap-4 cursor-pointer rounded-xl p-3 transition-colors hover:bg-sky-50 print:break-inside-avoid print:py-2 print:hover:bg-transparent",
+            whenDark(theme, "hover:bg-sky-500/10"),
+          )}
         >
           <span className="w-[60px] shrink-0 pt-0.5 font-mono text-xs font-semibold text-sky-500 transition-colors group-hover:text-sky-600 print:text-gray-500">
             <Play className="inline-block size-3 mr-1 opacity-0 transition-opacity group-hover:opacity-100 print:hidden" />
@@ -53,7 +61,10 @@ export default function TranscriptList({
             <div className="text-sm font-semibold print:text-black">
               {t.speaker || "알 수 없음"}
             </div>
-            <p className="mt-1 text-sm leading-7 text-muted-foreground group-hover:text-gray-900 print:text-gray-800">
+            <p className={cn(
+              "mt-1 text-sm leading-7 text-muted-foreground group-hover:text-gray-900 print:text-gray-800",
+              whenDark(theme, "group-hover:text-zinc-100"),
+            )}>
               {t.text || ""}
             </p>
           </div>

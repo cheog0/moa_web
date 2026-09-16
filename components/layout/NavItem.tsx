@@ -1,5 +1,9 @@
 "use client";
 
+import { useTheme } from "@/hooks/useTheme";
+import { whenDark } from "@/lib/theme";
+import { cn } from "@/lib/utils";
+
 export default function NavItem({
   icon: Icon,
   label,
@@ -13,6 +17,7 @@ export default function NavItem({
   onClick?: () => void;
   disabled?: boolean;
 }) {
+  const { theme } = useTheme();
   const handleClick = () => {
     if (disabled) {
       alert("🚀 곧 추가될 업데이트 준비 중인 기능입니다!");
@@ -27,7 +32,10 @@ export default function NavItem({
       className={`flex items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-all ${
         active
           ? "bg-primary/10 font-semibold text-primary shadow-2xs"
-          : "text-muted-foreground hover:bg-slate-200/50 hover:text-foreground"
+          : cn(
+              "text-muted-foreground hover:bg-slate-200/50 hover:text-foreground",
+              whenDark(theme, "hover:bg-zinc-800 hover:text-zinc-100"),
+            )
       }`}
     >
       <Icon className="size-4 shrink-0" />

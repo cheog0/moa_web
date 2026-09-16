@@ -17,9 +17,13 @@ import Header from "@/components/dashboard/Header";
 import Notice from "@/components/dashboard/Notice";
 import { useAuthSession } from "@/hooks/useAuthSession";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { useTheme } from "@/hooks/useTheme";
+import { whenDark } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 export default function Page() {
   const { session, loadingSession } = useAuthSession();
+  const { theme } = useTheme();
   const [currentView, setCurrentView] = useState("dashboard");
   const [dashboardMode, setDashboardMode] = useState<"list" | "calendar">(
     "list",
@@ -38,7 +42,12 @@ export default function Page() {
 
   if (loadingSession) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
+      <div
+        className={cn(
+          "flex min-h-screen items-center justify-center bg-white",
+          whenDark(theme, "bg-zinc-950 text-zinc-100"),
+        )}
+      >
         세션 확인 중...
       </div>
     );
@@ -101,7 +110,12 @@ export default function Page() {
                     : ["워크스페이스", "대시보드"];
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-white text-foreground print:block print:h-auto print:max-h-none print:overflow-visible print:bg-white">
+    <div
+      className={cn(
+        "flex h-screen w-full overflow-hidden bg-white text-foreground print:block print:h-auto print:max-h-none print:overflow-visible print:bg-white",
+        whenDark(theme, "bg-zinc-950"),
+      )}
+    >
       {notification && <Notice message={notification} />}
       <Sidebar
         currentView={currentView}
@@ -113,7 +127,12 @@ export default function Page() {
         mobileOpen={mobileMenuOpen}
         onMobileClose={() => setMobileMenuOpen(false)}
       />
-      <div className="min-w-0 flex-1 flex flex-col h-full overflow-y-auto print:hidden bg-white">
+      <div
+        className={cn(
+          "min-w-0 flex-1 flex flex-col h-full overflow-y-auto print:hidden bg-white",
+          whenDark(theme, "bg-zinc-950"),
+        )}
+      >
         <Header
           sectionLabel={breadcrumb[0]}
           pageLabel={breadcrumb[1]}
@@ -145,7 +164,12 @@ export default function Page() {
             onPermanentlyDelete={workspace.handlePermanentlyDeleteMeeting}
           />
         ) : currentView === "new_project" ? (
-          <main className="mx-auto w-full max-w-6xl py-8 bg-white min-h-full">
+          <main
+            className={cn(
+              "mx-auto w-full max-w-6xl py-8 bg-white min-h-full",
+              whenDark(theme, "bg-zinc-950"),
+            )}
+          >
             <ProjectTimeline
               key="new_project"
               dbMeetings={activeMeetings}
@@ -154,7 +178,12 @@ export default function Page() {
             />
           </main>
         ) : currentView.startsWith("project_") ? (
-          <main className="mx-auto w-full max-w-6xl py-8 bg-white min-h-full">
+          <main
+            className={cn(
+              "mx-auto w-full max-w-6xl py-8 bg-white min-h-full",
+              whenDark(theme, "bg-zinc-950"),
+            )}
+          >
             <ProjectTimeline
               key={currentView}
               dbMeetings={activeMeetings}
@@ -182,7 +211,12 @@ export default function Page() {
             onQueryChange={setQuery}
           />
         ) : (
-          <main className="flex h-full items-center justify-center bg-white">
+          <main
+            className={cn(
+              "flex h-full items-center justify-center bg-white",
+              whenDark(theme, "bg-zinc-950"),
+            )}
+          >
             <div className="text-center text-muted-foreground">
               <h3 className="text-lg font-bold text-foreground">
                 🚀 준비 중인 기능입니다

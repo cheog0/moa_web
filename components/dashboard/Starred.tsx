@@ -1,6 +1,11 @@
+"use client";
+
 import { Star } from "lucide-react";
 import ListItem from "@/components/dashboard/ListItem";
 import MeetingSearch from "@/components/dashboard/MeetingSearch";
+import { useTheme } from "@/hooks/useTheme";
+import { whenDark } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 export default function Starred({
   meetings,
@@ -19,8 +24,15 @@ export default function Starred({
   query: string;
   onQueryChange: (value: string) => void;
 }) {
+  const { theme } = useTheme();
+
   return (
-    <main className="mx-auto w-full max-w-6xl p-5 sm:p-8 bg-white min-h-full">
+    <main
+      className={cn(
+        "mx-auto w-full max-w-6xl p-5 sm:p-8 bg-white min-h-full",
+        whenDark(theme, "bg-zinc-950"),
+      )}
+    >
       <div className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight">즐겨찾기</h1>
         <p className="mt-1 text-sm text-muted-foreground">
