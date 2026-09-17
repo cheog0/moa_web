@@ -61,6 +61,23 @@ export async function transcribeRecording({
   });
   if (!response.ok) throw new Error(`서버 오류 (${response.status})`);
   const result = await response.json();
-  if (!result.success) throw new Error(result.error);
+  if (!result.success) {
+    const error = new Error(result.error || "AI 처리에 실패했습니다.");
+    (error as Error & { meetingId?: string }).meetingId = result.meeting_id;
+    throw error;
+  }
   return result;
+}
+
+export function downloadRecordingBlob(blob: Blob) {
+  const extension = blob.type.includes("mp4") ? "mp4" : "webm";
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = objectUrl;
+  link.download = `meeting-recording-${stamp}.${extension}`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(objectUrl);
 }

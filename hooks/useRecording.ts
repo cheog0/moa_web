@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { getApiUrl } from "@/lib/api";
-import { transcribeRecording } from "@/lib/transcribe";
+import { downloadRecordingBlob, transcribeRecording } from "@/lib/transcribe";
 import { MeetingMinutes } from "@/lib/constants";
 import { parseMinutesPayload } from "@/lib/actionItems";
 import { normalizeManuals, ReplyManual } from "@/lib/manuals";
@@ -169,7 +169,10 @@ export function useRecording(
         result.meeting_id,
       );
     } catch (error: any) {
-      alert(error.message);
+      downloadRecordingBlob(audioBlob);
+      alert(
+        `${error.message || "연결이 끊겼습니다."}\n\n녹음 원본은 이 기기에 파일로 저장했습니다. 서버에 올라간 경우 직접 삭제하기 전까지 회의 목록에도 남아 있습니다.`,
+      );
       setStatus("ready");
     }
   };
