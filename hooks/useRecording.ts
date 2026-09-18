@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { getApiUrl } from "@/lib/api";
 import { downloadRecordingBlob, transcribeRecording } from "@/lib/transcribe";
 import { MeetingMinutes } from "@/lib/constants";
 import { parseMinutesPayload } from "@/lib/actionItems";
@@ -17,7 +16,6 @@ export function useRecording(
   const [selectedAttendees, setSelectedAttendees] = useState<string[]>([]);
   const [customInput, setCustomInput] = useState("");
   const [isAddingCustom, setIsAddingCustom] = useState(false);
-  const [isServerReady, setIsServerReady] = useState(false);
   const [userSettings, setUserSettings] = useState({
     user_id: "",
     ai_engine: "gemini",
@@ -65,20 +63,13 @@ export function useRecording(
       }
     };
     fetchSettings();
-    fetch(`${getApiUrl()}/api/meetings`)
-      .then(() => setIsServerReady(true))
-      .catch(() => setIsServerReady(true));
   }, []);
 
   useEffect(() => {
     if (status !== "recording") return;
     const timer = setInterval(() => setSeconds(getElapsedSeconds()), 250);
-    const keepAlive = setInterval(() => {
-      fetch(`${getApiUrl()}/api/meetings`).catch(() => {});
-    }, 10 * 60 * 1000);
     return () => {
       clearInterval(timer);
-      clearInterval(keepAlive);
     };
   }, [status]);
 
@@ -207,7 +198,6 @@ export function useRecording(
     setCustomInput,
     isAddingCustom,
     setIsAddingCustom,
-    isServerReady,
     timeString,
     handleStartRecording,
     handleFinish,

@@ -60,7 +60,6 @@ export default function RecordingPanel({
             <ProcessingView />
           ) : recording.status === "ready" ? (
             <ReadyView
-              isServerReady={recording.isServerReady}
               attendees={recording.selectedAttendees}
               customInput={recording.customInput}
               isAddingCustom={recording.isAddingCustom}

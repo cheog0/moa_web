@@ -26,7 +26,6 @@ export function ProcessingView() {
 }
 
 export function ReadyView({
-  isServerReady,
   attendees,
   customInput,
   isAddingCustom,
@@ -37,7 +36,6 @@ export function ReadyView({
   onBlurAdd,
   onStartRecording,
 }: {
-  isServerReady: boolean;
   attendees: string[];
   customInput: string;
   isAddingCustom: boolean;
@@ -50,12 +48,8 @@ export function ReadyView({
 }) {
   return (
     <div className="flex h-full flex-col items-center justify-center max-w-md mx-auto w-full">
-      <div
-        className={`flex size-20 items-center justify-center rounded-full transition-colors mb-6 ${isServerReady ? "bg-primary/10" : "bg-muted"}`}
-      >
-        <Mic
-          className={`size-8 ${isServerReady ? "text-primary" : "text-muted-foreground"}`}
-        />
+      <div className="mb-6 flex size-20 items-center justify-center rounded-full bg-primary/10 transition-colors">
+        <Mic className="size-8 text-primary" />
       </div>
       <Attendees
         names={attendees}
@@ -68,25 +62,11 @@ export function ReadyView({
         onBlur={onBlurAdd}
       />
       <Button
-        className="w-full h-12 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:cursor-not-allowed"
+        className="w-full h-12 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
         onClick={onStartRecording}
-        disabled={!isServerReady}
       >
-        {!isServerReady ? (
-          <>
-            <Loader2 className="mr-2 size-5 animate-spin" /> 서버를 깨우는 중...
-          </>
-        ) : (
-          <>
-            <Mic className="mr-2 size-5" /> 녹음 및 노트 시작
-          </>
-        )}
+        <Mic className="mr-2 size-5" /> 녹음 및 노트 시작
       </Button>
-      {!isServerReady && (
-        <p className="mt-4 text-xs text-muted-foreground animate-pulse">
-          서버와 연결을 설정하고 있습니다. 잠시만 기다려주세요
-        </p>
-      )}
     </div>
   );
 }
