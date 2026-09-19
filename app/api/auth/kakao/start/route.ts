@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(authErrorUrl(origin));
   }
 
-  const state = createKakaoState();
+  const state = createKakaoState(native);
   const response = NextResponse.redirect(
     kakaoAuthorizeUrl({
       clientId,
