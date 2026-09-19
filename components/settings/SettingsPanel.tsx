@@ -251,26 +251,21 @@ export default function SettingsPanel({ session }: { session: any }) {
           {settings.saving ? "저장 중..." : "설정 저장"}
         </button>
 
-        <section
-          className={cn(
-            "mt-3 overflow-hidden rounded-[22px] border border-[#E8EAEE] bg-white",
-            whenDark(theme, "border-zinc-800 bg-zinc-900"),
-          )}
-        >
+        <div className="mt-5 flex justify-center">
           <button
             type="button"
             onClick={() => setIsLogoutOpen(true)}
             className={cn(
-              "flex w-full items-center gap-3 px-4 py-[15px] text-left transition-colors hover:bg-[#F7F8FA]",
-              whenDark(theme, "hover:bg-zinc-800"),
+              "inline-flex h-11 items-center gap-2 rounded-full border border-[#E8EAEE] bg-white px-5 text-[14px] font-semibold text-[#1C1F24] transition-colors hover:bg-[#F7F8FA]",
+              whenDark(theme, "border-zinc-800 bg-zinc-900 text-zinc-100 hover:bg-zinc-800"),
             )}
           >
-            <LogOut className="size-[18px] shrink-0" />
-            <span className="text-[15px] font-semibold">로그아웃</span>
+            <LogOut className="size-4" />
+            로그아웃
           </button>
-        </section>
+        </div>
 
-        <div className="mt-8 flex justify-center">
+        <div className="mt-5 flex justify-center">
           <button
             type="button"
             onClick={() => setIsDeleteOpen(true)}
