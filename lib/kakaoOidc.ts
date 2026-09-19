@@ -78,18 +78,9 @@ export async function fetchKakaoProfile(accessToken: string) {
 
 export function nativeAppResponse(query: string) {
   const target = `${KAKAO_NATIVE_REDIRECT}?${query}`;
-  const html = `<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="refresh" content="0;url=${target.replace(/&/g, "&amp;")}" />
-    <script>location.replace(${JSON.stringify(target)});</script>
-  </head>
-  <body>앱으로 돌아가는 중...</body>
-</html>`;
-  return new NextResponse(html, {
-    status: 200,
-    headers: { "content-type": "text/html; charset=utf-8" },
-  });
+  const response = new NextResponse(null, { status: 302 });
+  response.headers.set("Location", target);
+  response.headers.set("Cache-Control", "no-store");
+  return response;
 }
 
