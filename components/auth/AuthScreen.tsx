@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Mic, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
@@ -9,14 +9,21 @@ export default function AuthScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [kakaoLoading, setKakaoLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("authError")) {
+      setErrorMessage("카카오 로그인에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      window.history.replaceState({}, "", "/");
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrorMessage(null);
-    setSuccessMessage(null);
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -31,24 +38,21 @@ export default function AuthScreen() {
     setLoading(false);
   };
 
-  const handleSignUp = async () => {
-    if (!email || !password) {
-      setErrorMessage("이메일과 비밀번호를 모두 입력해주세요.");
-      return;
-    }
-
-    setLoading(true);
+  const handleKakao = async () => {
+    setKakaoLoading(true);
     setErrorMessage(null);
-    setSuccessMessage(null);
 
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "kakao",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
 
     if (error) {
-      setErrorMessage(error.message);
-    } else {
-      setSuccessMessage("가입이 완료되었습니다! 이제 로그인해 주세요.");
+      setErrorMessage("카카오 로그인에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      setKakaoLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -64,19 +68,10 @@ export default function AuthScreen() {
           </p>
         </div>
 
-        {/* 💡 에러 메시지 알림 박스 */}
         {errorMessage && (
           <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-600 animate-in fade-in slide-in-from-top-2">
             <AlertCircle className="size-4 shrink-0 text-rose-500" />
             <span>{errorMessage}</span>
-          </div>
-        )}
-
-        {/* 💡 성공 메시지 알림 박스 */}
-        {successMessage && (
-          <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-600 animate-in fade-in slide-in-from-top-2">
-            <AlertCircle className="size-4 shrink-0 text-emerald-500" />
-            <span>{successMessage}</span>
           </div>
         )}
 
@@ -110,7 +105,7 @@ export default function AuthScreen() {
 
           <Button
             type="submit"
-            disabled={loading}
+            disabled={loading || kakaoLoading}
             className="mt-2 w-full h-11 rounded-xl font-semibold shadow-sm"
           >
             {loading ? (
@@ -122,6 +117,35 @@ export default function AuthScreen() {
             )}
           </Button>
         </form>
+
+        <div className="my-5 flex items-center gap-3">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-xs text-muted-foreground">또는</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        <button
+          type="button"
+          disabled={loading || kakaoLoading}
+          onClick={handleKakao}
+          className="flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-[#FEE500] text-[15px] font-semibold tracking-tight text-[#191919] transition-opacity hover:opacity-90 disabled:opacity-70"
+        >
+          {kakaoLoading ? (
+            <Loader2 className="size-5 animate-spin" />
+          ) : (
+            <svg
+              viewBox="0 0 24 24"
+              className="size-5"
+              aria-hidden="true"
+            >
+              <path
+                fill="currentColor"
+                d="M12 3.2C6.7 3.2 2.4 6.6 2.4 10.8c0 2.7 1.8 5.1 4.5 6.5-.14.52-.9 3.28-1 3.7 0 0-.02.17.1.24.1.06.23 0 .23 0 .3-.04 3.5-2.3 4.06-2.68.7.1 1.42.16 2.17.16 5.3 0 9.6-3.4 9.6-7.92C22.06 6.6 17.76 3.2 12 3.2Z"
+              />
+            </svg>
+          )}
+          {kakaoLoading ? "카카오 연결 중..." : "카카오 로그인"}
+        </button>
       </div>
     </div>
   );

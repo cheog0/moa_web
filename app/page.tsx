@@ -19,6 +19,7 @@ import { useAuthSession } from "@/hooks/useAuthSession";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useTheme } from "@/hooks/useTheme";
 import { whenDark } from "@/lib/theme";
+import { userAvatarInitial } from "@/lib/userDisplay";
 import { cn } from "@/lib/utils";
 
 export default function Page() {
@@ -136,7 +137,7 @@ export default function Page() {
         <Header
           sectionLabel={breadcrumb[0]}
           pageLabel={breadcrumb[1]}
-          email={session.user.email}
+          initial={userAvatarInitial(session.user)}
           onNotify={() => triggerNotification("새로운 알림이 없습니다.")}
           onMenuOpen={() => setMobileMenuOpen(true)}
         />

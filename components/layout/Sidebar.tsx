@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import NavItem from "@/components/layout/NavItem";
 import { useTheme } from "@/hooks/useTheme";
 import { whenDark, whenDarkValue } from "@/lib/theme";
+import { userAvatarInitial, userDisplayLabel } from "@/lib/userDisplay";
 import { cn } from "@/lib/utils";
 
 export default function Sidebar({
@@ -37,11 +38,9 @@ export default function Sidebar({
   mobileOpen?: boolean;
   onMobileClose?: () => void;
 }) {
-  // 💡 메인에서 전달받은 실제 로그인 유저 정보 우선 사용
-  const userEmail = session?.user?.email || "로그인 필요";
-  const userInitial = session?.user?.email
-    ? session.user.email.charAt(0).toUpperCase()
-    : "유";
+  const userLabel = userDisplayLabel(session?.user);
+  const userInitial = userAvatarInitial(session?.user);
+  const userSubtitle = session?.user?.email || "카카오 계정";
 
   const handleNavigate = (view: string) => {
     onNavigate(view);
@@ -210,10 +209,10 @@ export default function Sidebar({
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-xs font-bold text-foreground truncate">
-                {session?.user?.email ? userEmail.split("@")[0] : "게스트"}
+                {userLabel}
               </span>
               <span className="text-[10px] text-muted-foreground truncate">
-                {userEmail}
+                {userSubtitle}
               </span>
             </div>
           </div>

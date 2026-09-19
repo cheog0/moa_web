@@ -8,13 +8,13 @@ import { cn } from "@/lib/utils";
 export default function Header({
   sectionLabel,
   pageLabel,
-  email,
+  initial,
   onNotify,
   onMenuOpen,
 }: {
   sectionLabel: string;
   pageLabel: string;
-  email?: string;
+  initial?: string;
   onNotify: () => void;
   onMenuOpen: () => void;
 }) {
@@ -57,7 +57,7 @@ export default function Header({
           <Bell className="size-5" />
         </button>
         <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary font-bold text-[11px] shadow-sm">
-          {email ? email.charAt(0).toUpperCase() : "유"}
+          {initial || "R"}
         </div>
       </div>
     </header>
