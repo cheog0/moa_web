@@ -2,6 +2,7 @@ type AuthUserLike = {
   email?: string | null;
   user_metadata?: Record<string, unknown> | null;
   identities?: Array<{
+    provider?: string | null;
     identity_data?: Record<string, unknown> | null;
   }> | null;
 } | null | undefined;
@@ -54,6 +55,18 @@ export function userDisplayLabel(user: AuthUserLike): string {
 
 export function userDisplayEmail(user: AuthUserLike): string {
   return pickEmail(user);
+}
+
+export function isKakaoUser(user: AuthUserLike): boolean {
+  return (user?.identities ?? []).some((identity) => identity.provider === "kakao");
+}
+
+export function userDisplaySubtitle(user: AuthUserLike): string {
+  const label = userDisplayLabel(user);
+  const email = pickEmail(user);
+  if (email && email !== label) return email;
+  if (isKakaoUser(user)) return "카카오 계정";
+  return "";
 }
 
 export function userAvatarInitial(user: AuthUserLike): string {

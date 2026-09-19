@@ -18,8 +18,8 @@ import { useTheme } from "@/hooks/useTheme";
 import { whenDark, whenDarkValue } from "@/lib/theme";
 import {
   userAvatarInitial,
-  userDisplayEmail,
   userDisplayLabel,
+  userDisplaySubtitle,
 } from "@/lib/userDisplay";
 import { cn } from "@/lib/utils";
 
@@ -44,9 +44,7 @@ export default function Sidebar({
 }) {
   const userLabel = userDisplayLabel(session?.user);
   const userInitial = userAvatarInitial(session?.user);
-  const userEmail = userDisplayEmail(session?.user);
-  const userSubtitle =
-    userEmail && userEmail !== userLabel ? userEmail : "카카오 계정";
+  const userSubtitle = userDisplaySubtitle(session?.user);
 
   const handleNavigate = (view: string) => {
     onNavigate(view);
@@ -217,9 +215,11 @@ export default function Sidebar({
               <span className="text-xs font-bold text-foreground truncate">
                 {userLabel}
               </span>
-              <span className="text-[10px] text-muted-foreground truncate">
-                {userSubtitle}
-              </span>
+              {userSubtitle ? (
+                <span className="text-[10px] text-muted-foreground truncate">
+                  {userSubtitle}
+                </span>
+              ) : null}
             </div>
           </div>
 
