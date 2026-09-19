@@ -1,9 +1,10 @@
 import { randomBytes } from "crypto";
+import { NextResponse } from "next/server";
 
 export const KAKAO_STATE_COOKIE = "raple_kakao_state";
 export const KAKAO_TOKENS_COOKIE = "raple_kakao_tokens";
 export const KAKAO_NATIVE_COOKIE = "raple_kakao_native";
-export const KAKAO_NATIVE_REDIRECT = "com.cheogo.rapleApp://kakao-oidc";
+export const KAKAO_NATIVE_REDIRECT = "com.cheogo.rapleapp://kakao-oidc";
 
 export function kakaoCookieOptions(maxAge: number) {
   return {
@@ -74,3 +75,21 @@ export async function fetchKakaoProfile(accessToken: string) {
     nickname: String(data.kakao_account?.profile?.nickname ?? "").trim(),
   };
 }
+
+export function nativeAppResponse(query: string) {
+  const target = `${KAKAO_NATIVE_REDIRECT}?${query}`;
+  const html = `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="0;url=${target.replace(/&/g, "&amp;")}" />
+    <script>location.replace(${JSON.stringify(target)});</script>
+  </head>
+  <body>앱으로 돌아가는 중...</body>
+</html>`;
+  return new NextResponse(html, {
+    status: 200,
+    headers: { "content-type": "text/html; charset=utf-8" },
+  });
+}
+

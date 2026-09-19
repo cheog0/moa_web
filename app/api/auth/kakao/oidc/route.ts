@@ -5,10 +5,10 @@ import {
   fetchKakaoProfile,
   getKakaoCredentials,
   isNativeKakaoState,
+  nativeAppResponse,
   kakaoCookieOptions,
   kakaoRedirectUri,
   KAKAO_NATIVE_COOKIE,
-  KAKAO_NATIVE_REDIRECT,
   KAKAO_STATE_COOKIE,
   KAKAO_TOKENS_COOKIE,
 } from "@/lib/kakaoOidc";
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
 
   const fail = () => {
     const response = native
-      ? NextResponse.redirect(`${KAKAO_NATIVE_REDIRECT}?error=1`)
+      ? nativeAppResponse("error=1")
       : NextResponse.redirect(authErrorUrl(origin));
     response.cookies.delete(KAKAO_STATE_COOKIE);
     response.cookies.delete(KAKAO_NATIVE_COOKIE);
@@ -87,9 +87,7 @@ export async function GET(request: Request) {
     if (tokens.access_token) payload.set("access_token", tokens.access_token);
     if (profile.email) payload.set("email", profile.email);
     if (profile.nickname) payload.set("nickname", profile.nickname);
-    const response = NextResponse.redirect(
-      `${KAKAO_NATIVE_REDIRECT}?${payload.toString()}`,
-    );
+    const response = nativeAppResponse(payload.toString());
     response.cookies.delete(KAKAO_STATE_COOKIE);
     response.cookies.delete(KAKAO_NATIVE_COOKIE);
     return response;

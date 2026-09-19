@@ -4,10 +4,10 @@ import {
   createKakaoState,
   getKakaoCredentials,
   kakaoAuthorizeUrl,
+  nativeAppResponse,
   kakaoCookieOptions,
   kakaoRedirectUri,
   KAKAO_NATIVE_COOKIE,
-  KAKAO_NATIVE_REDIRECT,
   KAKAO_STATE_COOKIE,
 } from "@/lib/kakaoOidc";
 
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
 
   if (!clientId) {
     if (native) {
-      return NextResponse.redirect(`${KAKAO_NATIVE_REDIRECT}?error=1`);
+      return nativeAppResponse("error=1");
     }
     return NextResponse.redirect(authErrorUrl(origin));
   }
