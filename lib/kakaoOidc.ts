@@ -31,7 +31,6 @@ export function kakaoAuthorizeUrl(params: {
   url.searchParams.set("response_type", "code");
   url.searchParams.set("state", params.state);
   url.searchParams.set("scope", "openid");
-  url.searchParams.set("nonce", params.state);
   return url.toString();
 }
 

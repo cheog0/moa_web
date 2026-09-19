@@ -84,7 +84,6 @@ export async function GET(request: Request) {
   if (native) {
     const payload = new URLSearchParams();
     payload.set("id_token", tokens.id_token);
-    payload.set("nonce", oauthState);
     if (profile.email) payload.set("email", profile.email);
     if (profile.nickname) payload.set("nickname", profile.nickname);
     const response = nativeAppResponse(payload.toString());
