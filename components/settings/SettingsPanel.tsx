@@ -9,7 +9,6 @@ import {
   Loader2,
   Save,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Keywords from "@/components/settings/Keywords";
 import EngineSelect from "@/components/settings/EngineSelect";
@@ -18,6 +17,10 @@ import { useSettings } from "@/hooks/useSettings";
 import { useTheme } from "@/hooks/useTheme";
 import { deleteOwnAccount } from "@/lib/account";
 import { whenDark } from "@/lib/theme";
+import {
+  userAvatarInitial,
+  userDisplayLabel,
+} from "@/lib/userDisplay";
 import { cn } from "@/lib/utils";
 
 export default function SettingsPanel({ session }: { session: any }) {
@@ -28,11 +31,14 @@ export default function SettingsPanel({ session }: { session: any }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
+  const label = userDisplayLabel(session.user);
+  const initial = userAvatarInitial(session.user);
+
   if (settings.loading) {
     return (
       <div
         className={cn(
-          "flex min-h-full items-center justify-center bg-slate-50 text-sm text-slate-500",
+          "flex min-h-full items-center justify-center bg-[#F5F6F8] text-sm text-[#9AA1AA]",
           whenDark(theme, "bg-zinc-950 text-zinc-400"),
         )}
       >
@@ -45,124 +51,116 @@ export default function SettingsPanel({ session }: { session: any }) {
   return (
     <main
       className={cn(
-        "min-h-full w-full bg-slate-50 px-5 py-8 text-slate-900 sm:px-8 sm:py-10 print:hidden animate-in fade-in duration-500",
+        "min-h-full w-full bg-[#F5F6F8] px-5 py-6 text-[#1C1F24] sm:px-8 sm:py-8 print:hidden animate-in fade-in duration-500",
         whenDark(theme, "bg-zinc-950 text-zinc-100"),
       )}
     >
-      <div className="mx-auto w-full max-w-2xl">
-        <header className="mb-8">
-          <h1
-            className={cn(
-              "text-2xl font-semibold tracking-tight text-slate-950",
-              whenDark(theme, "text-zinc-50"),
-            )}
-          >
-            설정
-          </h1>
-          <p
-            className={cn(
-              "mt-2 text-sm leading-6 text-slate-500",
-              whenDark(theme, "text-zinc-400"),
-            )}
-          >
-            받아쓰기 엔진과 키워드를 이 계정에 맞게 조정하세요.
-          </p>
-        </header>
-
-        <div
+      <div className="mx-auto w-full max-w-xl">
+        <h1
           className={cn(
-            "overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]",
-            whenDark(theme, "border-zinc-800 bg-zinc-900 shadow-none"),
+            "text-[18px] font-extrabold tracking-tight text-[#1C1F24]",
+            whenDark(theme, "text-zinc-50"),
           )}
         >
-          <div
-            className={cn(
-              "grid gap-4 border-b border-slate-100 px-5 py-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center",
-              whenDark(theme, "border-zinc-800"),
-            )}
-          >
-            <div>
+          설정
+        </h1>
+
+        <section
+          className={cn(
+            "mt-4 rounded-[24px] border border-[#E8EAEE] bg-white p-[18px]",
+            whenDark(theme, "border-zinc-800 bg-zinc-900"),
+          )}
+        >
+          <div className="flex items-center gap-3.5">
+            <div
+              className={cn(
+                "flex size-[52px] shrink-0 items-center justify-center rounded-full bg-[#E8F3FF] text-[20px] font-extrabold text-[#2F7DE0]",
+                whenDark(theme, "bg-zinc-800 text-sky-300"),
+              )}
+            >
+              {initial}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-[15px] font-bold">{label}</p>
               <p
                 className={cn(
-                  "text-sm font-semibold text-slate-900",
-                  whenDark(theme, "text-zinc-100"),
-                )}
-              >
-                화면 모드
-              </p>
-              <p
-                className={cn(
-                  "mt-1 text-xs leading-5 text-slate-500",
+                  "mt-1 text-xs text-[#9AA1AA]",
                   whenDark(theme, "text-zinc-400"),
                 )}
               >
-                밝은 화면과 어두운 화면을 전환합니다.
+                계정과 설정을 관리합니다
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section
+          className={cn(
+            "mt-3 overflow-hidden rounded-[22px] border border-[#E8EAEE] bg-white",
+            whenDark(theme, "border-zinc-800 bg-zinc-900"),
+          )}
+        >
+          <div className="flex items-center justify-between gap-3 px-4 py-[15px]">
+            <div>
+              <p className="text-[15px] font-semibold">화면 모드</p>
+              <p
+                className={cn(
+                  "mt-0.5 text-xs text-[#9AA1AA]",
+                  whenDark(theme, "text-zinc-400"),
+                )}
+              >
+                밝은 화면과 어두운 화면을 전환합니다
               </p>
             </div>
             <ThemeSwitch />
           </div>
+        </section>
 
-          <div
-            className={cn(
-              "grid gap-4 border-b border-slate-100 px-5 py-5 sm:grid-cols-[minmax(0,1fr)_minmax(220px,260px)] sm:items-center",
-              whenDark(theme, "border-zinc-800"),
-            )}
-          >
-            <div>
-              <p
-                className={cn(
-                  "text-sm font-semibold text-slate-900",
-                  whenDark(theme, "text-zinc-100"),
-                )}
-              >
-                STT / AI 엔진
-              </p>
-              <p
-                className={cn(
-                  "mt-1 text-xs leading-5 text-slate-500",
-                  whenDark(theme, "text-zinc-400"),
-                )}
-              >
-                회의 받아쓰기와 요약에 사용할 모델을 고릅니다.
-              </p>
-            </div>
-            <EngineSelect
-              value={settings.aiEngine}
-              onChange={settings.setAiEngine}
-            />
-          </div>
+        <p
+          className={cn(
+            "mt-5 text-[13px] leading-5 text-[#9AA1AA]",
+            whenDark(theme, "text-zinc-400"),
+          )}
+        >
+          받아쓰기 엔진과 키워드를 이 계정에 맞게 조정하세요.
+        </p>
 
-          <div
-            className={cn(
-              "grid gap-4 border-b border-slate-100 px-5 py-5 sm:grid-cols-[minmax(0,1fr)_minmax(220px,260px)] sm:items-center",
-              whenDark(theme, "border-zinc-800"),
-            )}
-          >
-            <div>
-              <p
-                className={cn(
-                  "text-sm font-semibold text-slate-900",
-                  whenDark(theme, "text-zinc-100"),
-                )}
-              >
-                API 키
-              </p>
-              <p
-                className={cn(
-                  "mt-1 text-xs leading-5 text-slate-500",
-                  whenDark(theme, "text-zinc-400"),
-                )}
-              >
-                선택한 엔진의 키는 이 계정에만 저장됩니다.
-              </p>
+        <section
+          className={cn(
+            "mt-3 overflow-hidden rounded-[24px] border border-[#E8EAEE] bg-white",
+            whenDark(theme, "border-zinc-800 bg-zinc-900"),
+          )}
+        >
+          <div className="px-[18px] py-[18px]">
+            <p className="text-sm font-bold">받아쓰기 엔진</p>
+            <p
+              className={cn(
+                "mt-1 text-xs leading-[1.45] text-[#9AA1AA]",
+                whenDark(theme, "text-zinc-400"),
+              )}
+            >
+              회의 받아쓰기와 요약에 사용할 모델을 고릅니다.
+            </p>
+            <div className="mt-2.5">
+              <EngineSelect
+                value={settings.aiEngine}
+                onChange={settings.setAiEngine}
+              />
             </div>
+
+            <p className="mt-[18px] text-sm font-bold">API 키</p>
+            <p
+              className={cn(
+                "mt-1 text-xs leading-[1.45] text-[#9AA1AA]",
+                whenDark(theme, "text-zinc-400"),
+              )}
+            >
+              선택한 엔진의 키는 이 계정에만 저장됩니다.
+            </p>
             <div
               className={cn(
-                "flex h-10 items-center rounded-lg border border-slate-200 bg-white px-3 transition-colors focus-within:border-slate-400",
-                whenDark(
-                  theme,
-                  "border-zinc-700 bg-zinc-950 focus-within:border-zinc-500",
-                ),
+                "mt-2.5 flex h-12 items-center rounded-2xl bg-[#F7F8FA] px-3.5 transition-colors focus-within:ring-2 focus-within:ring-[#4C9AFF]/35",
+                whenDark(theme, "bg-zinc-950 focus-within:ring-sky-500/30"),
               )}
             >
               <input
@@ -171,7 +169,7 @@ export default function SettingsPanel({ session }: { session: any }) {
                 onChange={(e) => settings.setApiKey(e.target.value)}
                 placeholder="키를 붙여넣으세요"
                 className={cn(
-                  "h-full min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400",
+                  "h-full min-w-0 flex-1 bg-transparent text-[13px] text-[#1C1F24] outline-none placeholder:text-[#9AA1AA]/85",
                   whenDark(theme, "text-zinc-100 placeholder:text-zinc-500"),
                 )}
               />
@@ -179,8 +177,8 @@ export default function SettingsPanel({ session }: { session: any }) {
                 type="button"
                 onClick={() => setShowApiKey((open) => !open)}
                 className={cn(
-                  "rounded-md p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700",
-                  whenDark(theme, "hover:bg-zinc-800 hover:text-zinc-200"),
+                  "rounded-lg p-1.5 text-[#9AA1AA] transition-colors hover:bg-white hover:text-[#1C1F24]",
+                  whenDark(theme, "hover:bg-zinc-800 hover:text-zinc-100"),
                 )}
                 aria-label={showApiKey ? "API 키 숨기기" : "API 키 보기"}
               >
@@ -193,34 +191,34 @@ export default function SettingsPanel({ session }: { session: any }) {
             </div>
           </div>
 
-          <div className="px-5 py-5">
+          <div
+            className={cn(
+              "border-t border-[#E8EAEE] px-[18px] py-[18px]",
+              whenDark(theme, "border-zinc-800"),
+            )}
+          >
             <div className="flex items-center justify-between gap-3">
-              <p
-                className={cn(
-                  "text-sm font-semibold text-slate-900",
-                  whenDark(theme, "text-zinc-100"),
-                )}
-              >
-                자동 적용 키워드
-              </p>
-              <p
-                className={cn(
-                  "text-xs tabular-nums text-slate-400",
-                  whenDark(theme, "text-zinc-500"),
-                )}
-              >
-                {settings.keywords.length}/100
-              </p>
+              <p className="text-sm font-bold">자동 적용 키워드</p>
+              {settings.keywords.length > 0 && (
+                <p
+                  className={cn(
+                    "text-xs font-semibold tabular-nums text-[#9AA1AA]",
+                    whenDark(theme, "text-zinc-500"),
+                  )}
+                >
+                  {settings.keywords.length}개
+                </p>
+              )}
             </div>
             <p
               className={cn(
-                "mt-1 text-xs leading-5 text-slate-500",
+                "mt-1 text-xs leading-[1.45] text-[#9AA1AA]",
                 whenDark(theme, "text-zinc-400"),
               )}
             >
               고유명사나 자주 쓰는 용어를 미리 등록해 두면 받아쓰기에 반영됩니다.
             </p>
-            <div className="mt-4">
+            <div className="mt-2.5">
               <Keywords
                 keywords={settings.keywords}
                 newKeyword={settings.newKeyword}
@@ -231,49 +229,36 @@ export default function SettingsPanel({ session }: { session: any }) {
               />
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="mt-6 flex justify-end">
-          <Button
-            onClick={settings.handleSave}
-            disabled={settings.saving}
-            className={cn(
-              "h-10 min-w-28 border-0 bg-slate-950 px-4 font-semibold text-white shadow-none hover:bg-slate-800",
-              whenDark(theme, "bg-zinc-100 text-zinc-950 hover:bg-white"),
-            )}
-          >
-            {settings.saving ? (
-              <Loader2 className="mr-1.5 size-4 animate-spin" />
-            ) : (
-              <Save className="mr-1.5 size-4" />
-            )}
-            {settings.saving ? "저장 중..." : "저장"}
-          </Button>
-        </div>
-
-        <div
+        <button
+          type="button"
+          onClick={settings.handleSave}
+          disabled={settings.saving}
           className={cn(
-            "mt-10 rounded-2xl border border-rose-200 bg-white px-5 py-5",
-            whenDark(theme, "border-rose-900/50 bg-zinc-900"),
+            "mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#3A3D42] text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50",
+            whenDark(theme, "bg-zinc-100 text-zinc-950"),
           )}
         >
-          <p className="text-sm font-semibold text-rose-600">회원 탈퇴</p>
-          <p
+          {settings.saving ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Save className="size-4" />
+          )}
+          {settings.saving ? "저장 중..." : "설정 저장"}
+        </button>
+
+        <div className="mt-8 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setIsDeleteOpen(true)}
             className={cn(
-              "mt-1 text-xs leading-5 text-slate-500",
-              whenDark(theme, "text-zinc-400"),
+              "px-3 py-2 text-[13px] text-[#9AA1AA] underline decoration-[#9AA1AA] underline-offset-4 transition-colors hover:text-[#1C1F24]",
+              whenDark(theme, "hover:text-zinc-200"),
             )}
           >
-            계정과 회의 기록이 삭제되며, 되돌릴 수 없습니다.
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setIsDeleteOpen(true)}
-            className="mt-4 h-9 border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
-          >
             회원 탈퇴
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -312,7 +297,7 @@ export default function SettingsPanel({ session }: { session: any }) {
           className={`fixed top-10 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-lg animate-in fade-in slide-in-from-top-5 duration-300 ${
             deleteError || settings.toast?.type === "error"
               ? "bg-rose-500"
-              : cn("bg-slate-950", whenDark(theme, "bg-zinc-100 text-zinc-950"))
+              : cn("bg-[#3A3D42]", whenDark(theme, "bg-zinc-100 text-zinc-950"))
           }`}
         >
           {deleteError || settings.toast?.type === "error" ? (
