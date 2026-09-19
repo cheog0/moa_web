@@ -232,7 +232,7 @@ export default function Sidebar({
           <button
             type="button"
             onClick={() => setLogoutOpen((open) => !open)}
-            className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary font-bold text-xs shadow-sm transition-colors hover:bg-primary/15"
+            className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md bg-primary/10 text-xs font-bold text-primary shadow-sm transition-colors hover:bg-primary/15"
             aria-label="계정 메뉴"
             aria-expanded={logoutOpen}
             aria-haspopup="menu"
@@ -255,7 +255,7 @@ export default function Sidebar({
                   void supabase.auth.signOut();
                 }}
                 className={cn(
-                  "flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] font-semibold text-[#1C1F24] transition-colors hover:bg-[#F7F8FA]",
+                  "flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-[13px] font-semibold text-[#1C1F24] transition-colors hover:bg-[#F7F8FA]",
                   whenDark(theme, "text-zinc-100 hover:bg-zinc-800"),
                 )}
               >
