@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import {
   LayoutDashboard,
   Plus,
@@ -10,10 +11,12 @@ import {
   Trash2,
   Folder,
   X,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NavItem from "@/components/layout/NavItem";
 import { useTheme } from "@/hooks/useTheme";
+import { supabase } from "@/lib/supabase";
 import { whenDark, whenDarkValue } from "@/lib/theme";
 import {
   userAvatarInitial,
@@ -42,6 +45,8 @@ export default function Sidebar({
   const userLabel = userDisplayLabel(session?.user);
   const userInitial = userAvatarInitial(session?.user);
   const userSubtitle = userDisplaySubtitle(session?.user);
+  const [logoutOpen, setLogoutOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   const handleNavigate = (view: string) => {
     onNavigate(view);
@@ -53,6 +58,26 @@ export default function Sidebar({
     onMobileClose?.();
   };
   const { theme } = useTheme();
+
+  useEffect(() => {
+    if (!logoutOpen) return;
+
+    const close = (event: MouseEvent) => {
+      if (!profileRef.current?.contains(event.target as Node)) {
+        setLogoutOpen(false);
+      }
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setLogoutOpen(false);
+    };
+
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [logoutOpen]);
 
   return (
     <>
@@ -203,21 +228,51 @@ export default function Sidebar({
           whenDark(theme, "border-zinc-800"),
         )}
       >
-        <div className="flex items-center gap-2 px-1">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary font-bold text-xs shadow-sm">
-              {userInitial}
+        <div ref={profileRef} className="relative flex items-center gap-2.5 px-1">
+          <button
+            type="button"
+            onClick={() => setLogoutOpen((open) => !open)}
+            className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary font-bold text-xs shadow-sm transition-colors hover:bg-primary/15"
+            aria-label="계정 메뉴"
+            aria-expanded={logoutOpen}
+            aria-haspopup="menu"
+          >
+            {userInitial}
+          </button>
+          {logoutOpen ? (
+            <div
+              role="menu"
+              className={cn(
+                "absolute bottom-[calc(100%+8px)] left-0 z-10 min-w-[148px] overflow-hidden rounded-xl border border-[#E8EAEE] bg-white py-1 shadow-lg",
+                whenDark(theme, "border-zinc-700 bg-zinc-900"),
+              )}
+            >
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setLogoutOpen(false);
+                  void supabase.auth.signOut();
+                }}
+                className={cn(
+                  "flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] font-semibold text-[#1C1F24] transition-colors hover:bg-[#F7F8FA]",
+                  whenDark(theme, "text-zinc-100 hover:bg-zinc-800"),
+                )}
+              >
+                <LogOut className="size-4" />
+                로그아웃
+              </button>
             </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-xs font-bold text-foreground truncate">
-                {userLabel}
+          ) : null}
+          <div className="flex min-w-0 flex-col">
+            <span className="truncate text-xs font-bold text-foreground">
+              {userLabel}
+            </span>
+            {userSubtitle ? (
+              <span className="truncate text-[10px] text-muted-foreground">
+                {userSubtitle}
               </span>
-              {userSubtitle ? (
-                <span className="text-[10px] text-muted-foreground truncate">
-                  {userSubtitle}
-                </span>
-              ) : null}
-            </div>
+            ) : null}
           </div>
         </div>
       </div>
