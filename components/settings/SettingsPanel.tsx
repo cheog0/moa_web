@@ -7,6 +7,7 @@ import {
   Eye,
   EyeOff,
   Loader2,
+  LogOut,
   Save,
 } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -16,6 +17,7 @@ import ThemeSwitch from "@/components/settings/ThemeSwitch";
 import { useSettings } from "@/hooks/useSettings";
 import { useTheme } from "@/hooks/useTheme";
 import { deleteOwnAccount } from "@/lib/account";
+import { supabase } from "@/lib/supabase";
 import { whenDark } from "@/lib/theme";
 import {
   userAvatarInitial,
@@ -29,6 +31,7 @@ export default function SettingsPanel({ session }: { session: any }) {
   const [showApiKey, setShowApiKey] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const label = userDisplayLabel(session.user);
@@ -248,6 +251,25 @@ export default function SettingsPanel({ session }: { session: any }) {
           {settings.saving ? "저장 중..." : "설정 저장"}
         </button>
 
+        <section
+          className={cn(
+            "mt-3 overflow-hidden rounded-[22px] border border-[#E8EAEE] bg-white",
+            whenDark(theme, "border-zinc-800 bg-zinc-900"),
+          )}
+        >
+          <button
+            type="button"
+            onClick={() => setIsLogoutOpen(true)}
+            className={cn(
+              "flex w-full items-center gap-3 px-4 py-[15px] text-left transition-colors hover:bg-[#F7F8FA]",
+              whenDark(theme, "hover:bg-zinc-800"),
+            )}
+          >
+            <LogOut className="size-[18px] shrink-0" />
+            <span className="text-[15px] font-semibold">로그아웃</span>
+          </button>
+        </section>
+
         <div className="mt-8 flex justify-center">
           <button
             type="button"
@@ -261,6 +283,26 @@ export default function SettingsPanel({ session }: { session: any }) {
           </button>
         </div>
       </div>
+
+      {isLogoutOpen && (
+        <ConfirmDialog
+          title="로그아웃할까요?"
+          description={
+            <>
+              이 기기에서 계정 연결이 해제됩니다.
+              <br />
+              다시 로그인하면 이어서 사용할 수 있어요.
+            </>
+          }
+          confirmLabel="로그아웃"
+          variant="default"
+          onCancel={() => setIsLogoutOpen(false)}
+          onConfirm={() => {
+            setIsLogoutOpen(false);
+            void supabase.auth.signOut();
+          }}
+        />
+      )}
 
       {isDeleteOpen && (
         <ConfirmDialog

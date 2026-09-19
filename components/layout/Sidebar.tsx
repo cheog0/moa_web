@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   Plus,
   Settings,
-  LogOut,
   LineChart,
   Star,
   FileEdit,
@@ -27,7 +26,6 @@ export default function Sidebar({
   currentView,
   onNavigate,
   onNew,
-  onLogout,
   projects = [],
   session,
   mobileOpen = false,
@@ -36,7 +34,6 @@ export default function Sidebar({
   currentView: string;
   onNavigate: (view: string) => void;
   onNew: () => void;
-  onLogout: () => void;
   projects?: any[];
   session?: any;
   mobileOpen?: boolean;
@@ -206,7 +203,7 @@ export default function Sidebar({
           whenDark(theme, "border-zinc-800"),
         )}
       >
-        <div className="flex items-center justify-between gap-2 px-1">
+        <div className="flex items-center gap-2 px-1">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary font-bold text-xs shadow-sm">
               {userInitial}
@@ -222,17 +219,6 @@ export default function Sidebar({
               ) : null}
             </div>
           </div>
-
-          <button
-            onClick={onLogout}
-            className={cn(
-              "rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-rose-50 hover:text-rose-600",
-              whenDark(theme, "hover:bg-rose-500/15 hover:text-rose-400"),
-            )}
-            title="로그아웃"
-          >
-            <LogOut className="size-4" />
-          </button>
         </div>
       </div>
       </aside>

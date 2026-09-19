@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
 import AuthScreen from "@/components/auth/AuthScreen";
 import Sidebar from "@/components/layout/Sidebar";
 import SettingsPanel from "@/components/settings/SettingsPanel";
@@ -122,7 +121,6 @@ export default function Page() {
         currentView={currentView}
         onNavigate={setCurrentView}
         onNew={() => setRecording(true)}
-        onLogout={() => supabase.auth.signOut()}
         projects={workspace.dbProjects}
         session={session}
         mobileOpen={mobileMenuOpen}
