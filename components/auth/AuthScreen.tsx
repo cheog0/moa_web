@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Mic, AlertCircle, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
+import { useTheme } from "@/hooks/useTheme";
+import { whenDark } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 export default function AuthScreen() {
+  const { theme } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -44,58 +47,102 @@ export default function AuthScreen() {
     window.location.assign("/api/auth/kakao/start");
   };
 
+  const fieldClass = cn(
+    "w-full rounded-2xl bg-[#F7F8FA] px-3.5 py-3.5 text-sm text-[#1C1F24] outline-none transition-shadow placeholder:text-[#9AA1AA]/80 focus:ring-2 focus:ring-[#4C9AFF]/35",
+    whenDark(
+      theme,
+      "bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 focus:ring-sky-500/30",
+    ),
+  );
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-xl animate-in fade-in zoom-in-95 duration-300">
-        <div className="mb-8 flex flex-col items-center">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground mb-4 shadow-sm">
-            <Mic className="size-6" />
+    <div
+      className={cn(
+        "flex min-h-screen items-center justify-center bg-[#F5F6F8] px-5 py-6",
+        whenDark(theme, "bg-zinc-950"),
+      )}
+    >
+      <div
+        className={cn(
+          "w-full max-w-[400px] rounded-[28px] bg-white px-6 py-7 shadow-[0_6px_18px_rgba(28,31,36,0.05),0_1px_4px_rgba(28,31,36,0.02)] animate-in fade-in slide-in-from-bottom-2 duration-300",
+          whenDark(theme, "bg-zinc-900 shadow-none"),
+        )}
+      >
+        <div className="mb-6 flex flex-col items-center">
+          <div
+            className={cn(
+              "mb-3.5 flex size-14 items-center justify-center rounded-full bg-[#E8F3FF]",
+              whenDark(theme, "bg-zinc-800"),
+            )}
+          >
+            <Mic className="size-[26px] text-[#4C9AFF]" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">로그인</h1>
-          <p className="mt-2 text-sm text-muted-foreground text-center">
-            AI 회의록 서비스에 오신 것을 환영합니다.
+          <h1
+            className={cn(
+              "text-[22px] font-extrabold tracking-tight text-[#1C1F24]",
+              whenDark(theme, "text-zinc-50"),
+            )}
+          >
+            Raple
+          </h1>
+          <p
+            className={cn(
+              "mt-1.5 text-center text-[13px] leading-[1.45] text-[#9AA1AA]",
+              whenDark(theme, "text-zinc-400"),
+            )}
+          >
+            AI 회의록을 더 편하게 기록하세요.
           </p>
         </div>
 
         {errorMessage && (
-          <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-600 animate-in fade-in slide-in-from-top-2">
-            <AlertCircle className="size-4 shrink-0 text-rose-500" />
+          <div className="mb-3.5 flex items-center gap-2 rounded-2xl bg-[#FFF1F2] px-3.5 py-3 text-xs font-semibold text-[#E11D48] animate-in fade-in">
+            <AlertCircle className="size-4 shrink-0" />
             <span>{errorMessage}</span>
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
-          <div>
-            <label className="mb-1.5 block text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              이메일
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 text-sm outline-none ring-primary focus:ring-2 transition-all"
-              placeholder="이메일을 입력해주세요"
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              비밀번호
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 text-sm outline-none ring-primary focus:ring-2 transition-all"
-              placeholder="••••••••"
-            />
-          </div>
+        <form onSubmit={handleLogin} className="flex flex-col">
+          <label
+            className={cn(
+              "mb-1.5 block text-xs font-bold text-[#9AA1AA]",
+              whenDark(theme, "text-zinc-400"),
+            )}
+          >
+            이메일
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className={fieldClass}
+            placeholder="이메일을 입력해주세요"
+          />
+          <label
+            className={cn(
+              "mt-3 mb-1.5 block text-xs font-bold text-[#9AA1AA]",
+              whenDark(theme, "text-zinc-400"),
+            )}
+          >
+            비밀번호
+          </label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className={fieldClass}
+            placeholder="••••••••"
+          />
 
-          <Button
+          <button
             type="submit"
             disabled={loading || kakaoLoading}
-            className="mt-2 w-full h-11 rounded-xl font-semibold shadow-sm"
+            className={cn(
+              "mt-5 flex h-12 w-full items-center justify-center rounded-2xl bg-[#3A3D42] text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50",
+              whenDark(theme, "bg-zinc-100 text-zinc-950"),
+            )}
           >
             {loading ? (
               <>
@@ -104,13 +151,24 @@ export default function AuthScreen() {
             ) : (
               "로그인"
             )}
-          </Button>
+          </button>
         </form>
 
-        <div className="my-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-border" />
-          <span className="text-xs text-muted-foreground">또는</span>
-          <div className="h-px flex-1 bg-border" />
+        <div className="my-4 flex items-center gap-2.5">
+          <div
+            className={cn("h-px flex-1 bg-[#E8EAEE]", whenDark(theme, "bg-zinc-800"))}
+          />
+          <span
+            className={cn(
+              "text-xs text-[#9AA1AA]",
+              whenDark(theme, "text-zinc-500"),
+            )}
+          >
+            또는
+          </span>
+          <div
+            className={cn("h-px flex-1 bg-[#E8EAEE]", whenDark(theme, "bg-zinc-800"))}
+          />
         </div>
 
         <button
@@ -120,7 +178,7 @@ export default function AuthScreen() {
           className="flex h-[52px] w-full items-center justify-center gap-2 rounded-full bg-[#FEE500] text-base font-bold tracking-tight text-[#191919] shadow-none transition-opacity hover:opacity-90 disabled:opacity-70"
         >
           {kakaoLoading ? (
-            <Loader2 className="size-5 animate-spin" />
+            <Loader2 className="size-[18px] animate-spin" />
           ) : (
             <svg viewBox="0 0 24 24" className="size-[18px]" aria-hidden="true">
               <circle cx="13" cy="11" r="7.2" fill="currentColor" />
