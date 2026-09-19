@@ -10,11 +10,13 @@ import {
   Save,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Keywords from "@/components/settings/Keywords";
 import EngineSelect from "@/components/settings/EngineSelect";
 import ThemeSwitch from "@/components/settings/ThemeSwitch";
 import { useSettings } from "@/hooks/useSettings";
 import { useTheme } from "@/hooks/useTheme";
+import { deleteOwnAccount } from "@/lib/account";
 import { whenDark } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +24,9 @@ export default function SettingsPanel({ session }: { session: any }) {
   const settings = useSettings(session.user.id);
   const { theme } = useTheme();
   const [showApiKey, setShowApiKey] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   if (settings.loading) {
     return (
@@ -245,22 +250,77 @@ export default function SettingsPanel({ session }: { session: any }) {
             {settings.saving ? "저장 중..." : "저장"}
           </Button>
         </div>
+
+        <div
+          className={cn(
+            "mt-10 rounded-2xl border border-rose-200 bg-white px-5 py-5",
+            whenDark(theme, "border-rose-900/50 bg-zinc-900"),
+          )}
+        >
+          <p className="text-sm font-semibold text-rose-600">회원 탈퇴</p>
+          <p
+            className={cn(
+              "mt-1 text-xs leading-5 text-slate-500",
+              whenDark(theme, "text-zinc-400"),
+            )}
+          >
+            계정과 회의 기록이 삭제되며, 되돌릴 수 없습니다.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsDeleteOpen(true)}
+            className="mt-4 h-9 border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+          >
+            회원 탈퇴
+          </Button>
+        </div>
       </div>
 
-      {settings.toast && (
+      {isDeleteOpen && (
+        <ConfirmDialog
+          title="회원 탈퇴"
+          description={
+            <>
+              계정과 저장된 회의록이 모두 삭제됩니다.
+              <br />
+              이 작업은 되돌릴 수 없습니다.
+            </>
+          }
+          confirmLabel="탈퇴하기"
+          loading={isDeleting}
+          onCancel={() => {
+            if (!isDeleting) setIsDeleteOpen(false);
+          }}
+          onConfirm={async () => {
+            setIsDeleting(true);
+            try {
+              await deleteOwnAccount();
+            } catch (error) {
+              console.error(error);
+              setIsDeleting(false);
+              setIsDeleteOpen(false);
+              setDeleteError("탈퇴에 실패했습니다. 잠시 후 다시 시도해주세요.");
+              window.setTimeout(() => setDeleteError(null), 3000);
+            }
+          }}
+        />
+      )}
+
+      {(settings.toast || deleteError) && (
         <div
           className={`fixed top-10 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-lg animate-in fade-in slide-in-from-top-5 duration-300 ${
-            settings.toast.type === "success"
-              ? cn("bg-slate-950", whenDark(theme, "bg-zinc-100 text-zinc-950"))
-              : "bg-rose-500"
+            deleteError || settings.toast?.type === "error"
+              ? "bg-rose-500"
+              : cn("bg-slate-950", whenDark(theme, "bg-zinc-100 text-zinc-950"))
           }`}
         >
-          {settings.toast.type === "success" ? (
-            <CheckCircle2 className="size-4" />
-          ) : (
+          {deleteError || settings.toast?.type === "error" ? (
             <AlertCircle className="size-4" />
+          ) : (
+            <CheckCircle2 className="size-4" />
           )}
-          {settings.toast.msg}
+          {deleteError || settings.toast?.msg}
         </div>
       )}
     </main>

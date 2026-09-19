@@ -38,21 +38,10 @@ export default function AuthScreen() {
     setLoading(false);
   };
 
-  const handleKakao = async () => {
+  const handleKakao = () => {
     setKakaoLoading(true);
     setErrorMessage(null);
-
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "kakao",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-
-    if (error) {
-      setErrorMessage("카카오 로그인에 실패했습니다. 잠시 후 다시 시도해주세요.");
-      setKakaoLoading(false);
-    }
+    window.location.assign("/api/auth/kakao/start");
   };
 
   return (
@@ -128,19 +117,16 @@ export default function AuthScreen() {
           type="button"
           disabled={loading || kakaoLoading}
           onClick={handleKakao}
-          className="flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-[#FEE500] text-[15px] font-semibold tracking-tight text-[#191919] transition-opacity hover:opacity-90 disabled:opacity-70"
+          className="flex h-[52px] w-full items-center justify-center gap-2 rounded-full bg-[#FEE500] text-base font-bold tracking-tight text-[#191919] shadow-none transition-opacity hover:opacity-90 disabled:opacity-70"
         >
           {kakaoLoading ? (
             <Loader2 className="size-5 animate-spin" />
           ) : (
-            <svg
-              viewBox="0 0 24 24"
-              className="size-5"
-              aria-hidden="true"
-            >
+            <svg viewBox="0 0 24 24" className="size-[18px]" aria-hidden="true">
+              <circle cx="13" cy="11" r="7.2" fill="currentColor" />
               <path
                 fill="currentColor"
-                d="M12 3.2C6.7 3.2 2.4 6.6 2.4 10.8c0 2.7 1.8 5.1 4.5 6.5-.14.52-.9 3.28-1 3.7 0 0-.02.17.1.24.1.06.23 0 .23 0 .3-.04 3.5-2.3 4.06-2.68.7.1 1.42.16 2.17.16 5.3 0 9.6-3.4 9.6-7.92C22.06 6.6 17.76 3.2 12 3.2Z"
+                d="M6.2 14.6c-.7 2.2-1.8 4.1-2.6 5.2 2-.6 4.4-2 5.6-2.8A7.4 7.4 0 0 1 6.2 14.6Z"
               />
             </svg>
           )}

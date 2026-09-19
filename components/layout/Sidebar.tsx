@@ -16,7 +16,11 @@ import { Button } from "@/components/ui/button";
 import NavItem from "@/components/layout/NavItem";
 import { useTheme } from "@/hooks/useTheme";
 import { whenDark, whenDarkValue } from "@/lib/theme";
-import { userAvatarInitial, userDisplayLabel } from "@/lib/userDisplay";
+import {
+  userAvatarInitial,
+  userDisplayEmail,
+  userDisplayLabel,
+} from "@/lib/userDisplay";
 import { cn } from "@/lib/utils";
 
 export default function Sidebar({
@@ -40,7 +44,9 @@ export default function Sidebar({
 }) {
   const userLabel = userDisplayLabel(session?.user);
   const userInitial = userAvatarInitial(session?.user);
-  const userSubtitle = session?.user?.email || "카카오 계정";
+  const userEmail = userDisplayEmail(session?.user);
+  const userSubtitle =
+    userEmail && userEmail !== userLabel ? userEmail : "카카오 계정";
 
   const handleNavigate = (view: string) => {
     onNavigate(view);
