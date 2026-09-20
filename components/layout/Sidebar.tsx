@@ -100,188 +100,189 @@ export default function Sidebar({
         }}
         className={cn(
           `fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col justify-between px-3.5 py-4 text-sm shadow-xl transition-transform duration-200 select-none after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-px after:bg-slate-200/70 after:blur-[0.3px] print:hidden lg:relative lg:z-auto lg:translate-x-0 lg:shadow-none ${
-          mobileOpen
-            ? "visible translate-x-0"
-            : "invisible -translate-x-full lg:visible"
-        }`,
+            mobileOpen
+              ? "visible translate-x-0"
+              : "invisible -translate-x-full lg:visible"
+          }`,
           whenDark(theme, "after:bg-zinc-700 text-zinc-100"),
         )}
       >
-      {/* 🚀 상단 로고, 새 회의 버튼, 네비게이션 영역 */}
-      <div className="flex flex-col gap-4 overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        {/* 로고 영역 */}
-        <div className="flex items-center justify-between gap-2.5 px-2 pb-1">
-          <div className="flex h-7 items-center gap-2">
-            <img
-              src="/raple_pas.png"
-              alt="랩플 로고"
-              className="h-6.5 w-auto object-contain"
-            />
-            <span className="text-xl font-bold tracking-tight text-foreground">
-              Raple
-            </span>
+        {/* 🚀 상단 로고, 새 회의 버튼, 네비게이션 영역 */}
+        <div className="flex flex-col gap-4 overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {/* 로고 영역 */}
+          <div className="flex items-center justify-between gap-2.5 px-2 pb-1">
+            <div className="flex h-7 items-center">
+              <img
+                src={
+                  theme === "dark"
+                    ? "/raple-wordmark-dark.png"
+                    : "/raple-wordmark.png"
+                }
+                alt="Raple"
+                className="h-6 w-auto select-none"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={onMobileClose}
+              className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted lg:hidden"
+              aria-label="메뉴 닫기"
+            >
+              <X className="size-5" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onMobileClose}
-            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted lg:hidden"
-            aria-label="메뉴 닫기"
+
+          {/* 새 회의 시작 버튼 */}
+          <Button
+            onClick={handleNew}
+            className="w-full justify-center gap-2 shadow-sm rounded-lg h-10 text-xs font-semibold"
           >
-            <X className="size-5" />
-          </button>
-        </div>
+            <Plus className="size-4" />새 회의 시작
+          </Button>
 
-        {/* 새 회의 시작 버튼 */}
-        <Button
-          onClick={handleNew}
-          className="w-full justify-center gap-2 shadow-sm rounded-lg h-10 text-xs font-semibold"
-        >
-          <Plus className="size-4" />새 회의 시작
-        </Button>
-
-        <nav className="flex flex-col gap-3.5">
-          {/* 워크스페이스 */}
-          <div className="flex flex-col gap-0.5">
-            <span className="px-2.5 text-[11px] font-bold text-muted-foreground/60 mb-1 tracking-wider uppercase">
-              워크스페이스
-            </span>
-            <NavItem
-              icon={LayoutDashboard}
-              label="대시보드"
-              active={currentView === "dashboard"}
-              onClick={() => handleNavigate("dashboard")}
-            />
-            <NavItem
-              icon={LineChart}
-              label="인사이트"
-              active={currentView === "insight"}
-              onClick={() => handleNavigate("insight")}
-            />
-          </div>
-
-          {/* 타임라인 */}
-          <div className="flex flex-col gap-0.5">
-            <div className="flex items-center justify-between px-2.5 mb-1">
-              <span className="text-[11px] font-bold text-muted-foreground/60 tracking-wider uppercase">
-                타임라인
+          <nav className="flex flex-col gap-3.5">
+            {/* 워크스페이스 */}
+            <div className="flex flex-col gap-0.5">
+              <span className="px-2.5 text-[11px] font-bold text-muted-foreground/60 mb-1 tracking-wider uppercase">
+                워크스페이스
               </span>
+              <NavItem
+                icon={LayoutDashboard}
+                label="대시보드"
+                active={currentView === "dashboard"}
+                onClick={() => handleNavigate("dashboard")}
+              />
+              <NavItem
+                icon={LineChart}
+                label="인사이트"
+                active={currentView === "insight"}
+                onClick={() => handleNavigate("insight")}
+              />
             </div>
 
-            {projects.map((project) => (
+            {/* 타임라인 */}
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center justify-between px-2.5 mb-1">
+                <span className="text-[11px] font-bold text-muted-foreground/60 tracking-wider uppercase">
+                  타임라인
+                </span>
+              </div>
+
+              {projects.map((project) => (
+                <NavItem
+                  key={project.id}
+                  icon={Folder}
+                  label={project.name}
+                  active={currentView === `project_${project.id}`}
+                  onClick={() => handleNavigate(`project_${project.id}`)}
+                />
+              ))}
+
               <NavItem
-                key={project.id}
-                icon={Folder}
-                label={project.name}
-                active={currentView === `project_${project.id}`}
-                onClick={() => handleNavigate(`project_${project.id}`)}
+                icon={Plus}
+                label="새 타임라인 생성"
+                active={currentView === "new_project"}
+                onClick={() => handleNavigate("new_project")}
               />
-            ))}
+            </div>
 
-            <NavItem
-              icon={Plus}
-              label="새 타임라인 생성"
-              active={currentView === "new_project"}
-              onClick={() => handleNavigate("new_project")}
-            />
-          </div>
+            {/* 회의 관리 */}
+            <div className="flex flex-col gap-0.5">
+              <span className="px-2.5 text-[11px] font-bold text-muted-foreground/60 mb-1 tracking-wider uppercase">
+                회의 관리
+              </span>
+              <NavItem
+                icon={Star}
+                label="즐겨찾기"
+                active={currentView === "starred_meetings"}
+                onClick={() => handleNavigate("starred_meetings")}
+              />
+              <NavItem
+                icon={FileEdit}
+                label="맞춤 템플릿"
+                active={currentView === "templates"}
+                onClick={() => handleNavigate("templates")}
+              />
+            </div>
 
-          {/* 회의 관리 */}
-          <div className="flex flex-col gap-0.5">
-            <span className="px-2.5 text-[11px] font-bold text-muted-foreground/60 mb-1 tracking-wider uppercase">
-              회의 관리
-            </span>
-            <NavItem
-              icon={Star}
-              label="즐겨찾기"
-              active={currentView === "starred_meetings"}
-              onClick={() => handleNavigate("starred_meetings")}
-            />
-            <NavItem
-              icon={FileEdit}
-              label="맞춤 템플릿"
-              active={currentView === "templates"}
-              onClick={() => handleNavigate("templates")}
-            />
-          </div>
+            {/* 시스템 */}
+            <div className="flex flex-col gap-0.5">
+              <span className="px-2.5 text-[11px] font-bold text-muted-foreground/60 mb-1 tracking-wider uppercase">
+                시스템
+              </span>
+              <NavItem
+                icon={Settings}
+                label="설정"
+                active={currentView === "settings"}
+                onClick={() => handleNavigate("settings")}
+              />
+              <NavItem
+                icon={Trash2}
+                label="휴지통"
+                active={currentView === "trash"}
+                onClick={() => handleNavigate("trash")}
+              />
+            </div>
+          </nav>
+        </div>
 
-          {/* 시스템 */}
-          <div className="flex flex-col gap-0.5">
-            <span className="px-2.5 text-[11px] font-bold text-muted-foreground/60 mb-1 tracking-wider uppercase">
-              시스템
-            </span>
-            <NavItem
-              icon={Settings}
-              label="설정"
-              active={currentView === "settings"}
-              onClick={() => handleNavigate("settings")}
-            />
-            <NavItem
-              icon={Trash2}
-              label="휴지통"
-              active={currentView === "trash"}
-              onClick={() => handleNavigate("trash")}
-            />
-          </div>
-        </nav>
-      </div>
-
-      {/* 🌟 하단 실제 세션 연동 유저 프로필 영역 */}
-      <div className="mt-1 flex shrink-0 flex-col gap-2.5 pt-3">
-        {usage ? <UsageCard usage={usage} /> : null}
-        <div
-          ref={profileRef}
-          className={cn(
-            "relative flex items-center gap-2.5 border-t border-slate-100 px-1 pt-2.5",
-            whenDark(theme, "border-zinc-800"),
-          )}
-        >
-          <button
-            type="button"
-            onClick={() => setLogoutOpen((open) => !open)}
-            className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md bg-primary/10 text-xs font-bold text-primary shadow-sm transition-colors hover:bg-primary/15"
-            aria-label="계정 메뉴"
-            aria-expanded={logoutOpen}
-            aria-haspopup="menu"
+        {/* 🌟 하단 실제 세션 연동 유저 프로필 영역 */}
+        <div className="mt-1 flex shrink-0 flex-col gap-2.5 pt-3">
+          {usage ? <UsageCard usage={usage} /> : null}
+          <div
+            ref={profileRef}
+            className={cn(
+              "relative flex items-center gap-2.5 border-t border-slate-100 px-1 pt-2.5",
+              whenDark(theme, "border-zinc-800"),
+            )}
           >
-            {userInitial}
-          </button>
-          {logoutOpen ? (
-            <div
-              role="menu"
-              className={cn(
-                "absolute bottom-[calc(100%+8px)] left-0 z-10 min-w-[148px] overflow-hidden rounded-xl border border-[#E8EAEE] bg-white py-1 shadow-lg",
-                whenDark(theme, "border-zinc-700 bg-zinc-900"),
-              )}
+            <button
+              type="button"
+              onClick={() => setLogoutOpen((open) => !open)}
+              className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md bg-primary/10 text-xs font-bold text-primary shadow-sm transition-colors hover:bg-primary/15"
+              aria-label="계정 메뉴"
+              aria-expanded={logoutOpen}
+              aria-haspopup="menu"
             >
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  setLogoutOpen(false);
-                  void supabase.auth.signOut();
-                }}
+              {userInitial}
+            </button>
+            {logoutOpen ? (
+              <div
+                role="menu"
                 className={cn(
-                  "flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-[13px] font-semibold text-[#1C1F24] transition-colors hover:bg-[#F7F8FA]",
-                  whenDark(theme, "text-zinc-100 hover:bg-zinc-800"),
+                  "absolute bottom-[calc(100%+8px)] left-0 z-10 min-w-[148px] overflow-hidden rounded-xl border border-[#E8EAEE] bg-white py-1 shadow-lg",
+                  whenDark(theme, "border-zinc-700 bg-zinc-900"),
                 )}
               >
-                <LogOut className="size-4" />
-                로그아웃
-              </button>
-            </div>
-          ) : null}
-          <div className="flex min-w-0 flex-col">
-            <span className="truncate text-xs font-bold text-foreground">
-              {userLabel}
-            </span>
-            {userSubtitle ? (
-              <span className="truncate text-[10px] text-muted-foreground">
-                {userSubtitle}
-              </span>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setLogoutOpen(false);
+                    void supabase.auth.signOut();
+                  }}
+                  className={cn(
+                    "flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-[13px] font-semibold text-[#1C1F24] transition-colors hover:bg-[#F7F8FA]",
+                    whenDark(theme, "text-zinc-100 hover:bg-zinc-800"),
+                  )}
+                >
+                  <LogOut className="size-4" />
+                  로그아웃
+                </button>
+              </div>
             ) : null}
+            <div className="flex min-w-0 flex-col">
+              <span className="truncate text-xs font-bold text-foreground">
+                {userLabel}
+              </span>
+              {userSubtitle ? (
+                <span className="truncate text-[10px] text-muted-foreground">
+                  {userSubtitle}
+                </span>
+              ) : null}
+            </div>
           </div>
         </div>
-      </div>
       </aside>
     </>
   );
