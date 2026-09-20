@@ -1,9 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { DEFAULT_ENGINE_ID, engineRequiresOwnKey, isDefaultEngine, missingApiKeyMessage, normalizeEngine } from "@/lib/engines";
 import { downloadRecordingBlob, transcribeRecording } from "@/lib/transcribe";
 import { MeetingMinutes } from "@/lib/constants";
 import { parseMinutesPayload } from "@/lib/actionItems";
 import { normalizeManuals, ReplyManual } from "@/lib/manuals";
+import {
+  consumeUsage,
+  fetchUsage,
+  formatUsageClock,
+  isUsageExhausted,
+  type UsageSnapshot,
+} from "@/lib/usage";
+import { showInfoNotice } from "@/lib/notice";
 
 export function useRecording(
   onComplete: (minutes: MeetingMinutes, newId?: string) => void,
@@ -16,9 +25,10 @@ export function useRecording(
   const [selectedAttendees, setSelectedAttendees] = useState<string[]>([]);
   const [customInput, setCustomInput] = useState("");
   const [isAddingCustom, setIsAddingCustom] = useState(false);
+  const [usage, setUsage] = useState<UsageSnapshot | null>(null);
   const [userSettings, setUserSettings] = useState({
     user_id: "",
-    ai_engine: "gemini",
+    ai_engine: DEFAULT_ENGINE_ID,
     api_key: "",
     keywords: "기획",
     custom_template: "",
@@ -29,6 +39,10 @@ export function useRecording(
   const streamRef = useRef<MediaStream | null>(null);
   const elapsedMsRef = useRef(0);
   const runningSinceRef = useRef<number | null>(null);
+  const remainingRef = useRef<number | null>(null);
+  const meteredRef = useRef(true);
+  const finishingRef = useRef(false);
+  const finishRef = useRef<() => void>(() => {});
 
   const getElapsedSeconds = () => {
     let ms = elapsedMsRef.current;
@@ -36,6 +50,18 @@ export function useRecording(
       ms += Date.now() - runningSinceRef.current;
     }
     return Math.max(0, Math.round(ms / 1000));
+  };
+
+  const refreshUsage = async () => {
+    if (!meteredRef.current) {
+      setUsage(null);
+      remainingRef.current = null;
+      return null;
+    }
+    const next = await fetchUsage();
+    setUsage(next);
+    remainingRef.current = next?.remainingSeconds ?? null;
+    return next;
   };
 
   useEffect(() => {
@@ -48,26 +74,40 @@ export function useRecording(
         .from("user_settings")
         .select("*")
         .eq("user_id", user.id)
-        .single();
-      if (data) {
-        setUserSettings({
-          user_id: user.id,
-          ai_engine: data.ai_engine || "gemini",
-          api_key: data.api_key || "",
-          keywords: Array.isArray(data.keywords)
-            ? data.keywords.join(",")
-            : "기획",
-          custom_template: data.custom_template || "",
-          manuals: normalizeManuals(data.reply_manuals),
-        });
-      }
+        .maybeSingle();
+      const engine = normalizeEngine(data?.ai_engine);
+      meteredRef.current = isDefaultEngine(engine);
+      setUserSettings({
+        user_id: user.id,
+        ai_engine: engine,
+        api_key: data?.api_key || "",
+        keywords: Array.isArray(data?.keywords)
+          ? data.keywords.join(",")
+          : "기획",
+        custom_template: data?.custom_template || "",
+        manuals: normalizeManuals(data?.reply_manuals),
+      });
+      await refreshUsage();
     };
-    fetchSettings();
+    void fetchSettings();
   }, []);
 
   useEffect(() => {
     if (status !== "recording") return;
-    const timer = setInterval(() => setSeconds(getElapsedSeconds()), 250);
+    const timer = setInterval(() => {
+      const elapsed = getElapsedSeconds();
+      setSeconds(elapsed);
+      const cap = remainingRef.current;
+      if (
+        cap != null &&
+        cap > 0 &&
+        elapsed >= cap &&
+        !finishingRef.current
+      ) {
+        finishingRef.current = true;
+        finishRef.current();
+      }
+    }, 250);
     return () => {
       clearInterval(timer);
     };
@@ -86,6 +126,23 @@ export function useRecording(
 
   const handleStartRecording = async () => {
     try {
+      if (engineRequiresOwnKey(userSettings.ai_engine) && !userSettings.api_key.trim()) {
+        showInfoNotice(
+          "API 키가 필요해요",
+          missingApiKeyMessage(userSettings.ai_engine),
+        );
+        return;
+      }
+      if (meteredRef.current) {
+        const current = await refreshUsage();
+        if (isUsageExhausted(current)) {
+          showInfoNotice(
+            "이번 달 사용량을 다 썼어요",
+            "기본 엔진은 한 달에 30분까지 사용할 수 있습니다. 다음 달에 다시 이용하거나 설정에서 내 API 키를 연결해 주세요.",
+          );
+          return;
+        }
+      }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       audioChunksRef.current = [];
@@ -106,10 +163,14 @@ export function useRecording(
       recorder.start(1000);
       elapsedMsRef.current = 0;
       runningSinceRef.current = Date.now();
+      finishingRef.current = false;
       setSeconds(0);
       setStatus("recording");
     } catch (error) {
-      alert("마이크 권한을 확인해주세요.");
+      showInfoNotice(
+        "마이크 권한이 필요해요",
+        "브라우저 설정에서 마이크 권한을 허용한 뒤 다시 시도해 주세요.",
+      );
     }
   };
 
@@ -120,7 +181,12 @@ export function useRecording(
       elapsedMsRef.current += Date.now() - runningSinceRef.current;
       runningSinceRef.current = null;
     }
-    const durationSeconds = Math.max(0, Math.round(elapsedMsRef.current / 1000));
+    finishingRef.current = true;
+    const remaining = remainingRef.current;
+    let durationSeconds = Math.max(0, Math.round(elapsedMsRef.current / 1000));
+    if (remaining != null && remaining > 0 && durationSeconds > remaining) {
+      durationSeconds = remaining;
+    }
     setSeconds(durationSeconds);
     setStatus("processing");
     const audioBlob = await new Promise<Blob | null>((resolve) => {
@@ -140,9 +206,13 @@ export function useRecording(
       streamRef.current = null;
     }
     if (!audioBlob || audioBlob.size === 0) {
-      alert("녹음된 음성이 없습니다.");
+      showInfoNotice(
+        "녹음된 음성이 없어요",
+        "잠시 녹음한 뒤 다시 종료해 주세요.",
+      );
       elapsedMsRef.current = 0;
       runningSinceRef.current = null;
+      finishingRef.current = false;
       setStatus("ready");
       setSeconds(0);
       return;
@@ -155,17 +225,27 @@ export function useRecording(
         attendees: selectedAttendees,
         liveMemo,
       });
+      if (meteredRef.current) {
+        const next = await consumeUsage(durationSeconds);
+        if (next) setUsage(next);
+      }
       onComplete(
         parseMinutesPayload(result.minutes) ?? result.minutes,
         result.meeting_id,
       );
     } catch (error: any) {
       downloadRecordingBlob(audioBlob);
-      alert(
+      showInfoNotice(
+        "회의록을 만들지 못했어요",
         `${error.message || "연결이 끊겼습니다."}\n\n녹음 원본은 이 기기에 파일로 저장했습니다. 서버에 올라간 경우 직접 삭제하기 전까지 회의 목록에도 남아 있습니다.`,
       );
+      finishingRef.current = false;
       setStatus("ready");
     }
+  };
+
+  finishRef.current = () => {
+    void handleFinish();
   };
 
   const togglePause = () => {
@@ -187,6 +267,9 @@ export function useRecording(
   };
 
   const timeString = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+  const metered = isDefaultEngine(userSettings.ai_engine);
+  const remainingLabel =
+    metered && usage ? formatUsageClock(usage.remainingSeconds) : null;
 
   return {
     status,
@@ -199,6 +282,9 @@ export function useRecording(
     isAddingCustom,
     setIsAddingCustom,
     timeString,
+    usage,
+    remainingLabel,
+    exhausted: metered && isUsageExhausted(usage),
     handleStartRecording,
     handleFinish,
     togglePause,

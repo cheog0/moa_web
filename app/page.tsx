@@ -17,6 +17,7 @@ import Notice from "@/components/dashboard/Notice";
 import { useAuthSession } from "@/hooks/useAuthSession";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useTheme } from "@/hooks/useTheme";
+import { useUsage } from "@/hooks/useUsage";
 import { whenDark } from "@/lib/theme";
 import { userAvatarInitial } from "@/lib/userDisplay";
 import { cn } from "@/lib/utils";
@@ -34,6 +35,7 @@ export default function Page() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const workspace = useWorkspace(session?.user?.id, recording);
+  const { usage } = useUsage(session?.user?.id, `${recording}:${currentView}`);
 
   const triggerNotification = (msg: string) => {
     setNotification(msg);
@@ -123,6 +125,7 @@ export default function Page() {
         onNew={() => setRecording(true)}
         projects={workspace.dbProjects}
         session={session}
+        usage={usage}
         mobileOpen={mobileMenuOpen}
         onMobileClose={() => setMobileMenuOpen(false)}
       />

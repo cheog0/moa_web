@@ -1,4 +1,5 @@
 import { getApiUrl } from "@/lib/api";
+import { toTranscribeApiKey, toTranscribeEngine } from "@/lib/engines";
 import { formatManualsForPrompt, ReplyManual } from "@/lib/manuals";
 
 export async function transcribeRecording({
@@ -28,8 +29,8 @@ export async function transcribeRecording({
   const formData = new FormData();
   formData.append("file", audioFile);
   formData.append("user_id", userSettings.user_id);
-  formData.append("engine", userSettings.ai_engine);
-  formData.append("api_key", userSettings.api_key);
+  formData.append("engine", toTranscribeEngine(userSettings.ai_engine));
+  formData.append("api_key", toTranscribeApiKey(userSettings.ai_engine, userSettings.api_key));
   formData.append("keywords", userSettings.keywords);
   formData.append(
     "duration",

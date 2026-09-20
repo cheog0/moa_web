@@ -1,6 +1,7 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import InfoNoticeHost from "@/components/ui/InfoNoticeHost";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -52,6 +53,7 @@ export default function RootLayout({
       <body className="antialiased">
         <ThemeProvider>
           {children}
+          <InfoNoticeHost />
           {process.env.NODE_ENV === "production" && <Analytics />}
         </ThemeProvider>
       </body>

@@ -15,9 +15,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NavItem from "@/components/layout/NavItem";
+import UsageCard from "@/components/dashboard/UsageCard";
 import { useTheme } from "@/hooks/useTheme";
 import { supabase } from "@/lib/supabase";
 import { whenDark, whenDarkValue } from "@/lib/theme";
+import type { UsageSnapshot } from "@/lib/usage";
 import {
   userAvatarInitial,
   userDisplayLabel,
@@ -31,6 +33,7 @@ export default function Sidebar({
   onNew,
   projects = [],
   session,
+  usage,
   mobileOpen = false,
   onMobileClose,
 }: {
@@ -39,6 +42,7 @@ export default function Sidebar({
   onNew: () => void;
   projects?: any[];
   session?: any;
+  usage?: UsageSnapshot | null;
   mobileOpen?: boolean;
   onMobileClose?: () => void;
 }) {
@@ -222,13 +226,15 @@ export default function Sidebar({
       </div>
 
       {/* 🌟 하단 실제 세션 연동 유저 프로필 영역 */}
-      <div
-        className={cn(
-          "flex flex-col gap-2.5 pt-3 border-t border-slate-100 mt-1 shrink-0",
-          whenDark(theme, "border-zinc-800"),
-        )}
-      >
-        <div ref={profileRef} className="relative flex items-center gap-2.5 px-1">
+      <div className="mt-1 flex shrink-0 flex-col gap-2.5 pt-3">
+        {usage ? <UsageCard usage={usage} /> : null}
+        <div
+          ref={profileRef}
+          className={cn(
+            "relative flex items-center gap-2.5 border-t border-slate-100 px-1 pt-2.5",
+            whenDark(theme, "border-zinc-800"),
+          )}
+        >
           <button
             type="button"
             onClick={() => setLogoutOpen((open) => !open)}

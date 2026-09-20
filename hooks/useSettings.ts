@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { DEFAULT_ENGINE_ID, normalizeEngine } from "@/lib/engines";
 import { supabase } from "@/lib/supabase";
 
 const MAX_KEYWORDS = 100;
@@ -6,7 +7,7 @@ const MAX_KEYWORDS = 100;
 export function useSettings(userId: string) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [aiEngine, setAiEngine] = useState("gemini");
+  const [aiEngine, setAiEngine] = useState(DEFAULT_ENGINE_ID);
   const [apiKey, setApiKey] = useState("");
   const [keywords, setKeywords] = useState<string[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
@@ -26,7 +27,7 @@ export function useSettings(userId: string) {
         .eq("user_id", userId)
         .maybeSingle();
       if (data) {
-        setAiEngine(data.ai_engine || "gemini");
+        setAiEngine(normalizeEngine(data.ai_engine));
         setApiKey(data.api_key || "");
         setKeywords(
           (Array.isArray(data.keywords)

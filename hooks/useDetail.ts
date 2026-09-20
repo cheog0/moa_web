@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { MeetingMinutes } from "@/lib/constants";
 import { ActionItem, normalizeActionItems } from "@/lib/actionItems";
 import { downloadTranscriptFile, seekAudio } from "@/lib/download";
+import { showInfoNotice } from "@/lib/notice";
 
 export function useDetail({
   minutes,
@@ -184,11 +185,20 @@ export function useDetail({
       if (audioRef.current) seekAudio(audioRef.current, timeStr);
     },
     handleDownloadAudio: () => {
-      if (!meeting?.audio_url) return alert("다운로드할 음성 파일이 없습니다.");
+      if (!meeting?.audio_url) {
+        showInfoNotice(
+          "다운로드할 음성이 없어요",
+          "이 회의에는 저장된 음성 파일이 없습니다.",
+        );
+        return;
+      }
       try {
         window.open(meeting.audio_url, "_blank");
       } catch (e) {
-        alert("음성 다운로드에 실패했습니다.");
+        showInfoNotice(
+          "음성을 열 수 없어요",
+          "음성 다운로드에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+        );
       }
     },
     handleDownloadTranscript: () =>

@@ -35,6 +35,8 @@ export function ReadyView({
   onStartAdd,
   onBlurAdd,
   onStartRecording,
+  exhausted = false,
+  remainingLabel,
 }: {
   attendees: string[];
   customInput: string;
@@ -45,6 +47,8 @@ export function ReadyView({
   onStartAdd: () => void;
   onBlurAdd: () => void;
   onStartRecording: () => void;
+  exhausted?: boolean;
+  remainingLabel?: string | null;
 }) {
   return (
     <div className="flex h-full flex-col items-center justify-center max-w-md mx-auto w-full">
@@ -61,9 +65,19 @@ export function ReadyView({
         onStartAdd={onStartAdd}
         onBlur={onBlurAdd}
       />
+      {exhausted ? (
+        <p className="mb-4 text-center text-sm text-rose-500">
+          이번 달 무료 30분을 모두 사용했습니다. 다음 달에 다시 이용하거나 설정에서 내 API 키를 연결해 주세요.
+        </p>
+      ) : remainingLabel ? (
+        <p className="mb-4 text-center text-sm text-muted-foreground">
+          기본 엔진 남은 시간 {remainingLabel}
+        </p>
+      ) : null}
       <Button
         className="w-full h-12 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
         onClick={onStartRecording}
+        disabled={exhausted}
       >
         <Mic className="mr-2 size-5" /> 녹음 및 노트 시작
       </Button>

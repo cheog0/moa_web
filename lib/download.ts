@@ -1,6 +1,11 @@
+import { showInfoNotice } from "@/lib/notice";
+
 export function downloadTranscriptFile(transcript: any, meetingTitle: string) {
   if (!transcript) {
-    alert("다운로드할 대화 내용이 없습니다.");
+    showInfoNotice(
+      "다운로드할 내용이 없어요",
+      "대화 내용이 아직 없어서 파일로 저장할 수 없습니다.",
+    );
     return;
   }
   let content = "";

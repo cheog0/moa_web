@@ -1,6 +1,7 @@
 "use client";
 
 import { useTheme } from "@/hooks/useTheme";
+import { showInfoNotice } from "@/lib/notice";
 import { whenDark } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +21,10 @@ export default function NavItem({
   const { theme } = useTheme();
   const handleClick = () => {
     if (disabled) {
-      alert("🚀 곧 추가될 업데이트 준비 중인 기능입니다!");
+      showInfoNotice(
+        "준비 중인 기능이에요",
+        "곧 추가될 업데이트입니다. 조금만 기다려 주세요.",
+      );
     } else if (onClick) {
       onClick();
     }

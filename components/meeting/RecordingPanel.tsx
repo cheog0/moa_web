@@ -73,6 +73,8 @@ export default function RecordingPanel({
               onStartAdd={() => recording.setIsAddingCustom(true)}
               onBlurAdd={() => recording.setIsAddingCustom(false)}
               onStartRecording={recording.handleStartRecording}
+              exhausted={recording.exhausted}
+              remainingLabel={recording.remainingLabel}
             />
           ) : (
             <MemoView

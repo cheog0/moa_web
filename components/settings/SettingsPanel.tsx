@@ -16,6 +16,7 @@ import ThemeSwitch from "@/components/settings/ThemeSwitch";
 import { useSettings } from "@/hooks/useSettings";
 import { useTheme } from "@/hooks/useTheme";
 import { deleteOwnAccount } from "@/lib/account";
+import { isDefaultEngine } from "@/lib/engines";
 import { whenDark } from "@/lib/theme";
 import {
   userAvatarInitial,
@@ -33,6 +34,7 @@ export default function SettingsPanel({ session }: { session: any }) {
 
   const label = userDisplayLabel(session.user);
   const initial = userAvatarInitial(session.user);
+  const usingDefaultEngine = isDefaultEngine(settings.aiEngine);
 
   if (settings.loading) {
     return (
@@ -148,47 +150,60 @@ export default function SettingsPanel({ session }: { session: any }) {
               />
             </div>
 
-            <p className="mt-[18px] text-sm font-bold">API 키</p>
-            <p
-              className={cn(
-                "mt-1 text-xs leading-[1.45] text-[#9AA1AA]",
-                whenDark(theme, "text-zinc-400"),
-              )}
-            >
-              선택한 엔진의 키는 이 계정에만 저장됩니다.
-            </p>
-            <div
-              className={cn(
-                "mt-2.5 flex h-12 items-center rounded-2xl bg-[#F7F8FA] px-3.5 transition-colors focus-within:ring-2 focus-within:ring-[#4C9AFF]/35",
-                whenDark(theme, "bg-zinc-950 focus-within:ring-sky-500/30"),
-              )}
-            >
-              <input
-                type={showApiKey ? "text" : "password"}
-                value={settings.apiKey}
-                onChange={(e) => settings.setApiKey(e.target.value)}
-                placeholder="키를 붙여넣으세요"
+            {usingDefaultEngine ? (
+              <p
                 className={cn(
-                  "h-full min-w-0 flex-1 bg-transparent text-[13px] text-[#1C1F24] outline-none placeholder:text-[#9AA1AA]/85",
-                  whenDark(theme, "text-zinc-100 placeholder:text-zinc-500"),
+                  "mt-[18px] text-xs leading-[1.45] text-[#9AA1AA]",
+                  whenDark(theme, "text-zinc-400"),
                 )}
-              />
-              <button
-                type="button"
-                onClick={() => setShowApiKey((open) => !open)}
-                className={cn(
-                  "rounded-lg p-1.5 text-[#9AA1AA] transition-colors hover:bg-white hover:text-[#1C1F24]",
-                  whenDark(theme, "hover:bg-zinc-800 hover:text-zinc-100"),
-                )}
-                aria-label={showApiKey ? "API 키 숨기기" : "API 키 보기"}
               >
-                {showApiKey ? (
-                  <EyeOff className="size-4" />
-                ) : (
-                  <Eye className="size-4" />
-                )}
-              </button>
-            </div>
+                기본 엔진은 랩플 API로 받아씁니다. 무료 회원은 한 달에 30분까지 사용할 수 있습니다.
+              </p>
+            ) : (
+              <>
+                <p className="mt-[18px] text-sm font-bold">API 키</p>
+                <p
+                  className={cn(
+                    "mt-1 text-xs leading-[1.45] text-[#9AA1AA]",
+                    whenDark(theme, "text-zinc-400"),
+                  )}
+                >
+                  선택한 엔진의 키는 이 계정에만 저장됩니다.
+                </p>
+                <div
+                  className={cn(
+                    "mt-2.5 flex h-12 items-center rounded-2xl bg-[#F7F8FA] px-3.5 transition-colors focus-within:ring-2 focus-within:ring-[#4C9AFF]/35",
+                    whenDark(theme, "bg-zinc-950 focus-within:ring-sky-500/30"),
+                  )}
+                >
+                  <input
+                    type={showApiKey ? "text" : "password"}
+                    value={settings.apiKey}
+                    onChange={(e) => settings.setApiKey(e.target.value)}
+                    placeholder="키를 붙여넣으세요"
+                    className={cn(
+                      "h-full min-w-0 flex-1 bg-transparent text-[13px] text-[#1C1F24] outline-none placeholder:text-[#9AA1AA]/85",
+                      whenDark(theme, "text-zinc-100 placeholder:text-zinc-500"),
+                    )}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowApiKey((open) => !open)}
+                    className={cn(
+                      "rounded-lg p-1.5 text-[#9AA1AA] transition-colors hover:bg-white hover:text-[#1C1F24]",
+                      whenDark(theme, "hover:bg-zinc-800 hover:text-zinc-100"),
+                    )}
+                    aria-label={showApiKey ? "API 키 숨기기" : "API 키 보기"}
+                  >
+                    {showApiKey ? (
+                      <EyeOff className="size-4" />
+                    ) : (
+                      <Eye className="size-4" />
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
 
           <div

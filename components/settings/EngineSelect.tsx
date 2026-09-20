@@ -2,32 +2,10 @@
 
 import { Check, ChevronDown } from "lucide-react";
 import { Select } from "@base-ui/react/select";
+import { ENGINES } from "@/lib/engines";
 import { useTheme } from "@/hooks/useTheme";
 import { whenDark } from "@/lib/theme";
 import { cn } from "@/lib/utils";
-
-export const ENGINES = [
-  {
-    id: "gemini",
-    name: "Google Gemini 3.6 Flash",
-    hint: "기본 추천 엔진",
-  },
-  {
-    id: "deepgram",
-    name: "Deepgram",
-    hint: "실시간 음성 인식",
-  },
-  {
-    id: "soniox",
-    name: "Soniox",
-    hint: "고정밀 받아쓰기",
-  },
-  {
-    id: "clova",
-    name: "ClovaNote",
-    hint: "한국어 특화",
-  },
-] as const;
 
 export default function EngineSelect({
   value,
@@ -114,15 +92,9 @@ export default function EngineSelect({
                   )}
                 >
                   <div className="min-w-0 flex-1">
-                    <Select.ItemText className="block text-sm font-bold" />
-                    <p
-                      className={cn(
-                        "mt-0.5 text-[11px] text-[#9AA1AA]",
-                        whenDark(theme, "text-zinc-400"),
-                      )}
-                    >
-                      {engine.hint}
-                    </p>
+                    <Select.ItemText className="block truncate text-sm font-bold">
+                      {engine.name}
+                    </Select.ItemText>
                   </div>
                   <Select.ItemIndicator className="flex size-[18px] shrink-0 items-center justify-center text-[#2F7DE0]">
                     <Check className="size-4" />
