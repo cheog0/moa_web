@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { DEFAULT_ENGINE_ID, normalizeEngine } from "@/lib/engines";
+import { TEMPLATE_SALES } from "@/lib/constants";
 import { supabase } from "@/lib/supabase";
 
 const MAX_KEYWORDS = 100;
@@ -53,7 +54,13 @@ export function useSettings(userId: string) {
         .maybeSingle();
       const payload = existing
         ? { ...existing, ai_engine: aiEngine, api_key: apiKey, keywords: keywords.slice(0, MAX_KEYWORDS) }
-        : { user_id: userId, ai_engine: aiEngine, api_key: apiKey, keywords: keywords.slice(0, MAX_KEYWORDS) };
+        : {
+            user_id: userId,
+            ai_engine: aiEngine,
+            api_key: apiKey,
+            keywords: keywords.slice(0, MAX_KEYWORDS),
+            custom_template: TEMPLATE_SALES,
+          };
       const { error } = await supabase.from("user_settings").upsert(payload);
       if (error) throw error;
       setToast({ type: "success", msg: "설정이 안전하게 저장되었습니다." });

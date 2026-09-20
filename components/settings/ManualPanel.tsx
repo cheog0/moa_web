@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
+import { TEMPLATE_SALES } from "@/lib/constants";
+import { DEFAULT_ENGINE_ID } from "@/lib/engines";
 import {
   createEmptyManual,
   normalizeManuals,
@@ -81,7 +83,8 @@ export default function ManualPanel({ session }: { session: any }) {
         : {
             user_id: session.user.id,
             reply_manuals: cleaned,
-            ai_engine: "gemini",
+            ai_engine: DEFAULT_ENGINE_ID,
+            custom_template: TEMPLATE_SALES,
           };
       const { error } = await supabase.from("user_settings").upsert(payload);
       if (error) throw error;

@@ -10,11 +10,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
-import {
-  TEMPLATE_BASIC,
-  TEMPLATE_SALES,
-  TEMPLATE_SCRUM,
-} from "@/lib/constants";
+import { TEMPLATE_BASIC, TEMPLATE_SALES, TEMPLATE_SCRUM } from "@/lib/constants";
+import { DEFAULT_ENGINE_ID } from "@/lib/engines";
 import { useTheme } from "@/hooks/useTheme";
 import { whenDark } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -40,7 +37,9 @@ export default function TemplatePanel({ session }: { session: any }) {
         .maybeSingle();
 
       if (data) {
-        setCustomTemplate(data.custom_template || "");
+        setCustomTemplate(data.custom_template ?? "");
+      } else {
+        setCustomTemplate(TEMPLATE_SALES);
       }
       setLoading(false);
     };
@@ -62,7 +61,7 @@ export default function TemplatePanel({ session }: { session: any }) {
         : {
             user_id: session.user.id,
             custom_template: customTemplate,
-            ai_engine: "gemini",
+            ai_engine: DEFAULT_ENGINE_ID,
           };
 
       const { error } = await supabase.from("user_settings").upsert(payload);
