@@ -7,6 +7,7 @@ import {
   Eye,
   EyeOff,
   Loader2,
+  LogOut,
   Save,
 } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -17,6 +18,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { useTheme } from "@/hooks/useTheme";
 import { deleteOwnAccount } from "@/lib/account";
 import { isDefaultEngine } from "@/lib/engines";
+import { supabase } from "@/lib/supabase";
 import { whenDark } from "@/lib/theme";
 import {
   userAvatarInitial,
@@ -82,7 +84,7 @@ export default function SettingsPanel({ session }: { session: any }) {
             >
               {initial}
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="truncate text-[15px] font-bold">{label}</p>
               <p
                 className={cn(
@@ -93,6 +95,18 @@ export default function SettingsPanel({ session }: { session: any }) {
                 계정과 설정을 관리합니다
               </p>
             </div>
+            <button
+              type="button"
+              onClick={() => void supabase.auth.signOut()}
+              className={cn(
+                "flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#9AA1AA] transition-colors hover:bg-[#F7F8FA] hover:text-[#1C1F24]",
+                whenDark(theme, "hover:bg-zinc-800 hover:text-zinc-100"),
+              )}
+              aria-label="로그아웃"
+              title="로그아웃"
+            >
+              <LogOut className="size-[18px]" />
+            </button>
           </div>
         </section>
 
