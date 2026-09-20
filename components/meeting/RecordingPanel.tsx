@@ -2,7 +2,6 @@
 
 import { KeyboardEvent } from "react";
 import { X } from "lucide-react";
-import { MeetingMinutes } from "@/lib/constants";
 import {
   Controls,
   MemoView,
@@ -13,12 +12,12 @@ import { useRecording } from "@/hooks/useRecording";
 
 export default function RecordingPanel({
   onClose,
-  onComplete,
+  onSaved,
 }: {
   onClose: () => void;
-  onComplete: (minutes: MeetingMinutes, newId?: string) => void;
+  onSaved: (meetingId: string) => void;
 }) {
-  const recording = useRecording(onComplete);
+  const recording = useRecording(onSaved);
 
   const handleCustomKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && recording.customInput.trim()) {

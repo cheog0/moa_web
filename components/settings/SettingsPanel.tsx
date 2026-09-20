@@ -18,6 +18,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { useTheme } from "@/hooks/useTheme";
 import { deleteOwnAccount } from "@/lib/account";
 import { isDefaultEngine } from "@/lib/engines";
+import { FREE_MONTHLY_MINUTES } from "@/lib/usage";
 import { supabase } from "@/lib/supabase";
 import { whenDark } from "@/lib/theme";
 import {
@@ -171,7 +172,7 @@ export default function SettingsPanel({ session }: { session: any }) {
                   whenDark(theme, "text-zinc-400"),
                 )}
               >
-                기본 엔진은 랩플 API로 받아씁니다. 무료 회원은 한 달에 30분까지 사용할 수 있습니다.
+                기본 엔진은 랩플 API로 받아씁니다. 무료 회원은 한 달에 {FREE_MONTHLY_MINUTES}분까지 사용할 수 있습니다.
               </p>
             ) : (
               <>

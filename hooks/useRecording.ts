@@ -1,22 +1,35 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { DEFAULT_ENGINE_ID, engineRequiresOwnKey, isDefaultEngine, missingApiKeyMessage, normalizeEngine } from "@/lib/engines";
-import { downloadRecordingBlob, transcribeRecording } from "@/lib/transcribe";
-import { MeetingMinutes } from "@/lib/constants";
-import { parseMinutesPayload } from "@/lib/actionItems";
+import { downloadRecordingBlob, processMeeting, uploadRecording } from "@/lib/transcribe";
+import { TEMPLATE_SALES } from "@/lib/constants";
 import { normalizeManuals, ReplyManual } from "@/lib/manuals";
 import {
   consumeUsage,
   fetchUsage,
   formatUsageClock,
+  FREE_MONTHLY_MINUTES,
   isUsageExhausted,
   type UsageSnapshot,
 } from "@/lib/usage";
-import { showInfoNotice } from "@/lib/notice";
+import { addMinutesReadyNotice } from "@/lib/notifications";
+import { showInfoNotice, showToastNotice } from "@/lib/notice";
 
-export function useRecording(
-  onComplete: (minutes: MeetingMinutes, newId?: string) => void,
-) {
+function warnRemainingQuota(leftSeconds: number) {
+  if (leftSeconds >= 50) {
+    showToastNotice(
+      "무료 녹음이 1분 남았습니다.",
+      "1분 후에 자동 종료됩니다.",
+    );
+    return;
+  }
+  showToastNotice(
+    `무료 녹음이 ${formatUsageClock(leftSeconds)} 남았습니다.`,
+    "곧 자동 종료됩니다.",
+  );
+}
+
+export function useRecording(onSaved: (meetingId: string) => void) {
   const [status, setStatus] = useState<
     "ready" | "recording" | "paused" | "processing"
   >("ready");
@@ -42,6 +55,7 @@ export function useRecording(
   const remainingRef = useRef<number | null>(null);
   const meteredRef = useRef(true);
   const finishingRef = useRef(false);
+  const oneMinuteWarnedRef = useRef(false);
   const finishRef = useRef<() => void>(() => {});
 
   const getElapsedSeconds = () => {
@@ -84,7 +98,7 @@ export function useRecording(
         keywords: Array.isArray(data?.keywords)
           ? data.keywords.join(",")
           : "기획",
-        custom_template: data?.custom_template || "",
+        custom_template: data?.custom_template || TEMPLATE_SALES,
         manuals: normalizeManuals(data?.reply_manuals),
       });
       await refreshUsage();
@@ -98,14 +112,16 @@ export function useRecording(
       const elapsed = getElapsedSeconds();
       setSeconds(elapsed);
       const cap = remainingRef.current;
-      if (
-        cap != null &&
-        cap > 0 &&
-        elapsed >= cap &&
-        !finishingRef.current
-      ) {
-        finishingRef.current = true;
-        finishRef.current();
+      if (cap != null && cap > 0 && !finishingRef.current) {
+        const left = cap - elapsed;
+        if (left > 0 && left <= 60 && !oneMinuteWarnedRef.current) {
+          oneMinuteWarnedRef.current = true;
+          warnRemainingQuota(left);
+        }
+        if (elapsed >= cap) {
+          finishingRef.current = true;
+          finishRef.current();
+        }
       }
     }, 250);
     return () => {
@@ -138,7 +154,7 @@ export function useRecording(
         if (isUsageExhausted(current)) {
           showInfoNotice(
             "이번 달 사용량을 다 썼어요",
-            "기본 엔진은 한 달에 30분까지 사용할 수 있습니다. 다음 달에 다시 이용하거나 설정에서 내 API 키를 연결해 주세요.",
+            `기본 엔진은 한 달에 ${FREE_MONTHLY_MINUTES}분까지 사용할 수 있습니다. 다음 달에 다시 이용하거나 설정에서 내 API 키를 연결해 주세요.`,
           );
           return;
         }
@@ -164,6 +180,17 @@ export function useRecording(
       elapsedMsRef.current = 0;
       runningSinceRef.current = Date.now();
       finishingRef.current = false;
+      const remainingAtStart = remainingRef.current;
+      if (
+        remainingAtStart != null &&
+        remainingAtStart > 0 &&
+        remainingAtStart <= 60
+      ) {
+        oneMinuteWarnedRef.current = true;
+        warnRemainingQuota(remainingAtStart);
+      } else {
+        oneMinuteWarnedRef.current = false;
+      }
       setSeconds(0);
       setStatus("recording");
     } catch (error) {
@@ -218,21 +245,37 @@ export function useRecording(
       return;
     }
     try {
-      const result = await transcribeRecording({
+      const uploaded = await uploadRecording({
         audioBlob,
         userSettings,
         seconds: durationSeconds,
-        attendees: selectedAttendees,
-        liveMemo,
       });
       if (meteredRef.current) {
         const next = await consumeUsage(durationSeconds);
         if (next) setUsage(next);
       }
-      onComplete(
-        parseMinutesPayload(result.minutes) ?? result.minutes,
-        result.meeting_id,
+      showToastNotice(
+        "녹음이 저장되었습니다.",
+        "회의록 분석은 이어서 진행됩니다.",
       );
+      onSaved(uploaded.meetingId);
+      void processMeeting({
+        meetingId: uploaded.meetingId,
+        userSettings,
+        attendees: selectedAttendees,
+        liveMemo,
+      }).then((result) => {
+        if (!result.processed) return;
+        void addMinutesReadyNotice(
+          userSettings.user_id,
+          uploaded.meetingId,
+        );
+        showToastNotice(
+          "회의록이 성공적으로 생성되었습니다.",
+          "회의 목록에서 확인해 주세요.",
+        );
+        window.dispatchEvent(new Event("raple:meetings-changed"));
+      });
     } catch (error: any) {
       downloadRecordingBlob(audioBlob);
       showInfoNotice(

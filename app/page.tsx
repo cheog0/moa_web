@@ -13,8 +13,8 @@ import Home from "@/components/dashboard/Home";
 import Starred from "@/components/dashboard/Starred";
 import Trash from "@/components/dashboard/Trash";
 import Header from "@/components/dashboard/Header";
-import Notice from "@/components/dashboard/Notice";
 import { useAuthSession } from "@/hooks/useAuthSession";
+import { useNotifications } from "@/hooks/useNotifications";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useTheme } from "@/hooks/useTheme";
 import { useUsage } from "@/hooks/useUsage";
@@ -31,16 +31,11 @@ export default function Page() {
   );
   const [recording, setRecording] = useState(false);
   const [query, setQuery] = useState("");
-  const [notification, setNotification] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const workspace = useWorkspace(session?.user?.id, recording);
+  const notices = useNotifications(session?.user?.id);
   const { usage } = useUsage(session?.user?.id, `${recording}:${currentView}`);
-
-  const triggerNotification = (msg: string) => {
-    setNotification(msg);
-    setTimeout(() => setNotification(null), 3000);
-  };
 
   if (loadingSession) {
     return (
@@ -118,7 +113,6 @@ export default function Page() {
         whenDark(theme, "bg-zinc-950"),
       )}
     >
-      {notification && <Notice message={notification} />}
       <Sidebar
         currentView={currentView}
         onNavigate={setCurrentView}
@@ -139,7 +133,17 @@ export default function Page() {
           sectionLabel={breadcrumb[0]}
           pageLabel={breadcrumb[1]}
           initial={userAvatarInitial(session.user)}
-          onNotify={() => triggerNotification("새로운 알림이 없습니다.")}
+          unreadCount={notices.unread}
+          notices={notices.items}
+          onOpenInbox={notices.markAllRead}
+          onOpenMeeting={(meetingId, title) => {
+            const meeting =
+              workspace.dbMeetings.find((item) => item.id === meetingId) ?? {
+                id: meetingId,
+                title,
+              };
+            void workspace.handleOpenDetail(meeting);
+          }}
           onMenuOpen={() => setMobileMenuOpen(true)}
         />
         <div className="min-h-0 flex-1 overflow-y-auto">
@@ -235,11 +239,8 @@ export default function Page() {
       {recording && (
         <RecordingPanel
           onClose={() => setRecording(false)}
-          onComplete={(minutes, newId) => {
-            workspace.setGeneratedMinutes(minutes);
-            workspace.setSelectedMeeting({ id: newId, title: "새 회의" });
+          onSaved={() => {
             setRecording(false);
-            workspace.setDetail(true);
           }}
         />
       )}

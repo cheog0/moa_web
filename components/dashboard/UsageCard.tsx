@@ -4,17 +4,27 @@ import { useTheme } from "@/hooks/useTheme";
 import { whenDark } from "@/lib/theme";
 import {
   formatUsageClock,
+  FREE_MONTHLY_MINUTES,
   isUsageExhausted,
   usageProgress,
   type UsageSnapshot,
 } from "@/lib/usage";
 import { cn } from "@/lib/utils";
 
+function usageTone(usage: UsageSnapshot) {
+  if (usage.remainingSeconds <= 0) return "danger";
+  const left = usage.remainingSeconds / Math.max(usage.limitSeconds, 1);
+  if (left <= 0.2 || usage.remainingSeconds <= 60) return "warn";
+  if (left <= 0.5) return "caution";
+  return "ok";
+}
+
 export default function UsageCard({ usage }: { usage?: UsageSnapshot | null }) {
   const { theme } = useTheme();
   if (!usage) return null;
 
   const exhausted = isUsageExhausted(usage);
+  const tone = usageTone(usage);
 
   return (
     <section
@@ -28,8 +38,7 @@ export default function UsageCard({ usage }: { usage?: UsageSnapshot | null }) {
         <p
           className={cn(
             "text-[11px] font-semibold tabular-nums text-[#1C1F24]",
-            exhausted && "text-rose-500",
-            whenDark(theme, exhausted ? "text-rose-300" : "text-zinc-100"),
+            whenDark(theme, "text-zinc-100"),
           )}
         >
           {formatUsageClock(usage.usedSeconds)} / {formatUsageClock(usage.limitSeconds)}
@@ -44,20 +53,35 @@ export default function UsageCard({ usage }: { usage?: UsageSnapshot | null }) {
         <div
           className={cn(
             "h-full rounded-full transition-all",
-            exhausted ? "bg-rose-500" : "bg-[#4C9AFF]",
+            tone === "ok" && "bg-[#4C9AFF]",
+            tone === "caution" && "bg-amber-400",
+            tone === "warn" && "bg-orange-500",
+            tone === "danger" && "bg-rose-500",
           )}
           style={{ width: `${Math.round(usageProgress(usage) * 100)}%` }}
         />
       </div>
       <p
         className={cn(
-          "mt-1.5 text-[10px] leading-4 text-[#9AA1AA]",
-          exhausted && "text-rose-500",
-          whenDark(theme, exhausted ? "text-rose-300" : "text-zinc-400"),
+          "mt-1.5 text-[10px] leading-4",
+          tone === "ok" && "text-[#9AA1AA]",
+          tone === "caution" && "text-amber-600",
+          tone === "warn" && "text-orange-600",
+          tone === "danger" && "text-rose-500",
+          whenDark(
+            theme,
+            tone === "ok"
+              ? "text-zinc-400"
+              : tone === "caution"
+                ? "text-amber-300"
+                : tone === "warn"
+                  ? "text-orange-300"
+                  : "text-rose-300",
+          ),
         )}
       >
         {exhausted
-          ? "이번 달 30분을 모두 사용했습니다"
+          ? `이번 달 ${FREE_MONTHLY_MINUTES}분을 모두 사용했습니다`
           : `남은 시간 ${formatUsageClock(usage.remainingSeconds)}`}
       </p>
     </section>

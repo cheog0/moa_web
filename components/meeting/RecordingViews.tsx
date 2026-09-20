@@ -4,6 +4,7 @@ import { Loader2, Mic, Pause, Play, Sparkles, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Attendees from "@/components/meeting/Attendees";
 import { KeyboardEvent } from "react";
+import { FREE_MONTHLY_MINUTES } from "@/lib/usage";
 
 export function ProcessingView() {
   return (
@@ -67,7 +68,7 @@ export function ReadyView({
       />
       {exhausted ? (
         <p className="mb-4 text-center text-sm text-rose-500">
-          이번 달 무료 30분을 모두 사용했습니다. 다음 달에 다시 이용하거나 설정에서 내 API 키를 연결해 주세요.
+          이번 달 무료 {FREE_MONTHLY_MINUTES}분을 모두 사용했습니다. 다음 달에 다시 이용하거나 설정에서 내 API 키를 연결해 주세요.
         </p>
       ) : remainingLabel ? (
         <p className="mb-4 text-center text-sm text-muted-foreground">

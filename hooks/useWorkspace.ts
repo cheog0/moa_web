@@ -83,6 +83,10 @@ export function useWorkspace(userId?: string, recording?: boolean) {
 
     fetchMeetings();
     fetchProjects();
+    window.addEventListener("raple:meetings-changed", fetchMeetings);
+    return () => {
+      window.removeEventListener("raple:meetings-changed", fetchMeetings);
+    };
   }, [userId, recording]);
 
   const handleUpdateTitle = async (id: string, newTitle: string) => {

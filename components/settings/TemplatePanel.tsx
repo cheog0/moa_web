@@ -36,10 +36,22 @@ export default function TemplatePanel({ session }: { session: any }) {
         .eq("user_id", session.user.id)
         .maybeSingle();
 
-      if (data) {
-        setCustomTemplate(data.custom_template ?? "");
-      } else {
+      if (!data || !(data.custom_template || "").trim()) {
         setCustomTemplate(TEMPLATE_SALES);
+        if (!data) {
+          await supabase.from("user_settings").insert({
+            user_id: session.user.id,
+            custom_template: TEMPLATE_SALES,
+            ai_engine: DEFAULT_ENGINE_ID,
+          });
+        } else {
+          await supabase
+            .from("user_settings")
+            .update({ custom_template: TEMPLATE_SALES })
+            .eq("user_id", session.user.id);
+        }
+      } else {
+        setCustomTemplate(data.custom_template);
       }
       setLoading(false);
     };

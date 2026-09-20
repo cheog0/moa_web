@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 
-export const FREE_MONTHLY_SECONDS = 30 * 60;
+export const FREE_MONTHLY_SECONDS = 5 * 60;
+export const FREE_MONTHLY_MINUTES = Math.round(FREE_MONTHLY_SECONDS / 60);
 
 export type UsageSnapshot = {
   plan: string;
@@ -31,13 +32,9 @@ export function formatUsageClock(seconds: number) {
 
 function snapshotFromPayload(data: Record<string, unknown> | null): UsageSnapshot | null {
   if (!data) return null;
-  const limitSeconds =
-    Number(data.limit_seconds ?? data.limitSeconds) || FREE_MONTHLY_SECONDS;
+  const limitSeconds = FREE_MONTHLY_SECONDS;
   const usedSeconds = Math.max(0, Number(data.used_seconds ?? data.usedSeconds) || 0);
-  const remainingSeconds = Math.max(
-    0,
-    Number(data.remaining_seconds ?? data.remainingSeconds ?? limitSeconds - usedSeconds),
-  );
+  const remainingSeconds = Math.max(0, limitSeconds - usedSeconds);
   return {
     plan: String(data.plan || "free"),
     limitSeconds,
