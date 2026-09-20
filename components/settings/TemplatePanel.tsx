@@ -138,7 +138,7 @@ export default function TemplatePanel({ session }: { session: any }) {
               ),
             )}
           >
-            영업 미팅
+            미팅
           </button>
           <button
             onClick={() => setCustomTemplate(TEMPLATE_SCRUM)}
