@@ -18,7 +18,7 @@ export function useDetail({
   onUpdateMinutes: (
     id: string,
     updatedMinutes: Partial<MeetingMinutes>,
-  ) => void;
+  ) => Promise<void>;
 }) {
   const [tab, setTab] = useState<"minutes" | "transcript">("minutes");
   const [meetingTitle, setMeetingTitle] = useState(meeting?.title || "새 회의");
@@ -106,7 +106,7 @@ export function useDetail({
     return t;
   }, [minutes?.transcript]);
 
-  const persistChanges = () => {
+  const persistChanges = async () => {
     if (!meeting?.id) return;
     if (meetingTitle !== meeting.title) onUpdateTitle(meeting.id, meetingTitle);
     if (
@@ -115,7 +115,7 @@ export function useDetail({
       JSON.stringify(actionItems) !== JSON.stringify(loadedActionItems) ||
       replyDraft !== loadedReplyDraft
     ) {
-      onUpdateMinutes(meeting.id, {
+      await onUpdateMinutes(meeting.id, {
         summary: summaryText,
         decisions: decisionsText,
         action_items: actionItems,
@@ -166,14 +166,34 @@ export function useDetail({
     hideUI: isPreviewMode ? "hidden" : "print:hidden",
     showPrintBlock: isPreviewMode ? "block" : "hidden print:block",
     handlePrintPDF,
-    handleManualSave: () => {
+    handleManualSave: async () => {
       if (!meeting?.id || !hasChanges) return;
       setSaveStatus("saving");
-      persistChanges();
-      setTimeout(() => setSaveStatus("saved"), 600);
+      try {
+        await persistChanges();
+        setSaveStatus("saved");
+      } catch (error) {
+        console.error(error);
+        setSaveStatus("idle");
+        showInfoNotice(
+          "저장되지 않았어요",
+          "회의록 변경사항을 저장하지 못했습니다. 다시 시도해 주세요.",
+        );
+      }
     },
-    handleSmartClose: () => {
-      if (hasChanges && meeting?.id) persistChanges();
+    handleSmartClose: async () => {
+      if (hasChanges && meeting?.id) {
+        try {
+          await persistChanges();
+        } catch (error) {
+          console.error(error);
+          showInfoNotice(
+            "저장되지 않았어요",
+            "회의록 변경사항을 저장하지 못했습니다. 다시 시도해 주세요.",
+          );
+          return;
+        }
+      }
       onClose();
     },
     togglePlay: () => {

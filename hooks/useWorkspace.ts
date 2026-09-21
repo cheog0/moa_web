@@ -135,15 +135,21 @@ export function useWorkspace(userId?: string, recording?: boolean) {
       payload.reply_draft = updatedMinutes.reply_draft;
     if (Object.keys(payload).length === 0) return;
 
-    const { error } = await supabase
-      .from("meeting_minutes")
-      .update(payload)
-      .eq("meeting_id", meetingId);
-    if (!error) {
-      setGeneratedMinutes((prev) =>
-        prev ? { ...prev, ...updatedMinutes } : null,
-      );
+    const response = await fetch(
+      `${getApiUrl()}/api/meetings/${meetingId}/minutes`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      },
+    );
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.success === false) {
+      throw new Error(data.detail || data.error || "회의록 저장에 실패했습니다.");
     }
+    setGeneratedMinutes((prev) =>
+      prev ? { ...prev, ...updatedMinutes } : null,
+    );
   };
 
   const handleDeleteMeeting = async (id: string) => {
