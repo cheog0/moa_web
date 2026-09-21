@@ -18,7 +18,9 @@ export default function MarkdownBody({
 }) {
   const { theme } = useTheme();
 
-  if (!markdown.trim()) {
+  const source = markdown.replace(/(\d)~(\d)/g, "$1–$2");
+
+  if (!source.trim()) {
     return (
       <p className={cn("py-6 text-sm text-slate-400", className)}>
         내용이 없습니다.
@@ -35,7 +37,7 @@ export default function MarkdownBody({
       )}
     >
       <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkBreaks]}
+        remarkPlugins={[[remarkGfm, { singleTilde: false }], remarkBreaks]}
         components={{
           h1: ({ children }) => (
             <h1
@@ -147,7 +149,7 @@ export default function MarkdownBody({
           ),
         }}
       >
-        {markdown}
+        {source}
       </ReactMarkdown>
     </div>
   );
