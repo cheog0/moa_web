@@ -49,7 +49,7 @@ export function useTimelineData(
     const fetchProjectData = async () => {
       try {
         const { data: pData } = await supabase
-          .from("projects")
+          .from("timelines")
           .select("name, status")
           .eq("id", projectId)
           .single();
@@ -59,9 +59,9 @@ export function useTimelineData(
           setProjectStatus(pData.status || "진행 중");
         }
         const { data: pmData, error: pmError } = await supabase
-          .from("project_meetings")
+          .from("timeline_meetings")
           .select("*")
-          .eq("project_id", projectId);
+          .eq("timeline_id", projectId);
         if (pmError) throw pmError;
         if (isCancelled || !pmData) return;
         const loadedItems = pmData.map((pm: any) => {

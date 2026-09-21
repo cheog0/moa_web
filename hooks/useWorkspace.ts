@@ -19,7 +19,7 @@ export function useWorkspace(userId?: string, recording?: boolean) {
   const fetchProjects = async () => {
     try {
       const { data } = await supabase
-        .from("projects")
+        .from("timelines")
         .select("*")
         .order("created_at", { ascending: false });
       if (!data) return;
@@ -32,15 +32,15 @@ export function useWorkspace(userId?: string, recording?: boolean) {
       }
 
       const { data: links } = await supabase
-        .from("project_meetings")
-        .select("meeting_id, project_id")
-        .in("project_id", projectIds);
+        .from("timeline_meetings")
+        .select("meeting_id, timeline_id")
+        .in("timeline_id", projectIds);
       const nameById = new Map(
         data.map((project) => [project.id, project.name as string]),
       );
       const next: Record<string, string[]> = {};
       for (const row of links ?? []) {
-        const name = nameById.get(row.project_id);
+        const name = nameById.get(row.timeline_id);
         if (!name) continue;
         const names = next[row.meeting_id] ?? [];
         if (!names.includes(name)) names.push(name);
@@ -181,7 +181,7 @@ export function useWorkspace(userId?: string, recording?: boolean) {
   const handlePermanentlyDeleteMeeting = async (id: string) => {
     const meeting = dbMeetings.find((item) => item.id === id);
     await deleteMeetingAudio(id, meeting?.audio_url);
-    await supabase.from("project_meetings").delete().eq("meeting_id", id);
+    await supabase.from("timeline_meetings").delete().eq("meeting_id", id);
     const { error } = await supabase.from("meetings").delete().eq("id", id);
     if (!error) {
       setDbMeetings((prev) => prev.filter((meeting) => meeting.id !== id));

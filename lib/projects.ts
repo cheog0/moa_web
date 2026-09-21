@@ -22,16 +22,16 @@ export async function saveTimeline({
   let currentProjectId = projectId || createdProjectId;
   if (currentProjectId) {
     await supabase
-      .from("projects")
+      .from("timelines")
       .update({ name: projectName, status: projectStatus })
       .eq("id", currentProjectId);
     await supabase
-      .from("project_meetings")
+      .from("timeline_meetings")
       .delete()
-      .eq("project_id", currentProjectId);
+      .eq("timeline_id", currentProjectId);
   } else {
     const { data: pData, error: pError } = await supabase
-      .from("projects")
+      .from("timelines")
       .insert({
         user_id: user.id,
         name: projectName,
@@ -44,18 +44,18 @@ export async function saveTimeline({
   }
 
   const meetingsToInsert = timelineItems.map((item) => ({
-    project_id: currentProjectId,
+    timeline_id: currentProjectId,
     meeting_id: item.id,
     timeline_date: item.date,
   }));
   const { error: mappingError } = await supabase
-    .from("project_meetings")
+    .from("timeline_meetings")
     .insert(meetingsToInsert);
   if (mappingError) throw mappingError;
   return currentProjectId as string;
 }
 
 export async function deleteTimeline(projectId: string) {
-  const { error } = await supabase.from("projects").delete().eq("id", projectId);
+  const { error } = await supabase.from("timelines").delete().eq("id", projectId);
   if (error) throw error;
 }
