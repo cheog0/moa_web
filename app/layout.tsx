@@ -6,7 +6,7 @@ import ToastNoticeHost from "@/components/ui/ToastNoticeHost";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "랩플",
+  title: "래플",
   description:
     "회의 녹음부터 AI 요약과 액션 아이템까지, 모아에서 한 번에 정리하세요.",
   generator: "v0.app",

@@ -50,7 +50,7 @@ export function userDisplayLabel(user: AuthUserLike): string {
   }
   const email = pickEmail(user);
   if (email) return email;
-  return "랩플 사용자";
+  return "래플 사용자";
 }
 
 export function userDisplayEmail(user: AuthUserLike): string {
@@ -71,6 +71,6 @@ export function userDisplaySubtitle(user: AuthUserLike): string {
 
 export function userAvatarInitial(user: AuthUserLike): string {
   const label = userDisplayLabel(user);
-  if (!label || label === "랩플 사용자") return "R";
+  if (!label || label === "래플 사용자") return "R";
   return Array.from(label)[0]?.toUpperCase() ?? "R";
 }
