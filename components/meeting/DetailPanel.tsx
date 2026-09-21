@@ -68,10 +68,10 @@ export default function DetailPanel({
         )}
         onClick={(e) => e.stopPropagation()}
       >
-        {meeting?.audio_url && (
+        {detail.currentSrc && (
           <audio
             ref={detail.audioRef}
-            src={meeting.audio_url}
+            src={detail.currentSrc}
             preload="metadata"
           />
         )}
@@ -92,7 +92,7 @@ export default function DetailPanel({
           <DetailHeader
             dateStr={detail.dateStr}
             meetingTitle={detail.meetingTitle}
-            audioUrl={meeting?.audio_url}
+            audioUrl={detail.audioUrls[0] || meeting?.audio_url}
             isPlaying={detail.isPlaying}
             currentTimeDisplay={detail.currentTimeDisplay}
             hasChanges={detail.hasChanges}
