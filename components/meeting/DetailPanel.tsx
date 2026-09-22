@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Pencil } from "lucide-react";
 import { MeetingMinutes } from "@/lib/constants";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import PreviewBar from "@/components/meeting/PreviewBar";
@@ -138,19 +139,38 @@ export default function DetailPanel({
           />
         )}
         <div
-          className={`flex shrink-0 border-b border-border bg-background px-6 pt-4 ${detail.hideUI}`}
+          className={`flex shrink-0 items-end justify-between gap-4 border-b border-border bg-background px-6 ${detail.hideUI}`}
         >
+          <div className="flex">
+            <button
+              type="button"
+              onClick={() => detail.setTab("minutes")}
+              className={`cursor-pointer border-b-2 px-1 pb-3 pt-4 text-sm font-semibold ${detail.tab === "minutes" ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}
+            >
+              문서 뷰
+            </button>
+            <button
+              type="button"
+              onClick={() => detail.setTab("transcript")}
+              className={`ml-6 cursor-pointer border-b-2 px-1 pb-3 pt-4 text-sm font-semibold ${detail.tab === "transcript" ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}
+            >
+              전체 대화
+            </button>
+          </div>
           <button
-            onClick={() => detail.setTab("minutes")}
-            className={`border-b-2 px-1 pb-3 text-sm font-semibold ${detail.tab === "minutes" ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}
+            type="button"
+            onClick={() => {
+              if (detail.tab !== "minutes") {
+                detail.setTab("minutes");
+                detail.setIsEditingDoc(true);
+                return;
+              }
+              detail.setIsEditingDoc((open) => !open);
+            }}
+            className="mb-2 inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
           >
-            문서 뷰
-          </button>
-          <button
-            onClick={() => detail.setTab("transcript")}
-            className={`ml-6 border-b-2 px-1 pb-3 text-sm font-semibold ${detail.tab === "transcript" ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}
-          >
-            전체 대화
+            <Pencil className="size-3.5" />
+            {detail.isEditingDoc ? "미리보기" : "원문 편집"}
           </button>
         </div>
         <main
@@ -177,6 +197,7 @@ export default function DetailPanel({
               showPrintBlock={detail.showPrintBlock}
               isPreviewMode={detail.isPreviewMode}
               includeActionItems={detail.printOptions.actionItems}
+              isEditing={detail.isEditingDoc}
             />
           ) : (
             <div className="flex flex-col gap-2 py-7 print:py-[15mm] print:px-[20mm]">

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Clock3, Pencil, Sparkles } from "lucide-react";
+import { Clock3, Sparkles } from "lucide-react";
 import { MeetingMinutes } from "@/lib/constants";
 import { ActionItem } from "@/lib/actionItems";
 import FollowUpSection from "@/components/meeting/FollowUpSection";
@@ -27,6 +26,7 @@ export default function MinutesDoc({
   showPrintBlock,
   isPreviewMode,
   includeActionItems,
+  isEditing,
 }: {
   meetingTitle: string;
   onTitleChange: (value: string) => void;
@@ -44,10 +44,10 @@ export default function MinutesDoc({
   showPrintBlock: string;
   isPreviewMode: boolean;
   includeActionItems: boolean;
+  isEditing: boolean;
 }) {
   const { theme } = useTheme();
   const darkDoc = !isPreviewMode;
-  const [isEditingSummary, setIsEditingSummary] = useState(false);
 
   return (
     <div
@@ -60,21 +60,9 @@ export default function MinutesDoc({
           ),
       )}
     >
-      <button
-        type="button"
-        onClick={() => setIsEditingSummary((open) => !open)}
-        className={cn(
-          `absolute top-3 right-4 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 ${hideUI}`,
-          darkDoc &&
-            whenDark(theme, "hover:bg-zinc-800 hover:text-zinc-100"),
-        )}
-      >
-        <Pencil className="size-3.5" />
-        {isEditingSummary ? "미리보기" : "원문 편집"}
-      </button>
       <input
         className={cn(
-          `w-full rounded-md bg-transparent p-1 -ml-1 pr-24 text-4xl font-extrabold tracking-tight text-gray-900 outline-none placeholder:text-gray-300 transition-colors hover:bg-gray-50 focus:bg-white ${hideUI}`,
+          `w-full rounded-md bg-transparent p-1 -ml-1 text-4xl font-extrabold tracking-tight text-gray-900 outline-none placeholder:text-gray-300 transition-colors hover:bg-gray-50 focus:bg-white ${hideUI}`,
           darkDoc &&
             whenDark(
               theme,
@@ -118,7 +106,7 @@ export default function MinutesDoc({
                 <Sparkles className="size-5 text-blue-500" /> 회의 요약 및 내용
               </h3>
               <div className={hideUI}>
-                {isEditingSummary ? (
+                {isEditing ? (
                   <textarea
                     value={summaryText}
                     onChange={(e) => onSummaryChange(e.target.value)}
@@ -141,7 +129,7 @@ export default function MinutesDoc({
             </div>
             <FollowUpSection
               actionItems={actionItems}
-              isEditing={isEditingSummary}
+              isEditing={isEditing}
               onToggleItem={onToggleActionItem}
               onChangeItem={onChangeActionItem}
               onAddItem={onAddActionItem}

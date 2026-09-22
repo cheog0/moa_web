@@ -28,6 +28,7 @@ export function useDetail({
   ) => Promise<void>;
 }) {
   const [tab, setTab] = useState<"minutes" | "transcript">("minutes");
+  const [isEditingDoc, setIsEditingDoc] = useState(false);
   const [meetingTitle, setMeetingTitle] = useState(meeting?.title || "새 회의");
   const [summaryText, setSummaryText] = useState(minutes?.summary || "");
   const [decisionsText, setDecisionsText] = useState(minutes?.decisions || "");
@@ -232,6 +233,8 @@ export function useDetail({
   return {
     tab,
     setTab,
+    isEditingDoc,
+    setIsEditingDoc,
     meetingTitle,
     setMeetingTitle,
     summaryText,
