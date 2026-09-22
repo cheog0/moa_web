@@ -5,7 +5,6 @@ import { downloadRecordingBlob, processMeeting, uploadRecording } from "@/lib/tr
 import { TEMPLATE_SALES } from "@/lib/constants";
 import { normalizeManuals, ReplyManual } from "@/lib/manuals";
 import {
-  consumeUsage,
   fetchUsage,
   formatUsageClock,
   FREE_MONTHLY_MINUTES,
@@ -251,7 +250,7 @@ export function useRecording(onSaved: (meetingId: string) => void) {
         seconds: durationSeconds,
       });
       if (meteredRef.current) {
-        const next = await consumeUsage(durationSeconds);
+        const next = await fetchUsage();
         if (next) setUsage(next);
       }
       showToastNotice(
@@ -265,6 +264,11 @@ export function useRecording(onSaved: (meetingId: string) => void) {
         attendees: selectedAttendees,
         liveMemo,
       }).then((result) => {
+        if (meteredRef.current) {
+          void fetchUsage().then((next) => {
+            if (next) setUsage(next);
+          });
+        }
         if (!result.processed) return;
         void addMinutesReadyNotice(
           userSettings.user_id,
