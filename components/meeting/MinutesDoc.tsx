@@ -141,6 +141,7 @@ export default function MinutesDoc({
             </div>
             <FollowUpSection
               actionItems={actionItems}
+              isEditing={isEditingSummary}
               onToggleItem={onToggleActionItem}
               onChangeItem={onChangeActionItem}
               onAddItem={onAddActionItem}

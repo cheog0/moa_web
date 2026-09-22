@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 
 export default function FollowUpSection({
   actionItems,
+  isEditing,
   onToggleItem,
   onChangeItem,
   onAddItem,
@@ -19,6 +20,7 @@ export default function FollowUpSection({
   includeActionItems,
 }: {
   actionItems: ActionItem[];
+  isEditing: boolean;
   onToggleItem: (id: string) => void;
   onChangeItem: (id: string, task: string) => void;
   onAddItem: () => void;
@@ -31,8 +33,9 @@ export default function FollowUpSection({
 }) {
   const { theme } = useTheme();
   const darkDoc = !isPreviewMode;
+  const canEdit = isEditing && !isPreviewMode;
 
-  if (actionItems.length === 0 && isPreviewMode) return null;
+  if (actionItems.length === 0 && !canEdit) return null;
 
   return (
     <div
@@ -45,17 +48,20 @@ export default function FollowUpSection({
         )}
       >
         <ListChecks className="size-5 text-amber-500" /> 후속 조치
-        <button
-          type="button"
-          onClick={onAddItem}
-          className={cn(
-            `ml-auto inline-flex cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 ${hideUI}`,
-            darkDoc && whenDark(theme, "hover:bg-zinc-800 hover:text-zinc-100"),
-          )}
-        >
-          <Plus className="size-3.5" />
-          추가
-        </button>
+        {canEdit ? (
+          <button
+            type="button"
+            onClick={onAddItem}
+            className={cn(
+              `ml-auto inline-flex cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 ${hideUI}`,
+              darkDoc &&
+                whenDark(theme, "hover:bg-zinc-800 hover:text-zinc-100"),
+            )}
+          >
+            <Plus className="size-3.5" />
+            추가
+          </button>
+        ) : null}
       </h3>
       {actionItems.length === 0 ? (
         <p
@@ -84,22 +90,38 @@ export default function FollowUpSection({
                   className="mt-1 size-4 shrink-0 cursor-pointer rounded border-slate-300 text-sky-600 focus:ring-sky-500"
                 />
                 <div className="min-w-0 flex-1">
-                  <input
-                    value={item.task}
-                    onChange={(event) =>
-                      onChangeItem(item.id, event.target.value)
-                    }
-                    placeholder="후속 조치를 입력하세요"
-                    className={cn(
-                      "w-full bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400",
-                      item.done && "text-slate-400 line-through",
-                      darkDoc &&
-                        whenDark(
-                          theme,
-                          item.done ? "text-zinc-500" : "text-zinc-100",
-                        ),
-                    )}
-                  />
+                  {canEdit ? (
+                    <input
+                      value={item.task}
+                      onChange={(event) =>
+                        onChangeItem(item.id, event.target.value)
+                      }
+                      placeholder="후속 조치를 입력하세요"
+                      className={cn(
+                        "w-full bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400",
+                        item.done && "text-slate-400 line-through",
+                        darkDoc &&
+                          whenDark(
+                            theme,
+                            item.done ? "text-zinc-500" : "text-zinc-100",
+                          ),
+                      )}
+                    />
+                  ) : (
+                    <span
+                      className={cn(
+                        "block text-sm font-medium text-slate-800",
+                        item.done && "text-slate-400 line-through",
+                        darkDoc &&
+                          whenDark(
+                            theme,
+                            item.done ? "text-zinc-500" : "text-zinc-100",
+                          ),
+                      )}
+                    >
+                      {item.task}
+                    </span>
+                  )}
                   {(item.question ||
                     item.commitment ||
                     item.timestamp ||
@@ -130,18 +152,20 @@ export default function FollowUpSection({
                     </span>
                   )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => onRemoveItem(item.id)}
-                  className={cn(
-                    "mt-0.5 inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md text-slate-400 hover:bg-white hover:text-slate-700",
-                    darkDoc &&
-                      whenDark(theme, "hover:bg-zinc-800 hover:text-zinc-200"),
-                  )}
-                  aria-label="후속 조치 삭제"
-                >
-                  <X className="size-3.5" />
-                </button>
+                {canEdit ? (
+                  <button
+                    type="button"
+                    onClick={() => onRemoveItem(item.id)}
+                    className={cn(
+                      "mt-0.5 inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md text-slate-400 hover:bg-white hover:text-slate-700",
+                      darkDoc &&
+                        whenDark(theme, "hover:bg-zinc-800 hover:text-zinc-200"),
+                    )}
+                    aria-label="후속 조치 삭제"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                ) : null}
               </div>
             </li>
           ))}
