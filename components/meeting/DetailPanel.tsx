@@ -169,6 +169,9 @@ export default function DetailPanel({
               actionItems={detail.actionItems}
               onSummaryChange={detail.setSummaryText}
               onToggleActionItem={detail.toggleActionItem}
+              onChangeActionItem={detail.changeActionItem}
+              onAddActionItem={detail.addActionItem}
+              onRemoveActionItem={detail.removeActionItem}
               onSeek={detail.handleSeek}
               hideUI={detail.hideUI}
               showPrintBlock={detail.showPrintBlock}

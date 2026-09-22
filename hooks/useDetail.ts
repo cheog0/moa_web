@@ -218,7 +218,7 @@ export function useDetail({
       await onUpdateMinutes(meeting.id, {
         summary: summaryText,
         decisions: decisionsText,
-        action_items: actionItems,
+        action_items: actionItems.filter((item) => item.task.trim()),
         reply_draft: replyDraft,
       });
     }
@@ -247,6 +247,24 @@ export function useDetail({
           item.id === id ? { ...item, done: !item.done } : item,
         ),
       );
+    },
+    changeActionItem: (id: string, task: string) => {
+      setActionItems((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, task } : item)),
+      );
+    },
+    addActionItem: () => {
+      setActionItems((prev) => [
+        ...prev,
+        {
+          id: `item-${Date.now()}`,
+          task: "",
+          done: false,
+        },
+      ]);
+    },
+    removeActionItem: (id: string) => {
+      setActionItems((prev) => prev.filter((item) => item.id !== id));
     },
     isPreviewMode,
     setIsPreviewMode,

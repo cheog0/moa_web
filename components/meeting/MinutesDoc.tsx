@@ -19,6 +19,9 @@ export default function MinutesDoc({
   actionItems,
   onSummaryChange,
   onToggleActionItem,
+  onChangeActionItem,
+  onAddActionItem,
+  onRemoveActionItem,
   onSeek,
   hideUI,
   showPrintBlock,
@@ -33,6 +36,9 @@ export default function MinutesDoc({
   actionItems: ActionItem[];
   onSummaryChange: (value: string) => void;
   onToggleActionItem: (id: string) => void;
+  onChangeActionItem: (id: string, task: string) => void;
+  onAddActionItem: () => void;
+  onRemoveActionItem: (id: string) => void;
   onSeek?: (timeStr: string) => void;
   hideUI: string;
   showPrintBlock: string;
@@ -136,6 +142,9 @@ export default function MinutesDoc({
             <FollowUpSection
               actionItems={actionItems}
               onToggleItem={onToggleActionItem}
+              onChangeItem={onChangeActionItem}
+              onAddItem={onAddActionItem}
+              onRemoveItem={onRemoveActionItem}
               onSeek={onSeek}
               hideUI={hideUI}
               showPrintBlock={showPrintBlock}
