@@ -1,0 +1,2 @@
+alter table public.user_settings
+add column if not exists personal_templates jsonb default '[]'::jsonb;
