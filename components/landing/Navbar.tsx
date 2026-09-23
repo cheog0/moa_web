@@ -18,11 +18,11 @@ export default function Navbar() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 bg-black text-white">
-      <div className="mx-auto flex h-16 w-full max-w-[1180px] items-center justify-between px-5 sm:px-8">
+      <div className="flex h-16 w-full items-center justify-between px-5 sm:px-8 lg:px-10">
         <a href="#top" className="flex items-center" aria-label="Raple 홈">
           <Logo dark className="h-[22px]" />
         </a>
-        <nav className="hidden items-center gap-8 text-[14px] text-white/70 md:flex">
+        <nav className="hidden items-center gap-6 text-[14px] text-white/70 sm:flex lg:gap-8">
           {links.map((link) => (
             <a key={link.href} href={link.href} className="transition-colors hover:text-white">
               {link.label}
@@ -38,7 +38,7 @@ export default function Navbar() {
           </a>
           <button
             type="button"
-            className="rounded-lg p-2 text-white md:hidden"
+            className="rounded-lg p-2 text-white sm:hidden"
             aria-label={open ? "메뉴 닫기" : "메뉴"}
             onClick={() => setOpen((value) => !value)}
           >
@@ -52,7 +52,7 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="border-t border-white/10 bg-black px-5 py-4 md:hidden"
+            className="border-t border-white/10 bg-black px-5 py-4 sm:hidden"
           >
             <div className="flex flex-col gap-1 text-sm text-white/75">
               {links.map((link) => (

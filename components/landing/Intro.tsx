@@ -59,7 +59,7 @@ export default function Intro({
               transition={{ delay: 0.7, duration: 0.8 }}
               className="mt-8 text-center text-[18px] font-medium tracking-[-0.03em] text-white/70 sm:text-[22px]"
             >
-              말하고, 기록하고, 앞으로.
+              말하고, 기록하고, 정리하고.
             </motion.p>
           </div>
         </motion.div>

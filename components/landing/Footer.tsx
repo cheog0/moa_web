@@ -8,7 +8,7 @@ export default function Footer() {
         <a href="#top" aria-label="Raple 홈">
           <Logo dark />
         </a>
-        <p className="text-[13px]">말하고, 기록하고, 앞으로.</p>
+        <p className="text-[13px]">말하고, 기록하고, 정리하고.</p>
         <div className="ml-auto flex flex-wrap gap-5 text-[13px] text-white/70">
           <a href="#features">기능</a>
           <a href="#templates">템플릿</a>
