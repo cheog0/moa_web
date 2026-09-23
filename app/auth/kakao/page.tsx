@@ -11,7 +11,7 @@ export default function KakaoOidcCallbackPage() {
     const finish = async () => {
       const res = await fetch("/api/auth/kakao/complete", { method: "POST" });
       if (!res.ok) {
-        router.replace("/?authError=1");
+        router.replace("/login?authError=1");
         return;
       }
 
@@ -22,7 +22,7 @@ export default function KakaoOidcCallbackPage() {
         nickname?: string;
       };
       if (!tokens.id_token) {
-        router.replace("/?authError=1");
+        router.replace("/login?authError=1");
         return;
       }
 
@@ -33,7 +33,7 @@ export default function KakaoOidcCallbackPage() {
       });
 
       if (error) {
-        router.replace("/?authError=1");
+        router.replace("/login?authError=1");
         return;
       }
 

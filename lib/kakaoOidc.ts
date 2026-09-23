@@ -49,7 +49,7 @@ export function getKakaoCredentials() {
 }
 
 export function authErrorUrl(origin: string) {
-  return new URL("/?authError=1", origin);
+  return new URL("/login?authError=1", origin);
 }
 
 export async function fetchKakaoProfile(accessToken: string) {

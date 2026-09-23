@@ -11,7 +11,7 @@ export default function AuthCallbackPage() {
     const finish = async () => {
       const params = new URLSearchParams(window.location.search);
       if (params.get("error")) {
-        router.replace("/?authError=1");
+        router.replace("/login?authError=1");
         return;
       }
 
@@ -19,7 +19,7 @@ export default function AuthCallbackPage() {
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (error) {
-          router.replace("/?authError=1");
+          router.replace("/login?authError=1");
           return;
         }
       }

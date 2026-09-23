@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import AuthScreen from "@/components/auth/AuthScreen";
+import LandingPage from "@/components/landing/LandingPage";
 import Sidebar from "@/components/layout/Sidebar";
 import SettingsPanel from "@/components/settings/SettingsPanel";
 import TemplatePanel from "@/components/settings/TemplatePanel";
@@ -49,7 +49,7 @@ export default function Page() {
       </div>
     );
   }
-  if (!session) return <AuthScreen />;
+  if (!session) return <LandingPage />;
 
   const activeMeetings = workspace.dbMeetings.filter(
     (meeting) => !meeting.deleted_at,

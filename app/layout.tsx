@@ -1,9 +1,23 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
+import { Noto_Sans_KR, Outfit } from "next/font/google";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import InfoNoticeHost from "@/components/ui/InfoNoticeHost";
 import ToastNoticeHost from "@/components/ui/ToastNoticeHost";
 import "./globals.css";
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const noto = Noto_Sans_KR({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "래플",
@@ -33,7 +47,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className="bg-background" suppressHydrationWarning>
+    <html lang="ko" className={`${outfit.variable} ${noto.variable} bg-background`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
