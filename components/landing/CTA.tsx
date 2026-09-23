@@ -19,7 +19,7 @@ export default function CTA() {
           지금 시작됩니다.
         </h2>
         <p className="mt-5 text-[16px] text-white/55">
-          무료로 시작하고, 회의가 문서로 남는 순간을 경험해 보세요.
+          무료로 시작하고, 회의가 문서로 남는 순간을 경험해{"\u00a0"}보세요.
         </p>
         <Magnetic className="mt-10 inline-flex">
           <a

@@ -23,9 +23,9 @@ export default function Hero() {
           </h1>
         </Reveal>
         <Reveal delay={0.16} y={18}>
-          <p className="mt-6 max-w-[560px] text-[17px] leading-8 text-[#5B6573] sm:text-[19px]">
+          <p className="mt-6 max-w-[640px] text-[17px] leading-8 text-[#5B6573] sm:text-[19px]">
             대화에 집중하세요. 래플이 녹음부터 AI 요약, 후속 조치까지
-            실행 가능한 회의록으로 남겨 드립니다.
+            실행 가능한 회의록으로 남겨{"\u00a0"}드립니다.
           </p>
         </Reveal>
         <Reveal delay={0.22} y={16}>

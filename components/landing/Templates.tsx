@@ -17,9 +17,9 @@ export default function Templates() {
             <br />
             <span className="text-[#2F7DE0]">더 똑똑하게.</span>
           </h2>
-          <p className="mt-5 max-w-[460px] text-[16px] leading-7 text-[#748298]">
+          <p className="mt-5 max-w-[520px] text-[16px] leading-7 text-[#748298]">
             미팅, 데일리 스크럼, 기본 회의 양식을 바로 쓰고, 팀에 맞는 포맷은
-            내 템플릿으로 추가해 같은 품질의 회의록을 만드세요.
+            내 템플릿으로 추가해 같은 품질의 회의록을{"\u00a0"}만드세요.
           </p>
           <div className="mt-8 divide-y divide-[#E5EBF3] border-t border-[#E5EBF3]">
             {[

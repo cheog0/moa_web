@@ -8,11 +8,11 @@ import Reveal from "@/components/landing/Reveal";
 const faqs = [
   {
     q: "무료로 쓸 수 있나요?",
-    a: "네. 기본 엔진은 래플이 API를 제공하고, 무료 회원은 월 사용량 한도 안에서 바로 녹음할 수 있습니다. 본인 API 키를 연결한 엔진은 그 한도에 잡히지 않습니다.",
+    a: "네. 기본 엔진은 래플이 API를 제공하고, 무료 회원은 월 사용량 한도 안에서 바로 녹음할 수 있습니다. 본인 API\u00a0키를 연결한 엔진은 그 한도에 잡히지 않습니다.",
   },
   {
     q: "어떤 음성 엔진을 쓰나요?",
-    a: "기본 엔진 외에 Google Gemini, Deepgram, Soniox, ClovaNote를 설정에서 고를 수 있습니다. 기본이 아닌 엔진은 본인 API 키가 필요합니다.",
+    a: "기본 엔진 외에 Google Gemini, Deepgram, Soniox, ClovaNote를 설정에서 고를 수 있습니다. 기본이 아닌 엔진은 본인 API\u00a0키가 필요합니다.",
   },
   {
     q: "회의록은 나중에 고칠 수 있나요?",

@@ -60,9 +60,9 @@ export default function How() {
               <h3 className="mt-8 text-[28px] font-extrabold tracking-[-0.04em] text-black sm:text-[36px]">
                 실시간으로 받아적어요
               </h3>
-              <p className="mt-3 max-w-[640px] text-[16px] leading-7 text-[#5B6573] sm:text-[18px]">
+              <p className="mt-3 max-w-[720px] text-[16px] leading-7 text-[#5B6573] sm:text-[18px]">
                 새 회의 시작을 누르고 대화에 집중하세요. 참석자와 현장 메모까지
-                함께 남길 수 있습니다.
+                함께 남길 수{"\u00a0"}있습니다.
               </p>
             </article>
           </Reveal>
@@ -96,9 +96,9 @@ export default function How() {
               <h3 className="mt-8 text-[28px] font-extrabold tracking-[-0.04em] text-black sm:text-[36px]">
                 회의가 끝나면 AI가 정리해요
               </h3>
-              <p className="mt-3 max-w-[640px] text-[16px] leading-7 text-[#5B6573] sm:text-[18px]">
+              <p className="mt-3 max-w-[720px] text-[16px] leading-7 text-[#5B6573] sm:text-[18px]">
                 녹음은 바로 저장되고, 분석은 뒤에서 이어집니다. 요약과 후속 조치가
-                준비되면 알려 드려요.
+                준비되면 알려{"\u00a0"}드려요.
               </p>
             </article>
           </Reveal>
@@ -129,9 +129,9 @@ export default function How() {
               <h3 className="mt-8 text-[28px] font-extrabold tracking-[-0.04em] text-black sm:text-[36px]">
                 다음 액션이 선명해져요
               </h3>
-              <p className="mt-3 max-w-[640px] text-[16px] leading-7 text-[#5B6573] sm:text-[18px]">
+              <p className="mt-3 max-w-[720px] text-[16px] leading-7 text-[#5B6573] sm:text-[18px]">
                 할 일과 담당자를 회의록에서 바로 확인하고, 타임라인에 묶어 팀의
-                실행으로 이어 가세요.
+                실행으로 이어{"\u00a0"}가세요.
               </p>
               <a
                 href={APP_URL}

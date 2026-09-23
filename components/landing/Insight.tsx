@@ -21,9 +21,9 @@ export default function Insight() {
             <br />
             <span className="text-[#80AAFF]">팀의 새로운 습관.</span>
           </h2>
-          <p className="mt-5 max-w-[440px] text-[16px] leading-7 text-[#A5B3C9]">
-            요약부터 후속 조치까지. 래플은 팀이 같은 페이지를 보게 합니다.
-            인사이트에서 이번 달 회의 패턴도 한눈에 확인할 수 있어요.
+          <p className="mt-5 max-w-[520px] text-[16px] leading-7 text-[#A5B3C9]">
+            요약부터 후속 조치까지. 래플은 팀이 같은 페이지를 보게{"\u00a0"}합니다.
+            인사이트에서 이번 달 회의 패턴도 한눈에 확인할 수{"\u00a0"}있어요.
           </p>
           <a
             href={APP_URL}
