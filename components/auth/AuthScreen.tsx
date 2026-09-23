@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Mic, AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useTheme } from "@/hooks/useTheme";
 import { whenDark } from "@/lib/theme";
@@ -69,25 +69,20 @@ export default function AuthScreen() {
         )}
       >
         <div className="mb-6 flex flex-col items-center">
-          <div
-            className={cn(
-              "mb-3.5 flex size-14 items-center justify-center rounded-full bg-[#E8F3FF]",
-              whenDark(theme, "bg-zinc-800"),
-            )}
-          >
-            <Mic className="size-[26px] text-[#4C9AFF]" />
-          </div>
-          <h1
-            className={cn(
-              "text-[22px] font-extrabold tracking-tight text-[#1C1F24]",
-              whenDark(theme, "text-zinc-50"),
-            )}
-          >
-            Raple
-          </h1>
+          <a href="/" aria-label="Raple 홈">
+            <img
+              src={
+                theme === "dark"
+                  ? "/raple-wordmark-dark.png"
+                  : "/raple-wordmark.png"
+              }
+              alt="Raple"
+              className="h-7 w-auto select-none"
+            />
+          </a>
           <p
             className={cn(
-              "mt-1.5 text-center text-[13px] leading-[1.45] text-[#9AA1AA]",
+              "mt-3 text-center text-[13px] leading-[1.45] text-[#9AA1AA]",
               whenDark(theme, "text-zinc-400"),
             )}
           >
