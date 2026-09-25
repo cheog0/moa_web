@@ -37,18 +37,7 @@ export default function Page() {
   const notices = useNotifications(session?.user?.id);
   const { usage } = useUsage(session?.user?.id, `${recording}:${currentView}`);
 
-  if (loadingSession) {
-    return (
-      <div
-        className={cn(
-          "flex min-h-screen items-center justify-center bg-white",
-          whenDark(theme, "bg-zinc-950 text-zinc-100"),
-        )}
-      >
-        세션 확인 중...
-      </div>
-    );
-  }
+  if (loadingSession) return <LandingPage />;
   if (!session) return <LandingPage />;
 
   const activeMeetings = workspace.dbMeetings.filter(
