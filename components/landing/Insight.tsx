@@ -50,7 +50,7 @@ export default function Insight() {
               <br />
               <span className="text-[#84AFFF]">가장 많이 기록</span>할까요?
             </h3>
-            <div className="mt-6 flex h-[132px] items-end gap-2.5 border-b border-[#405476]">
+            <div className="mt-6 flex h-[132px] items-end gap-2.5">
               {bars.map((height, index) => (
                 <motion.i
                   key={days[index]}
@@ -62,6 +62,7 @@ export default function Insight() {
                 />
               ))}
             </div>
+            <div className="h-px bg-[#405476]" />
             <div className="mt-2 flex justify-between text-[11px] text-[#7588A6]">
               {days.map((day) => (
                 <span key={day}>{day}</span>
