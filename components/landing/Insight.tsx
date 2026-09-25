@@ -36,7 +36,7 @@ export default function Insight() {
         <Reveal delay={0.12} y={48}>
           <motion.div
             whileHover={{ rotate: 0 }}
-            className="rotate-2 rounded-[22px] border border-[#385174] bg-gradient-to-br from-[#1D3157] to-[#111F3D] p-6 shadow-[0_25px_60px_rgba(0,0,0,0.28)]"
+            className="rotate-2 rounded-[22px] bg-gradient-to-br from-[#1D3157] to-[#111F3D] p-6 shadow-[0_25px_60px_rgba(0,0,0,0.28)]"
           >
             <div className="flex items-center justify-between text-[12px] text-[#AEBDD2]">
               <span className="inline-flex items-center gap-2 text-[#B9D2FF]">
