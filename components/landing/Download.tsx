@@ -1,20 +1,5 @@
 import Reveal from "@/components/landing/Reveal";
-import { APP_STORE_URL, PLAY_STORE_URL } from "@/lib/site";
-
-const stores = [
-  {
-    href: APP_STORE_URL,
-    kicker: "Download on the",
-    name: "App Store",
-    mark: "apple" as const,
-  },
-  {
-    href: PLAY_STORE_URL,
-    kicker: "GET IT ON",
-    name: "Google Play",
-    mark: "play" as const,
-  },
-];
+import StoreBadges from "@/components/landing/StoreBadges";
 
 export default function Download() {
   return (
@@ -31,12 +16,9 @@ export default function Download() {
           </h2>
           <p className="mt-5 max-w-[520px] text-[16px] leading-8 text-[#5B6573]">
             아이폰과 안드로이드에서 녹음하고, 웹에서 이어서 볼 수{"\u00a0"}있습니다.
-            계정은 같습니다.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            {stores.map((store) => (
-              <StoreBadge key={store.name} {...store} />
-            ))}
+            <StoreBadges />
           </div>
         </Reveal>
         <Reveal delay={0.08}>
@@ -65,66 +47,3 @@ export default function Download() {
   );
 }
 
-function StoreBadge({
-  href,
-  kicker,
-  name,
-  mark,
-}: {
-  href: string;
-  kicker: string;
-  name: string;
-  mark: "apple" | "play";
-}) {
-  const className =
-    "inline-flex h-14 min-w-[196px] items-center gap-3 rounded-xl bg-black px-4 text-white";
-  const body = (
-    <>
-      {mark === "apple" ? <AppleMark /> : <PlayMark />}
-      <span className="text-left leading-none">
-        <span className="block text-[10px] font-medium tracking-wide text-white/70">
-          {kicker}
-        </span>
-        <span className="mt-1 block text-[18px] font-semibold tracking-[-0.03em]">
-          {name}
-        </span>
-      </span>
-    </>
-  );
-
-  if (!href) {
-    return (
-      <span className={className} aria-disabled="true">
-        {body}
-      </span>
-    );
-  }
-
-  return (
-    <a href={href} target="_blank" rel="noreferrer" className={className}>
-      {body}
-    </a>
-  );
-}
-
-function AppleMark() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-6 shrink-0" aria-hidden="true">
-      <path
-        fill="currentColor"
-        d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.3 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-.1 2.9-2.2c.7-1.1 1-2.1 1-2.2-.1 0-2.3-.9-2.3-3.3ZM14.7 6.2c.6-.8 1.1-1.9.9-3-1 .1-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.2-.5 2.9-1.4Z"
-      />
-    </svg>
-  );
-}
-
-function PlayMark() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-6 shrink-0" aria-hidden="true">
-      <path fill="#34A853" d="M3.5 20.6 13.2 12 3.5 3.4v17.2Z" />
-      <path fill="#FBBC04" d="M16.2 14.7 13.2 12l3-2.7 3.6 2.1c.8.4.8 1.4 0 1.9l-3.6 2.4Z" />
-      <path fill="#4285F4" d="M3.5 3.4 13.2 12l3-2.7L5.2 2.2c-.6-.3-1.3 0-1.7.5v.7Z" />
-      <path fill="#EA4335" d="M13.2 12 3.5 20.6v.7c.4.5 1.1.8 1.7.5L16.2 14.7 13.2 12Z" />
-    </svg>
-  );
-}
