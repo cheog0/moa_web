@@ -13,6 +13,7 @@ export default function Footer() {
           <a href="#features">기능</a>
           <a href="#templates">템플릿</a>
           <a href="#faq">FAQ</a>
+          <a href="#app">앱</a>
           <a href="/privacy">개인정보처리방침</a>
           <a href={APP_URL}>무료로 시작하기</a>
         </div>

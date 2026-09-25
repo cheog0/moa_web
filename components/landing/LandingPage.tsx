@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion, useScroll } from "framer-motion";
 import CTA from "@/components/landing/CTA";
+import Download from "@/components/landing/Download";
 import FAQ from "@/components/landing/FAQ";
 import Footer from "@/components/landing/Footer";
 import Hero from "@/components/landing/Hero";
@@ -44,6 +45,7 @@ export default function LandingPage() {
         <Insight />
         <Templates />
         <FAQ />
+        <Download />
         <CTA />
         <Footer />
       </main>

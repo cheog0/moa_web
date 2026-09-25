@@ -11,6 +11,7 @@ const links = [
   { href: "#features", label: "기능" },
   { href: "#templates", label: "템플릿" },
   { href: "#faq", label: "FAQ" },
+  { href: "#app", label: "앱" },
 ];
 
 export default function Navbar() {
