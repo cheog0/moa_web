@@ -11,7 +11,7 @@ export default function AuthCallbackPage() {
     const finish = async () => {
       const params = new URLSearchParams(window.location.search);
       if (params.get("error")) {
-        router.replace("/login?authError=1");
+        router.replace("/login?authError=google");
         return;
       }
 
@@ -19,7 +19,7 @@ export default function AuthCallbackPage() {
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (error) {
-          router.replace("/login?authError=1");
+          router.replace("/login?authError=google");
           return;
         }
       }
@@ -32,7 +32,7 @@ export default function AuthCallbackPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">
-      카카오 로그인 처리 중...
+      로그인 처리 중...
     </div>
   );
 }
