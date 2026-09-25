@@ -4,7 +4,6 @@ import { ArrowRight } from "lucide-react";
 import LiveStudio from "@/components/landing/LiveStudio";
 import Magnetic from "@/components/landing/Magnetic";
 import Reveal from "@/components/landing/Reveal";
-import StoreBadges from "@/components/landing/StoreBadges";
 import { APP_URL } from "@/lib/site";
 
 export default function Hero() {
@@ -40,7 +39,6 @@ export default function Hero() {
                 <ArrowRight className="size-4" />
               </a>
             </Magnetic>
-            <StoreBadges compact />
             <a
               href="#how"
               className="inline-flex items-center gap-2 rounded-full border border-[#E5E7EB] px-5 py-3 text-[14px] font-semibold text-black"

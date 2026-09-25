@@ -15,11 +15,17 @@ const stores = [
   },
 ];
 
-export default function StoreBadges({ compact = false }: { compact?: boolean }) {
+export default function StoreBadges({
+  compact = false,
+  menu = false,
+}: {
+  compact?: boolean;
+  menu?: boolean;
+}) {
   return (
     <>
       {stores.map((store) => (
-        <StoreBadge key={store.name} compact={compact} {...store} />
+        <StoreBadge key={store.name} compact={compact} menu={menu} {...store} />
       ))}
     </>
   );
@@ -31,34 +37,46 @@ function StoreBadge({
   name,
   mark,
   compact,
+  menu,
 }: {
   href: string;
   kicker: string;
   name: string;
   mark: "apple" | "play";
   compact: boolean;
+  menu: boolean;
 }) {
-  const className = compact
-    ? "inline-flex h-12 items-center gap-2.5 rounded-xl bg-black px-3.5 text-white"
-    : "inline-flex h-14 min-w-[196px] items-center gap-3 rounded-xl bg-black px-4 text-white";
+  const className = menu
+    ? "flex h-12 w-full items-center gap-3 rounded-xl bg-[#F4F7FB] px-3 text-[#1C1F24] transition-colors hover:bg-[#E7F1FF]"
+    : compact
+      ? "inline-flex h-12 items-center gap-2.5 rounded-xl bg-black px-3.5 text-white"
+      : "inline-flex h-14 min-w-[196px] items-center gap-3 rounded-xl bg-black px-4 text-white";
   const body = (
     <>
-      {mark === "apple" ? <AppleMark compact={compact} /> : <PlayMark compact={compact} />}
+      {mark === "apple" ? (
+        <AppleMark compact={compact || menu} />
+      ) : (
+        <PlayMark compact={compact || menu} />
+      )}
       <span className="text-left leading-none">
         <span
           className={
-            compact
-              ? "block text-[9px] font-medium tracking-wide text-white/70"
-              : "block text-[10px] font-medium tracking-wide text-white/70"
+            menu
+              ? "block text-[10px] font-medium tracking-wide text-[#8B95A5]"
+              : compact
+                ? "block text-[9px] font-medium tracking-wide text-white/70"
+                : "block text-[10px] font-medium tracking-wide text-white/70"
           }
         >
           {kicker}
         </span>
         <span
           className={
-            compact
+            menu
               ? "mt-0.5 block text-[14px] font-semibold tracking-[-0.03em]"
-              : "mt-1 block text-[18px] font-semibold tracking-[-0.03em]"
+              : compact
+                ? "mt-0.5 block text-[14px] font-semibold tracking-[-0.03em]"
+                : "mt-1 block text-[18px] font-semibold tracking-[-0.03em]"
           }
         >
           {name}
