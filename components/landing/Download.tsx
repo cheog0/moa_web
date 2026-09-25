@@ -100,7 +100,7 @@ function PhoneStage() {
           />
           <div className="relative overflow-hidden rounded-[33px] bg-[#F4F6F8]">
             <div className="bg-white px-5 pb-3 pt-3">
-              <div className="mx-auto h-[22px] w-[96px] rounded-full bg-[#0B1220]" />
+              <div className="mx-auto h-[18px] w-[72px] rounded-full bg-[#0B1220]" />
               <div className="mt-4 flex items-center justify-between text-[11px] font-semibold text-[#9AA1AA]">
                 <span>09:41</span>
                 <span>래플</span>
