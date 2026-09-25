@@ -29,21 +29,20 @@ const scenes = [
   },
   {
     id: "sync",
-    label: "싱크",
+    label: "리뷰",
     lines: [
-      { who: "지아", text: "랜딩은 실제 워드마크를 쓰는 쪽으로 가요." },
-      { who: "현우", text: "히어로에 회의가 정리되는 장면을 보여주면 좋겠어요." },
-      { who: "지아", text: "좋아요. 복사한 문장은 빼고 제품만 말하죠." },
+      { who: "지아", text: "초안은 흐름은 괜찮은데 결론이 빠져 있어요." },
+      { who: "현우", text: "결정이랑 담당자를 맨 위에 올려둘게요." },
+      { who: "지아", text: "좋아요. 내일 오전에 한 번 더 보고 공유하죠." },
     ],
-    summary: "브랜드 이미지를 맞추고, 히어로에서 회의가 문서로 바뀌는 장면을 보여줍니다.",
-    actions: ["워드마크 적용 · 지아", "라이브 데모 구성 · 현우"],
+    summary: "초안 결론과 담당자를 앞에 두고, 내일 오전에 다시 보고 공유합니다.",
+    actions: ["결론과 담당자 정리 · 현우", "내일 오전 재검토 · 지아"],
   },
 ] as const;
 
-const WAVE = [18, 34, 22, 48, 30, 56, 26, 42, 20, 50, 28, 38, 24, 46, 32, 40];
-
 export default function LiveStudio() {
   const [sceneId, setSceneId] = useState<(typeof scenes)[number]["id"]>("kickoff");
+  const [playId, setPlayId] = useState(0);
   const [typed, setTyped] = useState(0);
   const [phase, setPhase] = useState<"live" | "notes">("live");
   const scene = useMemo(
@@ -52,9 +51,14 @@ export default function LiveStudio() {
   );
   const fullText = scene.lines.map((line) => `${line.who}: ${line.text}`).join("\n");
 
-  useEffect(() => {
+  const play = (id: (typeof scenes)[number]["id"]) => {
+    setSceneId(id);
+    setPlayId((value) => value + 1);
     setTyped(0);
     setPhase("live");
+  };
+
+  useEffect(() => {
     let count = 0;
     let notesTimer = 0;
     const id = window.setInterval(() => {
@@ -71,7 +75,7 @@ export default function LiveStudio() {
       window.clearInterval(id);
       window.clearTimeout(notesTimer);
     };
-  }, [fullText]);
+  }, [fullText, playId]);
 
   const visible = fullText.slice(0, typed);
   const rows = visible.split("\n");
@@ -86,27 +90,13 @@ export default function LiveStudio() {
           </span>
           실시간 회의
         </div>
-        <div className="flex h-10 items-end gap-[3px]">
-          {WAVE.map((base, index) => (
-            <motion.span
-              key={`wave-${index}`}
-              className="w-[3px] rounded-full bg-[#2F7DE0]"
-              animate={{ height: [`${base * 0.35}px`, `${base}px`, `${base * 0.4}px`] }}
-              transition={{
-                duration: 0.9 + (index % 5) * 0.08,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-          ))}
-        </div>
       </div>
 
       <div className="min-h-[320px] px-4 py-5 sm:min-h-[360px] sm:px-6">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           {phase === "live" ? (
             <motion.div
-              key={`live-${scene.id}`}
+              key={`live-${scene.id}-${playId}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -128,9 +118,10 @@ export default function LiveStudio() {
             </motion.div>
           ) : (
             <motion.div
-              key={`notes-${scene.id}`}
+              key={`notes-${scene.id}-${playId}`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
               className="space-y-5"
             >
               <div>
@@ -166,7 +157,7 @@ export default function LiveStudio() {
             <button
               key={item.id}
               type="button"
-              onClick={() => setSceneId(item.id)}
+              onClick={() => play(item.id)}
               className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
                 item.id === sceneId
                   ? "bg-[#2F7DE0] text-white"
