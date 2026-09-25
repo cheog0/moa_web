@@ -56,7 +56,7 @@ export default function Navbar() {
               aria-expanded={appsOpen}
               aria-haspopup="menu"
               onClick={() => setAppsOpen((value) => !value)}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-white bg-transparent px-4 text-[13px]! font-semibold! leading-none! text-white transition-colors hover:bg-white/10"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border-0 bg-transparent px-4 text-[13px]! font-semibold! leading-none! text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] transition-colors hover:bg-white/10"
             >
               앱 설치
               <ChevronDown className={`size-[13px] transition-transform ${appsOpen ? "rotate-180" : ""}`} />
