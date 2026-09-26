@@ -231,10 +231,9 @@ export default function AuthScreen() {
             <Loader2 className="size-[18px] animate-spin" />
           ) : (
             <svg viewBox="0 0 24 24" className="size-[18px]" aria-hidden="true">
-              <circle cx="13" cy="11" r="7.2" fill="currentColor" />
               <path
-                fill="currentColor"
-                d="M6.2 14.6c-.7 2.2-1.8 4.1-2.6 5.2 2-.6 4.4-2 5.6-2.8A7.4 7.4 0 0 1 6.2 14.6Z"
+                fill="#191919"
+                d="M12 3c-5.799 0-10.5 3.664-10.5 8.185 0 2.928 1.899 5.502 4.755 6.984l-.972 3.58c-.086.318.274.57.558.396l4.29-2.844c.64.096 1.296.15 1.969.15 5.799 0 10.5-3.664 10.5-8.185C22.5 6.664 17.799 3 12 3"
               />
             </svg>
           )}
