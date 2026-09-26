@@ -21,6 +21,7 @@ export default function DetailHeader({
   audioUrl,
   isPlaying,
   currentTimeDisplay,
+  totalTimeDisplay,
   hasChanges,
   saveStatus,
   isDownloadOpen,
@@ -39,6 +40,7 @@ export default function DetailHeader({
   audioUrl?: string;
   isPlaying: boolean;
   currentTimeDisplay: string;
+  totalTimeDisplay?: string;
   hasChanges: boolean;
   saveStatus: "idle" | "saving" | "saved";
   isDownloadOpen: boolean;
@@ -81,8 +83,10 @@ export default function DetailHeader({
                 <Play className="size-3.5" fill="currentColor" />
               )}
             </button>
-            <span className="w-9 text-center font-mono text-[11px] font-semibold text-muted-foreground">
-              {currentTimeDisplay}
+            <span className="min-w-9 text-center font-mono text-[11px] font-semibold tabular-nums text-muted-foreground">
+              {totalTimeDisplay
+                ? `${currentTimeDisplay} / ${totalTimeDisplay}`
+                : currentTimeDisplay}
             </span>
           </div>
         )}

@@ -96,6 +96,7 @@ export default function DetailPanel({
             audioUrl={detail.audioUrls[0] || meeting?.audio_url}
             isPlaying={detail.isPlaying}
             currentTimeDisplay={detail.currentTimeDisplay}
+            totalTimeDisplay={detail.totalTimeDisplay}
             hasChanges={detail.hasChanges}
             saveStatus={detail.saveStatus}
             isDownloadOpen={detail.isDownloadOpen}

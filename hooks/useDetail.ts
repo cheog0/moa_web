@@ -49,6 +49,7 @@ export function useDetail({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTimeDisplay, setCurrentTimeDisplay] = useState("00:00");
+  const [totalTimeDisplay, setTotalTimeDisplay] = useState("");
   const [audioUrls, setAudioUrls] = useState<string[]>([]);
   const [currentSrc, setCurrentSrc] = useState("");
   const urlsRef = useRef<string[]>([]);
@@ -124,6 +125,7 @@ export function useDetail({
     pendingPlayRef.current = false;
     setCurrentSrc(audioUrls[0] || "");
     setCurrentTimeDisplay("00:00");
+    setTotalTimeDisplay("");
     setIsPlaying(false);
 
     audioUrls.forEach((url, i) => {
@@ -132,6 +134,8 @@ export function useDetail({
       probe.src = url;
       probe.onloadedmetadata = () => {
         durationsRef.current[i] = probe.duration || 0;
+        const total = durationsRef.current.reduce((sum, item) => sum + (item || 0), 0);
+        if (total > 0) setTotalTimeDisplay(formatClock(total));
       };
     });
   }, [audioUrls]);
@@ -283,6 +287,7 @@ export function useDetail({
     currentSrc,
     isPlaying,
     currentTimeDisplay,
+    totalTimeDisplay,
     hasChanges,
     dateStr,
     normalizedTranscript,
