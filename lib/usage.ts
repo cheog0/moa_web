@@ -57,16 +57,3 @@ export async function fetchUsage(): Promise<UsageSnapshot | null> {
   }
   return snapshotFromPayload(data as Record<string, unknown>);
 }
-
-export async function consumeUsage(seconds: number): Promise<UsageSnapshot | null> {
-  const amount = Math.max(0, Math.round(seconds));
-  if (amount <= 0) return fetchUsage();
-  const { data, error } = await supabase.rpc("consume_free_usage", {
-    p_seconds: amount,
-  });
-  if (error) {
-    console.error("사용량 반영 실패:", error);
-    return null;
-  }
-  return snapshotFromPayload(data as Record<string, unknown>);
-}

@@ -53,10 +53,6 @@ export function userDisplayLabel(user: AuthUserLike): string {
   return "래플 사용자";
 }
 
-export function userDisplayEmail(user: AuthUserLike): string {
-  return pickEmail(user);
-}
-
 export function isKakaoUser(user: AuthUserLike): boolean {
   return (user?.identities ?? []).some((identity) => identity.provider === "kakao");
 }

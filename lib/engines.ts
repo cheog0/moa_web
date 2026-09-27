@@ -31,7 +31,7 @@ export function engineRequiresOwnKey(engine?: string | null) {
   return !isDefaultEngine(engine);
 }
 
-export function engineLabel(engine?: string | null) {
+function engineLabel(engine?: string | null) {
   return ENGINES.find((item) => item.id === engine)?.name || engine || "엔진";
 }
 

@@ -19,10 +19,6 @@ export const PRESET_TEMPLATES: PresetTemplate[] = [
   { id: "basic", name: "기본 회의", body: TEMPLATE_BASIC, builtin: true },
 ];
 
-export function isPresetId(id: string) {
-  return PRESET_TEMPLATES.some((item) => item.id === id);
-}
-
 export function normalizePersonalTemplates(raw: unknown): PersonalTemplate[] {
   if (!raw) return [];
   if (typeof raw === "string") {

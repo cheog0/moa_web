@@ -27,15 +27,6 @@ export function downloadTranscriptFile(transcript: any, meetingTitle: string) {
   URL.revokeObjectURL(url);
 }
 
-export function seekAudio(audio: HTMLAudioElement, timeStr: string) {
-  const parts = timeStr.split(":").map(Number);
-  let seconds = 0;
-  if (parts.length === 2) seconds = parts[0] * 60 + parts[1];
-  if (parts.length === 3) seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
-  audio.currentTime = seconds;
-  audio.play();
-}
-
 function extensionFromUrl(url: string): string {
   try {
     const path = new URL(url).pathname;
