@@ -7,6 +7,7 @@ import {
   locateSegment,
   offsetBefore,
   parseClock,
+  safeDuration,
 } from "@/lib/audioSegments";
 import { downloadAudioFiles, downloadTranscriptFile } from "@/lib/download";
 import { showInfoNotice } from "@/lib/notice";
@@ -132,11 +133,18 @@ export function useDetail({
       const probe = new Audio();
       probe.preload = "metadata";
       probe.src = url;
-      probe.onloadedmetadata = () => {
-        durationsRef.current[i] = probe.duration || 0;
-        const total = durationsRef.current.reduce((sum, item) => sum + (item || 0), 0);
+      const commit = () => {
+        const next = safeDuration(probe.duration);
+        if (next <= 0) return;
+        durationsRef.current[i] = next;
+        const total = durationsRef.current.reduce(
+          (sum, item) => sum + safeDuration(item),
+          0,
+        );
         if (total > 0) setTotalTimeDisplay(formatClock(total));
       };
+      probe.onloadedmetadata = commit;
+      probe.ondurationchange = commit;
     });
   }, [audioUrls]);
 
@@ -145,11 +153,20 @@ export function useDetail({
     if (!audio || !currentSrc) return;
 
     const applyPending = () => {
-      durationsRef.current[indexRef.current] = audio.duration || durationsRef.current[indexRef.current] || 0;
+      const known = safeDuration(audio.duration);
+      if (known > 0) {
+        durationsRef.current[indexRef.current] = known;
+        const total = durationsRef.current.reduce(
+          (sum, item) => sum + safeDuration(item),
+          0,
+        );
+        if (total > 0) setTotalTimeDisplay(formatClock(total));
+      }
       const offset = pendingOffsetRef.current;
       if (offset != null) {
+        const limit = known > 0 ? known : offset;
         try {
-          audio.currentTime = Math.min(offset, Math.max(0, (audio.duration || offset) - 0.05));
+          audio.currentTime = Math.min(offset, Math.max(0, limit - 0.05));
         } catch {
           /* ignore */
         }
@@ -165,7 +182,8 @@ export function useDetail({
     const onPause = () => setIsPlaying(false);
     const onTimeUpdate = () => {
       const global =
-        offsetBefore(durationsRef.current, indexRef.current) + (audio.currentTime || 0);
+        offsetBefore(durationsRef.current, indexRef.current) +
+        safeDuration(audio.currentTime);
       setCurrentTimeDisplay(formatClock(global));
     };
     const onEnded = () => {
@@ -185,6 +203,7 @@ export function useDetail({
     audio.addEventListener("timeupdate", onTimeUpdate);
     audio.addEventListener("ended", onEnded);
     audio.addEventListener("loadedmetadata", applyPending);
+    audio.addEventListener("durationchange", applyPending);
     if (audio.readyState >= 1) applyPending();
 
     return () => {
@@ -193,6 +212,7 @@ export function useDetail({
       audio.removeEventListener("timeupdate", onTimeUpdate);
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("loadedmetadata", applyPending);
+      audio.removeEventListener("durationchange", applyPending);
     };
   }, [currentSrc]);
 

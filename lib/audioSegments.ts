@@ -7,8 +7,16 @@ export function parseClock(timeStr: string): number {
   return parts[0] || 0;
 }
 
+/** HTMLMediaElement.duration can be Infinity/NaN for some webm/stream files. */
+export function safeDuration(seconds: number | null | undefined): number {
+  if (typeof seconds !== "number" || !Number.isFinite(seconds) || seconds < 0) {
+    return 0;
+  }
+  return seconds;
+}
+
 export function formatClock(seconds: number): string {
-  const total = Math.max(0, Math.floor(seconds || 0));
+  const total = Math.floor(safeDuration(seconds));
   const m = Math.floor(total / 60);
   const s = total % 60;
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
@@ -17,7 +25,7 @@ export function formatClock(seconds: number): string {
 export function locateSegment(durations: number[], globalSeconds: number) {
   let acc = 0;
   for (let i = 0; i < durations.length; i++) {
-    const duration = durations[i] || 0;
+    const duration = safeDuration(durations[i]);
     const isLast = i === durations.length - 1;
     if (duration <= 0 && !isLast) {
       return { index: i, offset: Math.max(0, globalSeconds - acc) };
@@ -31,5 +39,7 @@ export function locateSegment(durations: number[], globalSeconds: number) {
 }
 
 export function offsetBefore(durations: number[], index: number): number {
-  return durations.slice(0, Math.max(0, index)).reduce((sum, value) => sum + (value || 0), 0);
+  return durations
+    .slice(0, Math.max(0, index))
+    .reduce((sum, value) => sum + safeDuration(value), 0);
 }
