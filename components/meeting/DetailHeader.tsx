@@ -26,7 +26,7 @@ export default function DetailHeader({
   saveStatus,
   isDownloadOpen,
   onClose,
-  onTogglePlay,
+  onOpenPlayer,
   onSave,
   onPreview,
   onToggleDownload,
@@ -45,7 +45,7 @@ export default function DetailHeader({
   saveStatus: "idle" | "saving" | "saved";
   isDownloadOpen: boolean;
   onClose: () => void;
-  onTogglePlay: () => void;
+  onOpenPlayer: () => void;
   onSave: () => void;
   onPreview: () => void;
   onToggleDownload: () => void;
@@ -72,23 +72,27 @@ export default function DetailHeader({
       </div>
       <div className="flex items-center gap-2 shrink-0 relative">
         {audioUrl && (
-          <div className="hidden md:flex mr-1 items-center gap-2 rounded-full border border-border bg-muted/40 px-2.5 py-1 shadow-sm transition-colors hover:bg-muted/80 shrink-0">
-            <button
-              onClick={onTogglePlay}
-              className="text-primary hover:text-sky-600 transition-colors"
-            >
+          <button
+            type="button"
+            onClick={onOpenPlayer}
+            className="mr-1 inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-2.5 py-1 shadow-sm transition-colors hover:bg-muted/80 shrink-0"
+          >
+            <span className="text-primary">
               {isPlaying ? (
                 <Pause className="size-3.5" fill="currentColor" />
               ) : (
                 <Play className="size-3.5" fill="currentColor" />
               )}
-            </button>
+            </span>
             <span className="min-w-9 text-center font-mono text-[11px] font-semibold tabular-nums text-muted-foreground">
               {totalTimeDisplay
                 ? `${currentTimeDisplay} / ${totalTimeDisplay}`
                 : currentTimeDisplay}
             </span>
-          </div>
+            <span className="hidden text-[11px] font-semibold text-[#2F7DE0] sm:inline">
+              듣기
+            </span>
+          </button>
         )}
         <Button
           variant={hasChanges ? "default" : "outline"}

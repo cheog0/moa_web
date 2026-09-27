@@ -51,6 +51,8 @@ export function useDetail({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTimeDisplay, setCurrentTimeDisplay] = useState("00:00");
   const [totalTimeDisplay, setTotalTimeDisplay] = useState("");
+  const [currentSeconds, setCurrentSeconds] = useState(0);
+  const [totalSeconds, setTotalSeconds] = useState(0);
   const [audioUrls, setAudioUrls] = useState<string[]>([]);
   const [currentSrc, setCurrentSrc] = useState("");
   const urlsRef = useRef<string[]>([]);
@@ -58,6 +60,47 @@ export function useDetail({
   const durationsRef = useRef<number[]>([]);
   const pendingOffsetRef = useRef<number | null>(null);
   const pendingPlayRef = useRef(false);
+
+  const refreshTotalFromDurations = () => {
+    const total = durationsRef.current.reduce(
+      (sum, item) => sum + safeDuration(item),
+      0,
+    );
+    setTotalSeconds(total);
+    setTotalTimeDisplay(total > 0 ? formatClock(total) : "");
+  };
+
+  const seekToSeconds = (globalSeconds: number, autoPlay = true) => {
+    const urls = urlsRef.current;
+    if (!urls.length) return;
+    const knownTotal = durationsRef.current.reduce(
+      (sum, item) => sum + safeDuration(item),
+      0,
+    );
+    const target = Math.max(0, globalSeconds);
+    const capped =
+      knownTotal > 0 ? Math.min(target, Math.max(0, knownTotal - 0.05)) : target;
+    const { index, offset } = locateSegment(durationsRef.current, capped);
+    pendingPlayRef.current = autoPlay;
+    setCurrentSeconds(capped);
+    setCurrentTimeDisplay(formatClock(capped));
+    if (index !== indexRef.current) {
+      indexRef.current = index;
+      pendingOffsetRef.current = offset;
+      setCurrentSrc(urls[index]);
+      return;
+    }
+    const audio = audioRef.current;
+    if (!audio) return;
+    try {
+      audio.currentTime = offset;
+    } catch {
+      pendingOffsetRef.current = offset;
+    }
+    if (autoPlay) {
+      audio.play().catch(() => setIsPlaying(false));
+    }
+  };
 
   const loadedActionItems = useMemo(
     () => normalizeActionItems(minutes?.action_items),
@@ -127,6 +170,8 @@ export function useDetail({
     setCurrentSrc(audioUrls[0] || "");
     setCurrentTimeDisplay("00:00");
     setTotalTimeDisplay("");
+    setCurrentSeconds(0);
+    setTotalSeconds(0);
     setIsPlaying(false);
 
     audioUrls.forEach((url, i) => {
@@ -137,11 +182,7 @@ export function useDetail({
         const next = safeDuration(probe.duration);
         if (next <= 0) return;
         durationsRef.current[i] = next;
-        const total = durationsRef.current.reduce(
-          (sum, item) => sum + safeDuration(item),
-          0,
-        );
-        if (total > 0) setTotalTimeDisplay(formatClock(total));
+        refreshTotalFromDurations();
       };
       probe.onloadedmetadata = commit;
       probe.ondurationchange = commit;
@@ -156,11 +197,7 @@ export function useDetail({
       const known = safeDuration(audio.duration);
       if (known > 0) {
         durationsRef.current[indexRef.current] = known;
-        const total = durationsRef.current.reduce(
-          (sum, item) => sum + safeDuration(item),
-          0,
-        );
-        if (total > 0) setTotalTimeDisplay(formatClock(total));
+        refreshTotalFromDurations();
       }
       const offset = pendingOffsetRef.current;
       if (offset != null) {
@@ -184,6 +221,7 @@ export function useDetail({
       const global =
         offsetBefore(durationsRef.current, indexRef.current) +
         safeDuration(audio.currentTime);
+      setCurrentSeconds(global);
       setCurrentTimeDisplay(formatClock(global));
     };
     const onEnded = () => {
@@ -308,6 +346,8 @@ export function useDetail({
     isPlaying,
     currentTimeDisplay,
     totalTimeDisplay,
+    currentSeconds,
+    totalSeconds,
     hasChanges,
     dateStr,
     normalizedTranscript,
@@ -373,27 +413,20 @@ export function useDetail({
       audio.play().catch(() => setIsPlaying(false));
     },
     handleSeek: (timeStr: string) => {
-      const urls = urlsRef.current;
-      if (!urls.length) return;
-      const { index, offset } = locateSegment(
-        durationsRef.current,
-        parseClock(timeStr),
+      seekToSeconds(parseClock(timeStr), true);
+    },
+    seekToSeconds,
+    skipBy: (delta: number) => {
+      const knownTotal = durationsRef.current.reduce(
+        (sum, item) => sum + safeDuration(item),
+        0,
       );
-      pendingPlayRef.current = true;
-      if (index !== indexRef.current || urls[index] !== currentSrc) {
-        indexRef.current = index;
-        pendingOffsetRef.current = offset;
-        setCurrentSrc(urls[index]);
-        return;
-      }
       const audio = audioRef.current;
-      if (!audio) return;
-      try {
-        audio.currentTime = offset;
-      } catch {
-        pendingOffsetRef.current = offset;
-      }
-      audio.play().catch(() => setIsPlaying(false));
+      const live =
+        offsetBefore(durationsRef.current, indexRef.current) +
+        safeDuration(audio?.currentTime);
+      const next = live + delta;
+      seekToSeconds(knownTotal > 0 ? Math.min(Math.max(0, next), knownTotal) : Math.max(0, next), true);
     },
     handleDownloadAudio: async () => {
       if (!audioUrls.length) {

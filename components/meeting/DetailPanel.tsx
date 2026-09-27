@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pencil } from "lucide-react";
 import { MeetingMinutes } from "@/lib/constants";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import AudioPlayerModal from "@/components/meeting/AudioPlayerModal";
 import PreviewBar from "@/components/meeting/PreviewBar";
 import DetailHeader from "@/components/meeting/DetailHeader";
 import MinutesDoc from "@/components/meeting/MinutesDoc";
@@ -34,6 +35,7 @@ export default function DetailPanel({
   linkedTimelineNames?: string[];
 }) {
   const [toast, setToast] = useState<ToastConfig | null>(null);
+  const [playerOpen, setPlayerOpen] = useState(false);
   const detail = useDetail({
     minutes,
     meeting,
@@ -101,7 +103,7 @@ export default function DetailPanel({
             saveStatus={detail.saveStatus}
             isDownloadOpen={detail.isDownloadOpen}
             onClose={detail.handleSmartClose}
-            onTogglePlay={detail.togglePlay}
+            onOpenPlayer={() => setPlayerOpen(true)}
             onSave={detail.handleManualSave}
             onPreview={() => {
               detail.setTab("minutes");
@@ -213,6 +215,19 @@ export default function DetailPanel({
         </main>
       </div>
       {toast && <StatusToast toast={toast} />}
+      <AudioPlayerModal
+        open={playerOpen}
+        title={detail.meetingTitle}
+        isPlaying={detail.isPlaying}
+        currentSeconds={detail.currentSeconds}
+        totalSeconds={detail.totalSeconds}
+        currentTimeDisplay={detail.currentTimeDisplay}
+        totalTimeDisplay={detail.totalTimeDisplay}
+        onClose={() => setPlayerOpen(false)}
+        onTogglePlay={detail.togglePlay}
+        onSeek={detail.seekToSeconds}
+        onSkip={detail.skipBy}
+      />
       {detail.isDeleteModalOpen && (
         <ConfirmDialog
           title="회의록 삭제"
