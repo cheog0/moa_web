@@ -21,7 +21,7 @@ export default function Templates() {
             미팅, 데일리 스크럼, 기본 회의 양식을 바로 쓰고, 팀에 맞는 포맷은
             내 템플릿으로 추가해 같은 품질의 회의록을{"\u00a0"}만드세요.
           </p>
-          <div className="mt-8 divide-y divide-[#E5EBF3] border-t border-[#E5EBF3]">
+          <div className="mt-8 divide-y divide-[#E5EBF3] shadow-[inset_0_1px_0_#E5EBF3]">
             {[
               ["맞춤 템플릿", "기본 양식은 미리보기로, 내 양식만 수정", FileText],
               ["업무 매뉴얼", "회신 초안에 팀의 기준을 반영", Zap],
@@ -42,7 +42,7 @@ export default function Templates() {
         </Reveal>
         <Reveal delay={0.12} className="relative">
           <div className="rounded-[26px] bg-[#F2F6FC] p-6 sm:p-8">
-            <div className="rounded-[14px] border border-[#E4EAF3] bg-white p-7 shadow-[0_20px_40px_rgba(166,184,206,0.26)]">
+            <div className="rounded-[14px] bg-white p-7 shadow-[inset_0_0_0_1px_#E4EAF3,0_20px_40px_rgba(166,184,206,0.26)]">
               <p className="text-[10px] font-extrabold tracking-[0.16em] text-[#2F7DE0]">
                 DAILY SCRUM
               </p>
@@ -66,7 +66,7 @@ export default function Templates() {
           <motion.div
             animate={{ y: [0, -7, 0] }}
             transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute right-2 top-3 inline-flex items-center gap-1.5 rounded-xl border border-[#E2EAF5] bg-white px-3 py-2 text-[11px] font-semibold text-[#55708E] shadow-lg"
+            className="absolute right-2 top-3 inline-flex items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-[11px] font-semibold text-[#55708E] shadow-[inset_0_0_0_1px_#E2EAF5,0_10px_24px_rgba(15,23,42,0.12)]"
           >
             <Sparkles className="size-3.5 text-[#2F7DE0]" />
             AI가 정리했어요
@@ -74,7 +74,7 @@ export default function Templates() {
           <motion.div
             animate={{ y: [0, 8, 0] }}
             transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-4 left-1 inline-flex items-center gap-1.5 rounded-xl border border-[#E2EAF5] bg-white px-3 py-2 text-[11px] font-semibold text-[#55708E] shadow-lg"
+            className="absolute bottom-4 left-1 inline-flex items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-[11px] font-semibold text-[#55708E] shadow-[inset_0_0_0_1px_#E2EAF5,0_10px_24px_rgba(15,23,42,0.12)]"
           >
             <CalendarDays className="size-3.5 text-[#2F7DE0]" />
             9월 23일

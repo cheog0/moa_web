@@ -28,37 +28,112 @@
   --radius-sm: calc(var(--radius) * .6);
 }
 
-:root { color-scheme: light; --background: oklch(0.985 0.008 90); --foreground: oklch(0.22 0.025 260); --card: oklch(1 0 0); --card-foreground: oklch(0.22 0.025 260); --popover: oklch(1 0 0); --popover-foreground: oklch(0.22 0.025 260); --primary: oklch(0.47 0.18 258); --primary-foreground: oklch(0.99 0 0); --secondary: oklch(0.95 0.015 260); --secondary-foreground: oklch(0.3 0.04 260); --muted: oklch(0.955 0.01 90); --muted-foreground: oklch(0.53 0.03 260); --accent: oklch(0.94 0.035 258); --accent-foreground: oklch(0.35 0.12 258); --destructive: oklch(0.58 0.2 25); --border: oklch(0.9 0.02 260); --input: oklch(0.88 0.02 260); --ring: oklch(0.6 0.15 258); --radius: 0.7rem; --sidebar: oklch(0.97 0.015 260); --sidebar-foreground: oklch(0.25 0.03 260); --sidebar-border: oklch(0.9 0.02 260); }
+/* Hex first so browsers without oklch still get light borders (not black). */
+:root {
+  color-scheme: light;
+  --background: #f7f7f5;
+  --background: oklch(0.985 0.008 90);
+  --foreground: #2a3140;
+  --foreground: oklch(0.22 0.025 260);
+  --card: #ffffff;
+  --card-foreground: #2a3140;
+  --card-foreground: oklch(0.22 0.025 260);
+  --popover: #ffffff;
+  --popover-foreground: #2a3140;
+  --popover-foreground: oklch(0.22 0.025 260);
+  --primary: #2f6fed;
+  --primary: oklch(0.47 0.18 258);
+  --primary-foreground: #ffffff;
+  --secondary: #eef0f4;
+  --secondary: oklch(0.95 0.015 260);
+  --secondary-foreground: #3a4254;
+  --secondary-foreground: oklch(0.3 0.04 260);
+  --muted: #f1f1ee;
+  --muted: oklch(0.955 0.01 90);
+  --muted-foreground: #6b7385;
+  --muted-foreground: oklch(0.53 0.03 260);
+  --accent: #e8f0ff;
+  --accent: oklch(0.94 0.035 258);
+  --accent-foreground: #2f5bb8;
+  --accent-foreground: oklch(0.35 0.12 258);
+  --destructive: #e04b4b;
+  --destructive: oklch(0.58 0.2 25);
+  --border: #e4e7ec;
+  --border: oklch(0.9 0.02 260);
+  --input: #dce0e6;
+  --input: oklch(0.88 0.02 260);
+  --ring: #5b8def;
+  --ring: oklch(0.6 0.15 258);
+  --radius: 0.7rem;
+  --sidebar: #f2f3f7;
+  --sidebar: oklch(0.97 0.015 260);
+  --sidebar-foreground: #303848;
+  --sidebar-foreground: oklch(0.25 0.03 260);
+  --sidebar-border: #e4e7ec;
+  --sidebar-border: oklch(0.9 0.02 260);
+}
 
 .dark {
   color-scheme: dark;
+  --background: #1c1f27;
   --background: oklch(0.18 0.015 260);
+  --foreground: #f3f4f6;
   --foreground: oklch(0.96 0.01 260);
+  --card: #252833;
   --card: oklch(0.22 0.015 260);
+  --card-foreground: #f3f4f6;
   --card-foreground: oklch(0.96 0.01 260);
+  --popover: #252833;
   --popover: oklch(0.22 0.015 260);
+  --popover-foreground: #f3f4f6;
   --popover-foreground: oklch(0.96 0.01 260);
+  --primary: #7eb0ff;
   --primary: oklch(0.72 0.14 258);
+  --primary-foreground: #1a2030;
   --primary-foreground: oklch(0.18 0.02 260);
+  --secondary: #343846;
   --secondary: oklch(0.28 0.02 260);
+  --secondary-foreground: #e8eaed;
   --secondary-foreground: oklch(0.92 0.01 260);
+  --muted: #343846;
   --muted: oklch(0.28 0.015 260);
+  --muted-foreground: #a8aebc;
   --muted-foreground: oklch(0.72 0.02 260);
+  --accent: #3a4260;
   --accent: oklch(0.3 0.04 258);
+  --accent-foreground: #e4e9f5;
   --accent-foreground: oklch(0.9 0.02 258);
+  --destructive: #f07171;
   --destructive: oklch(0.7 0.18 25);
+  --border: #3d4354;
   --border: oklch(0.32 0.02 260);
+  --input: #454b5c;
   --input: oklch(0.35 0.02 260);
+  --ring: #6b9dff;
   --ring: oklch(0.65 0.12 258);
+  --sidebar: #21252f;
   --sidebar: oklch(0.2 0.02 260);
+  --sidebar-foreground: #eceef2;
   --sidebar-foreground: oklch(0.93 0.01 260);
+  --sidebar-border: #3d4354;
   --sidebar-border: oklch(0.32 0.02 260);
 }
 
-* { @apply border-border outline-ring/50; }
-html { background: var(--background); }
-body { @apply bg-background text-foreground antialiased; }
+/* Must stay in @layer base so border-* utilities can override on all browsers. */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    background: var(--background);
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
 button, input { font: inherit; }
+
 
 .landing-root {
   font-family: var(--font-sans), "Apple SD Gothic Neo", sans-serif;

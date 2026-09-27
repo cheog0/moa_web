@@ -81,8 +81,8 @@ export default function LiveStudio() {
   const rows = visible.split("\n");
 
   return (
-    <div className="overflow-hidden rounded-[28px] border border-[#E8EAEE] bg-white shadow-[0_30px_80px_rgba(16,24,40,0.12)]">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#EEF1F5] px-4 py-3 sm:px-5">
+    <div className="overflow-hidden rounded-[28px] bg-white shadow-[inset_0_0_0_1px_#E8EAEE,0_30px_80px_rgba(16,24,40,0.12)]">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 shadow-[inset_0_-1px_0_#EEF1F5] sm:px-5">
         <div className="flex items-center gap-2 text-[13px] font-semibold text-[#E11D48]">
           <span className="relative grid size-6 place-items-center">
             <span className="absolute inset-0 animate-ping rounded-full bg-[#E11D48]/20" />
@@ -151,7 +151,7 @@ export default function LiveStudio() {
         </AnimatePresence>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#EEF1F5] px-4 py-3 sm:px-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 shadow-[inset_0_1px_0_#EEF1F5] sm:px-5">
         <div className="flex flex-wrap gap-2">
           {scenes.map((item) => (
             <button
