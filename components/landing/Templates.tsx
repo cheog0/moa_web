@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, CalendarDays, FileText, Sparkles, Zap } from "lucide-react";
+import { ArrowRight, FileText, Sparkles, Zap } from "lucide-react";
 import Reveal from "@/components/landing/Reveal";
 
 export default function Templates() {
@@ -70,14 +70,6 @@ export default function Templates() {
           >
             <Sparkles className="size-3.5 text-[#2F7DE0]" />
             AI가 정리했어요
-          </motion.div>
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-4 left-1 inline-flex items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-[11px] font-semibold text-[#55708E] shadow-[inset_0_0_0_1px_#E2EAF5,0_10px_24px_rgba(15,23,42,0.12)]"
-          >
-            <CalendarDays className="size-3.5 text-[#2F7DE0]" />
-            9월 23일
           </motion.div>
         </Reveal>
       </div>
