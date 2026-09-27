@@ -58,7 +58,10 @@ export default function AudioPlayerModal({
   return (
     <div
       className="fixed inset-0 z-[60] flex items-end justify-center bg-black/45 p-3 backdrop-blur-sm sm:items-center sm:p-6 print:hidden"
-      onClick={onClose}
+      onClick={(event) => {
+        event.stopPropagation();
+        onClose();
+      }}
     >
       <div
         className="w-full max-w-lg overflow-hidden rounded-[28px] bg-white shadow-[0_24px_80px_rgba(15,23,42,0.28)]"
