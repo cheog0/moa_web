@@ -89,9 +89,6 @@ export default function DetailHeader({
                 ? `${currentTimeDisplay} / ${totalTimeDisplay}`
                 : currentTimeDisplay}
             </span>
-            <span className="hidden text-[11px] font-semibold text-[#2F7DE0] sm:inline">
-              듣기
-            </span>
           </button>
         )}
         <Button

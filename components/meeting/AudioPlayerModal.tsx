@@ -158,10 +158,6 @@ export default function AudioPlayerModal({
               <span className="mt-0.5 text-[10px] font-bold">10</span>
             </button>
           </div>
-
-          <p className="mt-4 text-center text-[12px] text-[#9AA3AF]">
-            ← → 10초 이동 · Space 재생/일시정지
-          </p>
         </div>
       </div>
     </div>
