@@ -60,12 +60,14 @@ export function useDetail({
   const durationsRef = useRef<number[]>([]);
   const pendingOffsetRef = useRef<number | null>(null);
   const pendingPlayRef = useRef(false);
+  const storedDuration = safeDuration(Number(meeting?.duration) || 0);
 
   const refreshTotalFromDurations = () => {
-    const total = durationsRef.current.reduce(
+    const measured = durationsRef.current.reduce(
       (sum, item) => sum + safeDuration(item),
       0,
     );
+    const total = measured > 0 ? measured : storedDuration;
     setTotalSeconds(total);
     setTotalTimeDisplay(total > 0 ? formatClock(total) : "");
   };
@@ -164,14 +166,16 @@ export function useDetail({
   useEffect(() => {
     urlsRef.current = audioUrls;
     indexRef.current = 0;
-    durationsRef.current = audioUrls.map(() => 0);
+    durationsRef.current = audioUrls.map((_, i) =>
+      audioUrls.length === 1 && i === 0 ? storedDuration : 0,
+    );
     pendingOffsetRef.current = null;
     pendingPlayRef.current = false;
     setCurrentSrc(audioUrls[0] || "");
     setCurrentTimeDisplay("00:00");
-    setTotalTimeDisplay("");
     setCurrentSeconds(0);
-    setTotalSeconds(0);
+    setTotalSeconds(storedDuration);
+    setTotalTimeDisplay(storedDuration > 0 ? formatClock(storedDuration) : "");
     setIsPlaying(false);
 
     audioUrls.forEach((url, i) => {
@@ -187,7 +191,7 @@ export function useDetail({
       probe.onloadedmetadata = commit;
       probe.ondurationchange = commit;
     });
-  }, [audioUrls]);
+  }, [audioUrls, storedDuration]);
 
   useEffect(() => {
     const audio = audioRef.current;
