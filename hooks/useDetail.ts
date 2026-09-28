@@ -221,12 +221,13 @@ export function useDetail({
 
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
-    const onTimeUpdate = () => {
+    const syncClock = () => {
       const global =
         offsetBefore(durationsRef.current, indexRef.current) +
         safeDuration(audio.currentTime);
       setCurrentSeconds(global);
-      setCurrentTimeDisplay(formatClock(global));
+      const label = formatClock(global);
+      setCurrentTimeDisplay((prev) => (prev === label ? prev : label));
     };
     const onEnded = () => {
       const next = indexRef.current + 1;
@@ -242,7 +243,8 @@ export function useDetail({
 
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
-    audio.addEventListener("timeupdate", onTimeUpdate);
+    audio.addEventListener("timeupdate", syncClock);
+    audio.addEventListener("seeked", syncClock);
     audio.addEventListener("ended", onEnded);
     audio.addEventListener("loadedmetadata", applyPending);
     audio.addEventListener("durationchange", applyPending);
@@ -251,12 +253,32 @@ export function useDetail({
     return () => {
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);
-      audio.removeEventListener("timeupdate", onTimeUpdate);
+      audio.removeEventListener("timeupdate", syncClock);
+      audio.removeEventListener("seeked", syncClock);
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("loadedmetadata", applyPending);
       audio.removeEventListener("durationchange", applyPending);
     };
   }, [currentSrc]);
+
+  useEffect(() => {
+    if (!isPlaying) return;
+    let frame = 0;
+    const tick = () => {
+      const audio = audioRef.current;
+      if (audio && !audio.paused) {
+        const global =
+          offsetBefore(durationsRef.current, indexRef.current) +
+          safeDuration(audio.currentTime);
+        setCurrentSeconds(global);
+        const label = formatClock(global);
+        setCurrentTimeDisplay((prev) => (prev === label ? prev : label));
+      }
+      frame = window.requestAnimationFrame(tick);
+    };
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
+  }, [isPlaying, currentSrc]);
 
   const dateStr = meeting?.created_at
     ? new Date(meeting.created_at).toLocaleDateString("ko-KR")
