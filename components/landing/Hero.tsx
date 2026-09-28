@@ -43,7 +43,7 @@ export default function Hero() {
               href="#how"
               className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-[14px] font-semibold text-black shadow-[inset_0_0_0_1px_#E5E7EB]"
             >
-              어떻게 작동하나요?
+              어떻게 사용하나요?
             </a>
           </div>
         </Reveal>
