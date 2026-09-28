@@ -125,7 +125,7 @@ export default function ItemList({
                 />
                 <p
                   className={cn(
-                    "font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400",
+                    "font-mono text-sm font-semibold uppercase tracking-[0.12em] text-slate-400",
                     whenDark(theme, "text-zinc-300"),
                   )}
                 >
