@@ -62,9 +62,9 @@ export default function PrivacyPage() {
               녹음 파일, 회의 제목, 참석자, 받아쓴 내용, 요약, 후속 조치,
               템플릿, 업무 매뉴얼은 그 사용자의 계정에 저장됩니다. 기본 음성
               엔진은 래플이 제공하는 엔진으로 음성을 글로 바꿉니다. 설정에서
-              Google Gemini, Deepgram, Soniox, ClovaNote를 고르면 사용자가
-              넣은 API 키로 그 서비스에 음성이 전달됩니다. API 키도 그
-              사용자의 설정에 저장됩니다.
+              Google Gemini, Deepgram, Soniox를 고르면 사용자가 넣은 API
+              키로 그 서비스에 음성이 전달됩니다. API 키도 그 사용자의
+              설정에 저장됩니다.
             </p>
           </section>
 

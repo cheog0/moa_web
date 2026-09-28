@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { AnimatePresence } from "framer-motion";
 import LandingPage from "@/components/landing/LandingPage";
 import AuthBoot from "@/components/auth/AuthBoot";
 import Sidebar from "@/components/layout/Sidebar";
@@ -33,13 +34,23 @@ export default function Page() {
   const [recording, setRecording] = useState(false);
   const [query, setQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [bootReady, setBootReady] = useState(false);
 
   const workspace = useWorkspace(session?.user?.id, recording);
   const notices = useNotifications(session?.user?.id);
   const { usage } = useUsage(session?.user?.id, `${recording}:${currentView}`);
 
-  if (loadingSession) return <AuthBoot />;
-  if (!session) return <LandingPage />;
+  useEffect(() => {
+    if (loadingSession || !session) {
+      setBootReady(false);
+      return;
+    }
+    // Let the workspace paint under the overlay, then crossfade.
+    const id = window.setTimeout(() => setBootReady(true), 60);
+    return () => window.clearTimeout(id);
+  }, [loadingSession, session]);
+
+  if (!loadingSession && !session) return <LandingPage />;
 
   const activeMeetings = workspace.dbMeetings.filter(
     (meeting) => !meeting.deleted_at,
@@ -96,7 +107,11 @@ export default function Page() {
                     ? ["타임라인", currentProject?.name || "프로젝트"]
                     : ["워크스페이스", "대시보드"];
 
+  const showBoot = !session || !bootReady;
+
   return (
+    <>
+      {session ? (
     <div
       className={cn(
         "flex h-screen w-full overflow-hidden bg-white text-foreground print:block print:h-auto print:max-h-none print:overflow-visible print:bg-white",
@@ -253,5 +268,8 @@ export default function Page() {
         />
       )}
     </div>
+      ) : null}
+      <AnimatePresence>{showBoot && <AuthBoot key="auth-boot" />}</AnimatePresence>
+    </>
   );
 }

@@ -17,10 +17,6 @@ export const ENGINES = [
     id: "soniox",
     name: "Soniox",
   },
-  {
-    id: "clova",
-    name: "ClovaNote",
-  },
 ] as const;
 
 export function isDefaultEngine(engine?: string | null) {
