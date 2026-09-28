@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import LandingPage from "@/components/landing/LandingPage";
+import AuthBoot from "@/components/auth/AuthBoot";
 import Sidebar from "@/components/layout/Sidebar";
 import SettingsPanel from "@/components/settings/SettingsPanel";
 import TemplatePanel from "@/components/settings/TemplatePanel";
@@ -37,7 +38,7 @@ export default function Page() {
   const notices = useNotifications(session?.user?.id);
   const { usage } = useUsage(session?.user?.id, `${recording}:${currentView}`);
 
-  if (loadingSession) return <LandingPage />;
+  if (loadingSession) return <AuthBoot />;
   if (!session) return <LandingPage />;
 
   const activeMeetings = workspace.dbMeetings.filter(
