@@ -130,10 +130,12 @@
   body {
     @apply bg-background text-foreground antialiased;
   }
+  /* Keep inside @layer base so Tailwind text-* / font-* utilities can override. */
+  button,
+  input {
+    font: inherit;
+  }
 }
-
-button, input { font: inherit; }
-
 
 .landing-root {
   font-family: var(--font-sans), "Apple SD Gothic Neo", sans-serif;

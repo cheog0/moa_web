@@ -13,7 +13,8 @@ const scenes = [
       { who: "서연", text: "금요일까지 초안 공유할게요." },
       { who: "지훈", text: "배포는 다음 주 월요일로 잡겠습니다." },
     ],
-    summary: "온보딩 초안을 금요일까지 공유하고, 월요일 배포로 일정을 맞춥니다.",
+    summary:
+      "온보딩 초안을 금요일까지 공유하고, 월요일 배포로 일정을 맞춥니다.",
     actions: ["온보딩 초안 공유 · 서연", "월요일 배포 확정 · 지훈"],
   },
   {
@@ -35,13 +36,15 @@ const scenes = [
       { who: "현우", text: "결정이랑 담당자를 맨 위에 올려둘게요." },
       { who: "지아", text: "좋아요. 내일 오전에 한 번 더 보고 공유하죠." },
     ],
-    summary: "초안 결론과 담당자를 앞에 두고, 내일 오전에 다시 보고 공유합니다.",
+    summary:
+      "초안 결론과 담당자를 앞에 두고, 내일 오전에 다시 보고 공유합니다.",
     actions: ["결론과 담당자 정리 · 현우", "내일 오전 재검토 · 지아"],
   },
 ] as const;
 
 export default function LiveStudio() {
-  const [sceneId, setSceneId] = useState<(typeof scenes)[number]["id"]>("kickoff");
+  const [sceneId, setSceneId] =
+    useState<(typeof scenes)[number]["id"]>("kickoff");
   const [playId, setPlayId] = useState(0);
   const [typed, setTyped] = useState(0);
   const [phase, setPhase] = useState<"live" | "notes">("live");
@@ -49,7 +52,9 @@ export default function LiveStudio() {
     () => scenes.find((item) => item.id === sceneId) ?? scenes[0],
     [sceneId],
   );
-  const fullText = scene.lines.map((line) => `${line.who}: ${line.text}`).join("\n");
+  const fullText = scene.lines
+    .map((line) => `${line.who}: ${line.text}`)
+    .join("\n");
 
   const play = (id: (typeof scenes)[number]["id"]) => {
     setSceneId(id);
@@ -107,7 +112,9 @@ export default function LiveStudio() {
                 const text = rest.join(": ");
                 return (
                   <p key={`${row}-${index}`}>
-                    <span className="mr-2 font-semibold text-[#2F7DE0]">{who}</span>
+                    <span className="mr-2 font-semibold text-[#2F7DE0]">
+                      {who}
+                    </span>
                     <span>{text}</span>
                     {index === rows.length - 1 ? (
                       <span className="ml-0.5 inline-block h-4 w-[2px] animate-pulse bg-[#2F7DE0] align-middle" />
@@ -158,7 +165,7 @@ export default function LiveStudio() {
               key={item.id}
               type="button"
               onClick={() => play(item.id)}
-              className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
+              className={`rounded-full px-3 py-1.5 text-[12px] font-medium leading-none transition-colors ${
                 item.id === sceneId
                   ? "bg-[#2F7DE0] text-white"
                   : "bg-[#F3F5F8] text-[#5B6573] hover:bg-[#E9EEF5]"
