@@ -13,7 +13,7 @@ export default function Intro({
 }) {
   useEffect(() => {
     if (!open) return;
-    const timer = window.setTimeout(onSkip, 3400);
+    const timer = window.setTimeout(onSkip, 2400);
     return () => window.clearTimeout(timer);
   }, [open, onSkip]);
 
@@ -33,7 +33,7 @@ export default function Intro({
           className="fixed inset-0 z-[80] flex flex-col bg-white text-black"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="flex h-16 items-center justify-between px-5 sm:px-8">
             <Logo className="h-5 bg-white" />
@@ -49,14 +49,14 @@ export default function Intro({
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
               <Logo className="h-10 bg-white sm:h-12" />
             </motion.div>
             <motion.p
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, duration: 0.8 }}
+              transition={{ delay: 0.45, duration: 0.55 }}
               className="mt-8 text-center text-[18px] font-medium tracking-[-0.03em] text-black/50 sm:text-[22px]"
             >
               말하고, 기록하고, 정리하고.
