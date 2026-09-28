@@ -47,15 +47,30 @@ export default function TimelineHeader({
   const { theme } = useTheme();
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 border-b border-border pb-3">
+    <div
+      className={cn(
+        "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 border-b border-border pb-3",
+        whenDark(theme, "border-white/10"),
+      )}
+    >
       <div>
         <div className="flex items-center gap-3 mb-2">
           {isLoading ? (
-            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-400">
+            <span
+              className={cn(
+                "rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-400",
+                whenDark(theme, "bg-white/8 text-zinc-400"),
+              )}
+            >
               불러오는 중
             </span>
           ) : items.length === 0 ? (
-            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-400">
+            <span
+              className={cn(
+                "rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-400",
+                whenDark(theme, "bg-white/8 text-zinc-400"),
+              )}
+            >
               대기 중
             </span>
           ) : (
@@ -74,8 +89,20 @@ export default function TimelineHeader({
                 className={cn(
                   "relative inline-flex h-[22px] items-center rounded-full border border-transparent py-0 pl-3 pr-7 text-[11px] font-bold leading-none outline-none cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-sky-500/20",
                   projectStatus === "완료"
-                    ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                    : "bg-sky-100 text-sky-700 hover:bg-sky-200",
+                    ? cn(
+                        "bg-emerald-100 text-emerald-700 hover:bg-emerald-200",
+                        whenDark(
+                          theme,
+                          "border-emerald-400/20 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25",
+                        ),
+                      )
+                    : cn(
+                        "bg-sky-100 text-sky-700 hover:bg-sky-200",
+                        whenDark(
+                          theme,
+                          "border-sky-400/20 bg-sky-500/15 text-sky-300 hover:bg-sky-500/25",
+                        ),
+                      ),
                 )}
               >
                 <Select.Value className="text-[11px] font-bold leading-none" />
@@ -95,7 +122,7 @@ export default function TimelineHeader({
                       "min-w-[7.5rem] origin-[var(--transform-origin)] overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-[0_12px_32px_rgba(15,23,42,0.12)] outline-none",
                       whenDark(
                         theme,
-                        "border-zinc-700 bg-zinc-900 shadow-black/40",
+                        "border-white/10 bg-[#252833] shadow-[0_12px_32px_rgba(0,0,0,0.45)]",
                       ),
                     )}
                   >
@@ -109,7 +136,7 @@ export default function TimelineHeader({
                             "flex cursor-pointer items-center justify-between gap-3 rounded-lg px-2.5 py-1.5 text-[11px] font-bold text-slate-700 outline-none select-none data-[highlighted]:bg-slate-50 data-[selected]:bg-slate-100",
                             whenDark(
                               theme,
-                              "text-zinc-100 data-[highlighted]:bg-zinc-800 data-[selected]:bg-zinc-800",
+                              "text-zinc-200 data-[highlighted]:bg-white/8 data-[selected]:bg-white/10",
                             ),
                           )}
                         >
@@ -175,7 +202,7 @@ export default function TimelineHeader({
               "group/save h-10 w-10 gap-0 overflow-hidden rounded-xl border border-slate-200 bg-white px-0 text-slate-950 shadow-sm transition-[width,gap,color,background-color,border-color,box-shadow] duration-300 hover:w-[92px] hover:gap-1 hover:border-slate-300 hover:bg-slate-100 hover:shadow-[0_6px_18px_rgba(15,23,42,0.1)] animate-in fade-in",
               whenDark(
                 theme,
-                "border-zinc-700 bg-zinc-900 text-zinc-100 hover:border-zinc-500 hover:bg-zinc-800",
+                "border-white/10 bg-white/[0.06] text-zinc-100 hover:border-white/18 hover:bg-white/[0.1] hover:shadow-none",
               ),
             )}
           >
@@ -198,7 +225,7 @@ export default function TimelineHeader({
               "group/delete h-10 w-10 gap-0 overflow-hidden rounded-xl border border-slate-200 bg-white px-0 text-rose-500 shadow-sm transition-[width,gap,color,background-color,border-color,box-shadow] duration-300 hover:w-[70px] hover:gap-1 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 hover:shadow-[0_6px_18px_rgba(244,63,94,0.12)] animate-in fade-in",
               whenDark(
                 theme,
-                "border-zinc-700 bg-zinc-900 hover:border-rose-400/40 hover:bg-rose-500/10",
+                "border-white/10 bg-white/[0.06] text-rose-400 hover:border-rose-400/35 hover:bg-rose-500/10 hover:shadow-none",
               ),
             )}
             title="타임라인 삭제"

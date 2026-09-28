@@ -24,21 +24,34 @@ export function EmptyState({ onOpenModal }: { onOpenModal: () => void }) {
     <div
       className={cn(
         "mt-12 flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 px-6 py-24 text-center transition-all hover:bg-slate-50",
-        whenDark(theme, "border-zinc-700 bg-zinc-900/50 hover:bg-zinc-900"),
+        whenDark(
+          theme,
+          "border-white/12 bg-white/[0.03] hover:bg-white/[0.05]",
+        ),
       )}
     >
-      <div className="mb-6 flex size-20 items-center justify-center rounded-full bg-sky-100 text-sky-500 shadow-sm">
+      <div
+        className={cn(
+          "mb-6 flex size-20 items-center justify-center rounded-full bg-sky-100 text-sky-500 shadow-sm",
+          whenDark(theme, "bg-sky-500/15 text-sky-300 shadow-none"),
+        )}
+      >
         <History className="size-10" />
       </div>
       <h2
         className={cn(
           "mb-3 text-xl font-bold text-slate-900",
-          whenDark(theme, "text-zinc-50"),
+          whenDark(theme, "text-zinc-100"),
         )}
       >
         첫 번째 회의를 연동해주세요
       </h2>
-      <p className="mb-8 max-w-md text-sm leading-relaxed text-slate-500">
+      <p
+        className={cn(
+          "mb-8 max-w-md text-sm leading-relaxed text-slate-500",
+          whenDark(theme, "text-zinc-400"),
+        )}
+      >
         제목을 클릭해 이름을 변경하고, 기존에 기록해둔 회의록을 하나씩 불러와서
         타임라인을 만들어보세요.
       </p>
@@ -103,7 +116,12 @@ export default function ItemList({
   };
 
   return (
-    <div className="relative ml-3 border-l border-slate-200 py-2 sm:ml-7">
+    <div
+      className={cn(
+        "relative ml-3 border-l border-slate-200 py-2 sm:ml-7",
+        whenDark(theme, "border-white/10"),
+      )}
+    >
       {visibleItems.map((meeting, index) => {
         const previousMeeting = visibleItems[index - 1];
         const showMonth =
@@ -120,13 +138,13 @@ export default function ItemList({
                 <span
                   className={cn(
                     "absolute -left-1.5 top-2.5 size-3 rounded-full border-[3px] border-white bg-slate-900",
-                    whenDark(theme, "border-zinc-950 bg-zinc-100"),
+                    whenDark(theme, "border-[#1c1f27] bg-zinc-300"),
                   )}
                 />
                 <p
                   className={cn(
                     "font-mono text-sm font-semibold uppercase tracking-[0.12em] text-slate-400",
-                    whenDark(theme, "text-zinc-300"),
+                    whenDark(theme, "text-zinc-400"),
                   )}
                 >
                   {getMonthLabel(meeting.date)}
@@ -137,12 +155,15 @@ export default function ItemList({
               <span
                 className={cn(
                   "absolute -left-[9px] top-7 flex size-[17px] items-center justify-center rounded-full bg-white",
-                  whenDark(theme, "bg-zinc-950"),
+                  whenDark(theme, "bg-[#1c1f27]"),
                 )}
               >
                 <CheckCircle2
-                  className="size-[17px] text-sky-500"
-                  fill={whenDarkValue(theme, "#082f49", "#e0f2fe")}
+                  className={cn(
+                    "size-[17px] text-sky-500",
+                    whenDark(theme, "text-sky-400"),
+                  )}
+                  fill={whenDarkValue(theme, "#0c1929", "#e0f2fe")}
                 />
               </span>
 
@@ -150,7 +171,10 @@ export default function ItemList({
                 <span
                   className={cn(
                     "absolute -left-4 -top-1 bg-white px-1 font-mono text-[11px] font-bold text-slate-500",
-                    whenDark(theme, "bg-transparent px-0 text-white"),
+                    whenDark(
+                      theme,
+                      "bg-[#1c1f27] px-1 text-zinc-500",
+                    ),
                   )}
                 >
                   +{dayGap}
@@ -165,7 +189,13 @@ export default function ItemList({
                   if (onMeetingClick && originalMeeting)
                     onMeetingClick(originalMeeting);
                 }}
-                className="cursor-pointer border-b border-slate-200 px-1 py-3.5 transition-colors hover:border-sky-300 sm:px-3"
+                className={cn(
+                  "cursor-pointer border-b border-slate-200 px-1 py-3.5 transition-colors hover:border-sky-300 sm:px-3",
+                  whenDark(
+                    theme,
+                    "border-white/[0.07] hover:border-sky-500/35",
+                  ),
+                )}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
@@ -173,7 +203,7 @@ export default function ItemList({
                       <Calendar
                         className={cn(
                           "size-3 text-slate-400",
-                          whenDark(theme, "text-zinc-300"),
+                          whenDark(theme, "text-zinc-500"),
                         )}
                       />
                       <input
@@ -187,12 +217,20 @@ export default function ItemList({
                           "cursor-pointer bg-transparent font-mono text-[10px] leading-none text-slate-500 outline-none transition-colors hover:text-sky-600 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-datetime-edit]:text-[10px]",
                           whenDark(
                             theme,
-                            "text-zinc-200 hover:text-sky-400 [&::-webkit-datetime-edit]:text-zinc-200",
+                            "text-zinc-500 hover:text-sky-300 [&::-webkit-datetime-edit]:text-zinc-500",
                           ),
                         )}
                       />
                       {meeting.id === latestMeetingId && (
-                        <span className="rounded-full bg-sky-50 px-2 py-0.5 font-mono text-[9px] font-bold tracking-wider text-sky-600">
+                        <span
+                          className={cn(
+                            "rounded-full bg-sky-50 px-2 py-0.5 font-mono text-[9px] font-bold tracking-wider text-sky-600",
+                            whenDark(
+                              theme,
+                              "border border-sky-400/25 bg-sky-500/10 text-sky-300",
+                            ),
+                          )}
+                        >
                           LATEST
                         </span>
                       )}
@@ -200,7 +238,10 @@ export default function ItemList({
                     <h3
                       className={cn(
                         "truncate text-base font-bold tracking-tight text-slate-900 transition-colors group-hover:text-sky-700",
-                        whenDark(theme, "text-zinc-50 group-hover:text-sky-400"),
+                        whenDark(
+                          theme,
+                          "text-zinc-100 group-hover:text-sky-300",
+                        ),
                       )}
                     >
                       {meeting.title}
@@ -214,13 +255,21 @@ export default function ItemList({
                       }}
                       className={cn(
                         "rounded-md p-2 text-slate-300 transition-colors hover:bg-rose-50 hover:text-rose-500",
-                        whenDark(theme, "hover:bg-rose-500/10"),
+                        whenDark(
+                          theme,
+                          "text-zinc-600 hover:bg-rose-500/10 hover:text-rose-400",
+                        ),
                       )}
                       title="타임라인에서 제외"
                     >
                       <Trash2 className="size-4" />
                     </button>
-                    <ChevronRight className="mb-1 size-4 -translate-x-1 text-slate-300 opacity-0 transition-all group-hover:translate-x-0 group-hover:text-sky-500 group-hover:opacity-100" />
+                    <ChevronRight
+                      className={cn(
+                        "mb-1 size-4 -translate-x-1 text-slate-300 opacity-0 transition-all group-hover:translate-x-0 group-hover:text-sky-500 group-hover:opacity-100",
+                        whenDark(theme, "text-zinc-600 group-hover:text-sky-400"),
+                      )}
+                    />
                   </div>
                 </div>
               </div>
@@ -229,19 +278,32 @@ export default function ItemList({
         );
       })}
       <div className="relative mt-5 pl-8 sm:pl-10">
-        <span className="absolute -left-[7px] top-4 size-3.5 rounded-full border-2 border-slate-300 bg-white" />
+        <span
+          className={cn(
+            "absolute -left-[7px] top-4 size-3.5 rounded-full border-2 border-slate-300 bg-white",
+            whenDark(theme, "border-white/20 bg-[#1c1f27]"),
+          )}
+        />
         <Button
           variant="ghost"
           onClick={onOpenModal}
           className={cn(
             "h-12 w-full justify-start rounded-xl border border-dashed border-slate-300 px-4 text-slate-500 hover:border-sky-400 hover:bg-sky-50/50 hover:text-sky-600",
-            whenDark(theme, "hover:bg-sky-500/10"),
+            whenDark(
+              theme,
+              "border-white/12 text-zinc-400 hover:border-sky-400/40 hover:bg-sky-500/10 hover:text-sky-300",
+            ),
           )}
         >
           <Plus className="mr-2 size-4" /> 다음 회의 연결하기
         </Button>
       </div>
-      <div className="absolute -bottom-4 -left-px h-10 w-px bg-gradient-to-b from-slate-200 to-transparent" />
+      <div
+        className={cn(
+          "absolute -bottom-4 -left-px h-10 w-px bg-gradient-to-b from-slate-200 to-transparent",
+          whenDark(theme, "from-white/10"),
+        )}
+      />
     </div>
   );
 }
