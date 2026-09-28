@@ -50,23 +50,27 @@ export default function Insight() {
               <br />
               <span className="text-[#84AFFF]">가장 많이 기록</span>할까요?
             </h3>
-            <div className="mt-6 flex h-[132px] items-end gap-2.5">
-              {bars.map((height, index) => (
-                <motion.i
-                  key={days[index]}
-                  className="block flex-1 rounded-t-md bg-gradient-to-t from-[#2759A6] to-[#76AAFF]"
-                  initial={{ height: 0 }}
-                  whileInView={{ height: `${height}%` }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.7, delay: 0.08 * index }}
-                />
-              ))}
-            </div>
-            <div className="h-px bg-[#405476]" />
-            <div className="mt-2 flex justify-between text-[11px] text-[#7588A6]">
-              {days.map((day) => (
-                <span key={day}>{day}</span>
-              ))}
+            <div className="mt-6">
+              <div className="flex h-[132px] items-end gap-2.5">
+                {bars.map((height, index) => (
+                  <motion.i
+                    key={days[index]}
+                    className="block flex-1 rounded-t-md bg-gradient-to-t from-[#2759A6] to-[#76AAFF]"
+                    initial={{ height: 0 }}
+                    whileInView={{ height: `${height}%` }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.7, delay: 0.08 * index }}
+                  />
+                ))}
+              </div>
+              <div className="h-px bg-[#405476]" />
+              <div className="mt-2 flex gap-2.5 text-[11px] text-[#7588A6]">
+                {days.map((day) => (
+                  <span key={day} className="flex-1 text-center">
+                    {day}
+                  </span>
+                ))}
+              </div>
             </div>
             <p className="mt-6 inline-flex items-center gap-2 text-[12px] text-[#9FE2BF]">
               <Check className="size-3.5" />
