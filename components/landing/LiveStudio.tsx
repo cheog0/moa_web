@@ -158,7 +158,7 @@ export default function LiveStudio() {
               key={item.id}
               type="button"
               onClick={() => play(item.id)}
-              className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
+              className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
                 item.id === sceneId
                   ? "bg-[#2F7DE0] text-white"
                   : "bg-[#F3F5F8] text-[#5B6573] hover:bg-[#E9EEF5]"
