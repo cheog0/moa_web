@@ -64,7 +64,8 @@ export default function PrivacyPage() {
               엔진은 래플이 제공하는 엔진으로 음성을 글로 바꿉니다. 설정에서
               Google Gemini, Deepgram, Soniox를 고르면 사용자가 넣은 API
               키로 그 서비스에 음성이 전달됩니다. API 키도 그 사용자의
-              설정에 저장됩니다.
+              설정에 저장됩니다. 회의를 녹음할 때 참석자에게 알리거나 동의를
+              받을 책임은 이용자에게 있습니다.
             </p>
           </section>
 
