@@ -111,7 +111,12 @@ export default function Sidebar({
         <div className="flex flex-col gap-4 overflow-y-auto pr-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {/* 로고 영역 */}
           <div className="flex items-center justify-between gap-2.5 px-2 pb-1">
-            <div className="flex h-7 items-center">
+            <button
+              type="button"
+              onClick={() => handleNavigate("dashboard")}
+              className="flex h-7 cursor-pointer items-center rounded-md outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-sky-500/30"
+              aria-label="대시보드로 이동"
+            >
               <img
                 src={
                   theme === "dark"
@@ -121,7 +126,7 @@ export default function Sidebar({
                 alt="Raple"
                 className="h-6 w-auto select-none"
               />
-            </div>
+            </button>
             <button
               type="button"
               onClick={onMobileClose}
