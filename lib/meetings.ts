@@ -1,34 +1,21 @@
 import { getApiUrl } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
 
-function parseSupabaseStoragePath(audioUrl?: string | null) {
-  if (!audioUrl) return null;
+export async function deleteMeetingAudio(id: string, _audioUrl?: string | null) {
+  // Soft-delete only. Recordings in Storage are never removed.
   try {
-    const { pathname } = new URL(audioUrl);
-    const match = pathname.match(
-      /\/storage\/v1\/object\/(?:public|sign|authenticated)\/([^/]+)\/(.+)/,
-    );
-    if (!match) return null;
-    return {
-      bucket: decodeURIComponent(match[1]),
-      path: decodeURIComponent(match[2]),
-    };
-  } catch {
-    return null;
-  }
-}
-
-export async function deleteMeetingAudio(id: string, audioUrl?: string | null) {
-  try {
-    await fetch(`${getApiUrl()}/api/meetings/${id}`, { method: "DELETE" });
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const headers: HeadersInit = {};
+    if (session?.access_token) {
+      headers.Authorization = `Bearer ${session.access_token}`;
+    }
+    await fetch(`${getApiUrl()}/api/meetings/${id}`, {
+      method: "DELETE",
+      headers,
+    });
   } catch (error) {
-    console.error("녹음 파일 서버 삭제 실패", error);
+    console.error("회의 휴지통 이동 실패", error);
   }
-
-  const stored = parseSupabaseStoragePath(audioUrl);
-  if (!stored) return;
-  const { error } = await supabase.storage
-    .from(stored.bucket)
-    .remove([stored.path]);
-  if (error) console.error("녹음 파일 스토리지 삭제 실패", error);
 }

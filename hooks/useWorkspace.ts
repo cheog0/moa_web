@@ -185,17 +185,19 @@ export function useWorkspace(userId?: string, recording?: boolean) {
   };
 
   const handlePermanentlyDeleteMeeting = async (id: string) => {
-    const meeting = dbMeetings.find((item) => item.id === id);
-    await deleteMeetingAudio(id, meeting?.audio_url);
-    await supabase.from("timeline_meetings").delete().eq("meeting_id", id);
-    const { error } = await supabase.from("meetings").delete().eq("id", id);
+    // Soft-delete only — never destroy the recording or minutes row.
+    await deleteMeetingAudio(id);
+    const deletedAt = new Date().toISOString();
+    const { error } = await supabase
+      .from("meetings")
+      .update({ deleted_at: deletedAt })
+      .eq("id", id);
     if (!error) {
-      setDbMeetings((prev) => prev.filter((meeting) => meeting.id !== id));
-      setTimelineLinks((prev) => {
-        const next = { ...prev };
-        delete next[id];
-        return next;
-      });
+      setDbMeetings((prev) =>
+        prev.map((meeting) =>
+          meeting.id === id ? { ...meeting, deleted_at: deletedAt } : meeting,
+        ),
+      );
     }
   };
 
