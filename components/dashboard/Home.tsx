@@ -1,6 +1,16 @@
 "use client";
 
-import { BookOpen, Clock3, Plus, Sparkles, Calendar, List } from "lucide-react";
+import { useMemo, useState } from "react";
+import {
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  Clock3,
+  Plus,
+  Sparkles,
+  Calendar,
+  List,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CalendarView from "@/components/meeting/CalenderView";
 import Stat from "@/components/dashboard/Stat";
@@ -9,6 +19,20 @@ import MeetingSearch from "@/components/dashboard/MeetingSearch";
 import { useTheme } from "@/hooks/useTheme";
 import { whenDark } from "@/lib/theme";
 import { cn } from "@/lib/utils";
+
+function startOfMonth(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function isSameMonth(value: string | null | undefined, month: Date) {
+  if (!value) return false;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+  return (
+    date.getFullYear() === month.getFullYear() &&
+    date.getMonth() === month.getMonth()
+  );
+}
 
 export default function Home({
   meetings,
@@ -40,6 +64,20 @@ export default function Home({
   onQueryChange: (value: string) => void;
 }) {
   const { theme } = useTheme();
+  const [listMonth, setListMonth] = useState(() => startOfMonth(new Date()));
+
+  const monthMeetings = useMemo(
+    () =>
+      meetings.filter((meeting) => isSameMonth(meeting.created_at, listMonth)),
+    [meetings, listMonth],
+  );
+  const monthLabel = `${listMonth.getFullYear()}년 ${listMonth.getMonth() + 1}월`;
+
+  const shiftMonth = (delta: number) => {
+    setListMonth(
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() + delta, 1),
+    );
+  };
 
   return (
     <main
@@ -89,7 +127,32 @@ export default function Home({
 
       <section className="mt-10">
         <div className="mb-4 flex items-center justify-between gap-4">
-          <h2 className="text-lg font-bold">기록된 회의</h2>
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <h2 className="text-lg font-bold">기록된 회의</h2>
+            {dashboardMode === "list" && (
+              <div className="inline-flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => shiftMonth(-1)}
+                  aria-label="이전 달"
+                  className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <ChevronLeft className="size-4" />
+                </button>
+                <p className="px-1 text-[14px] font-semibold tracking-tight text-foreground">
+                  {monthLabel}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => shiftMonth(1)}
+                  aria-label="다음 달"
+                  className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <ChevronRight className="size-4" />
+                </button>
+              </div>
+            )}
+          </div>
           <div className="relative flex items-center rounded-lg bg-muted/40 p-1">
             <span
               aria-hidden="true"
@@ -131,6 +194,7 @@ export default function Home({
             </button>
           </div>
         </div>
+
         {dashboardMode === "list" && (
           <MeetingSearch query={query} onQueryChange={onQueryChange} />
         )}
@@ -139,7 +203,7 @@ export default function Home({
           <CalendarView meetings={meetings} onMeetingClick={onOpenDetail} />
         ) : (
           <div className="flex flex-col gap-3">
-            {meetings.map((meeting) => (
+            {monthMeetings.map((meeting) => (
               <ListItem
                 key={meeting.id}
                 meeting={meeting}
@@ -147,9 +211,11 @@ export default function Home({
                 onToggleStar={onToggleStar}
               />
             ))}
-            {meetings.length === 0 && (
+            {monthMeetings.length === 0 && (
               <div className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
-                아직 기록된 회의가 없습니다. '새 회의 시작'을 눌러보세요!
+                {query
+                  ? `${monthLabel}에 검색된 회의가 없습니다.`
+                  : `${monthLabel}에 기록된 회의가 없습니다.`}
               </div>
             )}
           </div>
