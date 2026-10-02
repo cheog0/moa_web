@@ -185,19 +185,12 @@ export function useWorkspace(userId?: string, recording?: boolean) {
   };
 
   const handlePermanentlyDeleteMeeting = async (id: string) => {
-    // Soft-delete only — never destroy the recording or minutes row.
-    await deleteMeetingAudio(id);
-    const deletedAt = new Date().toISOString();
-    const { error } = await supabase
-      .from("meetings")
-      .update({ deleted_at: deletedAt })
-      .eq("id", id);
-    if (!error) {
-      setDbMeetings((prev) =>
-        prev.map((meeting) =>
-          meeting.id === id ? { ...meeting, deleted_at: deletedAt } : meeting,
-        ),
-      );
+    // Drop meetings + minutes from DB (leave Storage audio). Then remove from UI.
+    try {
+      await deleteMeetingAudio(id);
+      setDbMeetings((prev) => prev.filter((meeting) => meeting.id !== id));
+    } catch (error) {
+      console.error("영구 삭제 실패", error);
     }
   };
 
