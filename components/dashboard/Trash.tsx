@@ -2,11 +2,7 @@
 
 import { useState } from "react";
 import { Noto_Sans_KR } from "next/font/google";
-import {
-  MoreHorizontal,
-  RotateCcw,
-  Trash2,
-} from "lucide-react";
+import { MoreHorizontal, RotateCcw, Trash2 } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { formatMeetingDate } from "@/lib/dates";
 import { useTheme } from "@/hooks/useTheme";
@@ -81,9 +77,9 @@ export default function Trash({
                 whenDark(theme, "text-zinc-400"),
               )}
             >
-              더 이상 필요하지 않은 기록입니다. 복원하거나 영구 삭제할
-              수 있습니다. 영구 삭제 시 목록에서는 사라지고, 서버 녹음
-              파일은 보관됩니다.
+              더 이상 필요하지 않은 기록입니다. 복원하거나 영구 삭제할 수
+              있습니다. 영구 삭제 시 목록에서는 사라지고, 서버 녹음 파일은
+              보관됩니다.
             </p>
           </div>
         </header>
@@ -194,10 +190,7 @@ export default function Trash({
                           type="button"
                           className={cn(
                             "flex w-full items-center gap-2 px-3 py-1.5 text-left text-[11px] font-medium text-slate-600 transition-colors hover:bg-slate-50",
-                            whenDark(
-                              theme,
-                              "text-zinc-200 hover:bg-zinc-800",
-                            ),
+                            whenDark(theme, "text-zinc-200 hover:bg-zinc-800"),
                           )}
                           onClick={() => {
                             onRestore(meeting.id);
@@ -262,8 +255,7 @@ export default function Trash({
                 </span>
                 을(를) 영구 삭제하시겠습니까?
                 <br />
-                회의록은 목록에서 사라지고 복원할 수 없습니다. 서버
-                녹음 파일은 보관됩니다.
+                회의록은 목록에서 사라지고 복원할 수 없습니다.
               </>
             }
             confirmLabel="영구 삭제"

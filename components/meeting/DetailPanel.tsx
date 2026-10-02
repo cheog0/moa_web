@@ -30,7 +30,7 @@ export default function DetailPanel({
   onUpdateMinutes: (
     id: string,
     updatedMinutes: Partial<MeetingMinutes>,
-  ) => void;
+  ) => Promise<void>;
   onDelete: (id: string) => void;
   linkedTimelineNames?: string[];
 }) {
