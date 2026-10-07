@@ -77,9 +77,7 @@ export default function Trash({
                 whenDark(theme, "text-zinc-400"),
               )}
             >
-              더 이상 필요하지 않은 기록입니다. 복원하거나 영구 삭제할 수
-              있습니다. 영구 삭제 시 목록에서는 사라지고, 서버 녹음 파일은
-              보관됩니다.
+              삭제된 회의록을 관리합니다. 복원하거나 영구 삭제할 수 있습니다.
             </p>
           </div>
         </header>
