@@ -21,10 +21,7 @@ import { isDefaultEngine } from "@/lib/engines";
 import { FREE_MONTHLY_MINUTES } from "@/lib/usage";
 import { supabase } from "@/lib/supabase";
 import { whenDark } from "@/lib/theme";
-import {
-  userAvatarInitial,
-  userDisplayLabel,
-} from "@/lib/userDisplay";
+import { userAvatarInitial, userDisplayLabel } from "@/lib/userDisplay";
 import { cn } from "@/lib/utils";
 
 export default function SettingsPanel({ session }: { session: any }) {
@@ -156,7 +153,7 @@ export default function SettingsPanel({ session }: { session: any }) {
                 whenDark(theme, "text-zinc-400"),
               )}
             >
-              회의 받아쓰기와 요약에 사용할 모델을 고릅니다.
+              회의 받아쓰기와 요약에 사용할 모델을 선택합니다.
             </p>
             <div className="mt-2.5">
               <EngineSelect
@@ -172,7 +169,8 @@ export default function SettingsPanel({ session }: { session: any }) {
                   whenDark(theme, "text-zinc-400"),
                 )}
               >
-                기본 엔진은 래플 API로 받아씁니다. 무료 회원은 한 달에 {FREE_MONTHLY_MINUTES}분까지 사용할 수 있습니다.
+                기본 엔진은 래플 API로 받아씁니다. 무료 회원은 한 달에{" "}
+                {FREE_MONTHLY_MINUTES}분까지 사용할 수 있습니다.
               </p>
             ) : (
               <>
@@ -198,7 +196,10 @@ export default function SettingsPanel({ session }: { session: any }) {
                     placeholder="키를 붙여넣으세요"
                     className={cn(
                       "h-full min-w-0 flex-1 bg-transparent text-[13px] text-[#1C1F24] outline-none placeholder:text-[#9AA1AA]/85",
-                      whenDark(theme, "text-zinc-100 placeholder:text-zinc-500"),
+                      whenDark(
+                        theme,
+                        "text-zinc-100 placeholder:text-zinc-500",
+                      ),
                     )}
                   />
                   <button
@@ -246,7 +247,8 @@ export default function SettingsPanel({ session }: { session: any }) {
                 whenDark(theme, "text-zinc-400"),
               )}
             >
-              고유명사나 자주 쓰는 용어를 미리 등록해 두면 받아쓰기에 반영됩니다.
+              고유명사나 자주 쓰는 용어를 미리 등록해 두면 받아쓰기에
+              반영됩니다.
             </p>
             <div className="mt-2.5">
               <Keywords
@@ -298,8 +300,7 @@ export default function SettingsPanel({ session }: { session: any }) {
           description={
             <>
               계정과 저장된 회의록이 모두 삭제됩니다.
-              <br />
-              이 작업은 되돌릴 수 없습니다.
+              <br />이 작업은 되돌릴 수 없습니다.
             </>
           }
           confirmLabel="탈퇴하기"
