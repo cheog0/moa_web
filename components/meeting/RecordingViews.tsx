@@ -18,9 +18,7 @@ export function ProcessingView() {
       </p>
       <div className="mt-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">
         <Loader2 className="size-4 animate-spin" />
-        <span>
-          잠시만 기다려주세요... 오디오 길이에 따라 시간이 소요될 수 있습니다.
-        </span>
+        <span>오디오 길이에 따라 시간이 소요될 수 있습니다.</span>
       </div>
     </div>
   );
@@ -68,7 +66,8 @@ export function ReadyView({
       />
       {exhausted ? (
         <p className="mb-4 text-center text-sm text-rose-500">
-          이번 달 무료 {FREE_MONTHLY_MINUTES}분을 모두 사용했습니다. 다음 달에 다시 이용하거나 설정에서 내 API 키를 연결해 주세요.
+          이번 달 무료 {FREE_MONTHLY_MINUTES}분을 모두 사용했습니다. 다음 달에
+          다시 이용하거나 설정에서 내 API 키를 연결해 주세요.
         </p>
       ) : remainingLabel ? (
         <p className="mb-4 text-center text-sm text-muted-foreground">
