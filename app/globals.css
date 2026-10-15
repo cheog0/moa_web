@@ -239,4 +239,17 @@
     overflow: visible !important;
     position: static !important;
   }
+
+  /* PDF에서 연한 테두리가 거의 안 보이는 문제 — 살짝만 진하게 */
+  .minutes-markdown > div,
+  .minutes-markdown table,
+  .minutes-markdown th,
+  .minutes-markdown td {
+    border-color: #94a3b8 !important; /* slate-400 */
+  }
+
+  .minutes-markdown hr,
+  .minutes-markdown h1 {
+    border-color: #94a3b8 !important;
+  }
 }

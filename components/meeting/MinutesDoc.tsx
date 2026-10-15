@@ -80,7 +80,7 @@ export default function MinutesDoc({
       </h1>
       <div
         className={cn(
-          `mt-4 flex items-center gap-4 border-b border-gray-100 pb-6 text-sm text-gray-500 ${isPreviewMode ? "pb-4 mt-2" : "print:pb-4 print:mt-2 print:border-gray-300"}`,
+          `mt-4 flex items-center gap-4 border-b border-gray-100 pb-6 text-sm text-gray-500 ${isPreviewMode ? "pb-4 mt-2" : "print:pb-4 print:mt-2 print:border-slate-400"}`,
           darkDoc && whenDark(theme, "border-zinc-800 text-zinc-400"),
         )}
       >

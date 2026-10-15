@@ -121,7 +121,8 @@ export default function DetailPanel({
             }}
             onPrint={() => {
               detail.setIsDownloadOpen(false);
-              detail.handlePrintPDF();
+              detail.setTab("minutes");
+              detail.setIsPreviewMode(true);
             }}
             onDelete={
               meeting?.id

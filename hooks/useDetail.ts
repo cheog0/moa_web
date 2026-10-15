@@ -379,6 +379,8 @@ export function useDetail({
 
   const handlePrintPDF = () => {
     setTab("minutes");
+    // Browsers use document.title as the default "Save as PDF" filename.
+    document.title = (meetingTitle || "회의록").trim() || "회의록";
     setTimeout(() => window.print(), 100);
   };
 
