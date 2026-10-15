@@ -104,7 +104,7 @@ export function MemoView({
         value={liveMemo}
         onChange={(e) => onMemoChange(e.target.value)}
         placeholder="음성이 잘 안 들릴 때를 대비해 중요한 키워드나 결론을 메모해 두세요. AI가 회의록 작성 시 최우선으로 참고합니다."
-        className="w-full flex-1 resize-none bg-transparent text-lg leading-relaxed text-foreground outline-none placeholder:text-muted-foreground/50"
+        className="w-full flex-1 resize-none bg-transparent text-sm leading-relaxed text-foreground outline-none placeholder:text-muted-foreground/50"
       />
     </div>
   );
