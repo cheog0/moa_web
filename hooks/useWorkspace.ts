@@ -94,11 +94,13 @@ export function useWorkspace(userId?: string, recording?: boolean) {
       .from("meetings")
       .update({ title: newTitle })
       .eq("id", id);
-    if (!error) {
-      setDbMeetings((prev) =>
-        prev.map((m) => (m.id === id ? { ...m, title: newTitle } : m)),
-      );
-    }
+    if (error) throw error;
+    setDbMeetings((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, title: newTitle } : m)),
+    );
+    setSelectedMeeting((prev: any) =>
+      prev?.id === id ? { ...prev, title: newTitle } : prev,
+    );
   };
 
   const handleToggleStar = async (
@@ -147,9 +149,16 @@ export function useWorkspace(userId?: string, recording?: boolean) {
     if (!response.ok || data.success === false) {
       throw new Error(data.detail || data.error || "회의록 저장에 실패했습니다.");
     }
-    setGeneratedMinutes((prev) =>
-      prev ? { ...prev, ...updatedMinutes } : null,
-    );
+    setGeneratedMinutes((prev) => {
+      if (!prev) return null;
+      const next = { ...prev, ...updatedMinutes };
+      // Keep the saved payload as-is (already serialized). Re-normalizing
+      // can strip leading digits on older API responses / parsers.
+      if (updatedMinutes.action_items !== undefined) {
+        next.action_items = updatedMinutes.action_items;
+      }
+      return next;
+    });
   };
 
   const handleDeleteMeeting = async (id: string) => {

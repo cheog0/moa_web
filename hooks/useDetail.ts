@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MeetingMinutes } from "@/lib/constants";
-import { ActionItem, normalizeActionItems } from "@/lib/actionItems";
+import {
+  ActionItem,
+  actionItemsEqual,
+  normalizeActionItems,
+  serializeActionItems,
+} from "@/lib/actionItems";
 import { getApiUrl } from "@/lib/api";
 import {
   formatClock,
@@ -104,6 +109,9 @@ export function useDetail({
     }
   };
 
+  const loadedTitle = meeting?.title || "새 회의";
+  const loadedSummary = minutes?.summary || "";
+  const loadedDecisions = minutes?.decisions || "";
   const loadedActionItems = useMemo(
     () => normalizeActionItems(minutes?.action_items),
     [minutes],
@@ -111,24 +119,54 @@ export function useDetail({
   const loadedReplyDraft = minutes?.reply_draft || "";
 
   const hasChanges =
-    meetingTitle !== (meeting?.title || "새 회의") ||
-    summaryText !== (minutes?.summary || "") ||
-    decisionsText !== (minutes?.decisions || "") ||
-    JSON.stringify(actionItems) !== JSON.stringify(loadedActionItems) ||
+    meetingTitle !== loadedTitle ||
+    summaryText !== loadedSummary ||
+    decisionsText !== loadedDecisions ||
+    !actionItemsEqual(actionItems, loadedActionItems) ||
     replyDraft !== loadedReplyDraft;
+
+  const draftRef = useRef({
+    meetingTitle,
+    summaryText,
+    decisionsText,
+    actionItems,
+    replyDraft,
+    loadedTitle,
+    loadedSummary,
+    loadedDecisions,
+    loadedActionItems,
+    loadedReplyDraft,
+    hasChanges,
+  });
+  draftRef.current = {
+    meetingTitle,
+    summaryText,
+    decisionsText,
+    actionItems,
+    replyDraft,
+    loadedTitle,
+    loadedSummary,
+    loadedDecisions,
+    loadedActionItems,
+    loadedReplyDraft,
+    hasChanges,
+  };
 
   useEffect(() => {
     if (hasChanges) setSaveStatus("idle");
   }, [hasChanges]);
 
   useEffect(() => {
-    if (minutes) {
-      setSummaryText(minutes.summary || "");
-      setDecisionsText(minutes.decisions || "");
-      setActionItems(normalizeActionItems(minutes.action_items));
-      setReplyDraft(minutes.reply_draft || "");
-    }
+    if (!minutes) return;
+    setSummaryText(minutes.summary || "");
+    setDecisionsText(minutes.decisions || "");
+    setActionItems(normalizeActionItems(minutes.action_items));
+    setReplyDraft(minutes.reply_draft || "");
   }, [minutes]);
+
+  useEffect(() => {
+    setMeetingTitle(meeting?.title || "새 회의");
+  }, [meeting?.id, meeting?.title]);
 
   useEffect(() => {
     let cancelled = false;
@@ -297,19 +335,45 @@ export function useDetail({
 
   const persistChanges = async () => {
     if (!meeting?.id) return;
-    if (meetingTitle !== meeting.title) onUpdateTitle(meeting.id, meetingTitle);
-    if (
-      summaryText !== minutes?.summary ||
-      decisionsText !== minutes?.decisions ||
-      JSON.stringify(actionItems) !== JSON.stringify(loadedActionItems) ||
-      replyDraft !== loadedReplyDraft
-    ) {
+    const draft = draftRef.current;
+    const nextActionItems = serializeActionItems(draft.actionItems);
+    const titleChanged = draft.meetingTitle !== draft.loadedTitle;
+    const minutesChanged =
+      draft.summaryText !== draft.loadedSummary ||
+      draft.decisionsText !== draft.loadedDecisions ||
+      !actionItemsEqual(draft.actionItems, draft.loadedActionItems) ||
+      draft.replyDraft !== draft.loadedReplyDraft;
+
+    if (titleChanged) {
+      await onUpdateTitle(meeting.id, draft.meetingTitle);
+    }
+    if (minutesChanged) {
       await onUpdateMinutes(meeting.id, {
-        summary: summaryText,
-        decisions: decisionsText,
-        action_items: actionItems.filter((item) => item.task.trim()),
-        reply_draft: replyDraft,
+        summary: draft.summaryText,
+        decisions: draft.decisionsText,
+        action_items: nextActionItems,
+        reply_draft: draft.replyDraft,
       });
+      // Keep local list aligned with what we persisted (drops empty drafts).
+      setActionItems(nextActionItems);
+    }
+  };
+
+  const runSave = async () => {
+    if (!meeting?.id || !draftRef.current.hasChanges) return false;
+    setSaveStatus("saving");
+    try {
+      await persistChanges();
+      setSaveStatus("saved");
+      return true;
+    } catch (error) {
+      console.error(error);
+      setSaveStatus("idle");
+      showInfoNotice(
+        "저장되지 않았어요",
+        "회의록 변경사항을 저장하지 못했습니다. 다시 시도해 주세요.",
+      );
+      return false;
     }
   };
 
@@ -323,6 +387,13 @@ export function useDetail({
     setTab,
     isEditingDoc,
     setIsEditingDoc,
+    toggleEditingDoc: async () => {
+      if (isEditingDoc && draftRef.current.hasChanges) {
+        const saved = await runSave();
+        if (!saved) return;
+      }
+      setIsEditingDoc((open) => !open);
+    },
     meetingTitle,
     setMeetingTitle,
     summaryText,
@@ -381,32 +452,12 @@ export function useDetail({
     showPrintBlock: isPreviewMode ? "block" : "hidden print:block",
     handlePrintPDF,
     handleManualSave: async () => {
-      if (!meeting?.id || !hasChanges) return;
-      setSaveStatus("saving");
-      try {
-        await persistChanges();
-        setSaveStatus("saved");
-      } catch (error) {
-        console.error(error);
-        setSaveStatus("idle");
-        showInfoNotice(
-          "저장되지 않았어요",
-          "회의록 변경사항을 저장하지 못했습니다. 다시 시도해 주세요.",
-        );
-      }
+      await runSave();
     },
     handleSmartClose: async () => {
-      if (hasChanges && meeting?.id) {
-        try {
-          await persistChanges();
-        } catch (error) {
-          console.error(error);
-          showInfoNotice(
-            "저장되지 않았어요",
-            "회의록 변경사항을 저장하지 못했습니다. 다시 시도해 주세요.",
-          );
-          return;
-        }
+      if (draftRef.current.hasChanges && meeting?.id) {
+        const saved = await runSave();
+        if (!saved) return;
       }
       onClose();
     },

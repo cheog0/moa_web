@@ -168,7 +168,7 @@ export default function DetailPanel({
                 detail.setIsEditingDoc(true);
                 return;
               }
-              detail.setIsEditingDoc((open) => !open);
+              void detail.toggleEditingDoc();
             }}
             className="mb-2 inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
           >

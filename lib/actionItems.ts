@@ -40,14 +40,17 @@ function toActionItem(
   index: number,
 ): ActionItem | null {
   if (typeof item === "string") {
-    const task = item.replace(/^[-*•\d.)\s]+/, "").trim();
+    // Only strip markdown bullet markers ("- ", "* "). Never strip digits —
+    // "4대보험" must stay intact.
+    const task = item.replace(/^[-*•]\s+/, "").trim();
     if (!task) return null;
     return { id: `item-${index}`, task, done: false };
   }
   if (!item || typeof item !== "object") return null;
-  const task = String(item.task || item.text || item.commitment || "")
-    .replace(/^[-*•\d.)\s]+/, "")
-    .trim();
+  // Structured items are stored/edited text — preserve exactly (trim only).
+  const task = String(
+    item.task ?? item.text ?? item.commitment ?? "",
+  ).trim();
   if (!task) return null;
   return {
     id: String(item.id || `item-${index}`),
@@ -77,6 +80,39 @@ export function normalizeActionItems(raw: unknown): ActionItem[] {
   return raw
     .map((item, index) => toActionItem(item, index))
     .filter((item): item is ActionItem => Boolean(item));
+}
+
+/** Stable payload for API save + equality checks (drops empty drafts). */
+export function serializeActionItems(items: ActionItem[]): ActionItem[] {
+  return items
+    .map((item, index) => {
+      const task = String(item.task || "").trim();
+      if (!task) return null;
+      const next: ActionItem = {
+        id: String(item.id || `item-${index}`),
+        task,
+        done: Boolean(item.done),
+      };
+      const assignee = optionalText(item.assignee);
+      const question = optionalText(item.question);
+      const commitment = optionalText(item.commitment);
+      const timestamp = cleanTimestamp(item.timestamp);
+      const speaker = optionalText(item.speaker);
+      if (assignee) next.assignee = assignee;
+      if (question) next.question = question;
+      if (commitment) next.commitment = commitment;
+      if (timestamp) next.timestamp = timestamp;
+      if (speaker) next.speaker = speaker;
+      return next;
+    })
+    .filter((item): item is ActionItem => Boolean(item));
+}
+
+export function actionItemsEqual(a: ActionItem[], b: ActionItem[]) {
+  return (
+    JSON.stringify(serializeActionItems(a)) ===
+    JSON.stringify(serializeActionItems(b))
+  );
 }
 
 export function parseMinutesPayload(raw: unknown) {
