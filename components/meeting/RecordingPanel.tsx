@@ -32,8 +32,8 @@ export default function RecordingPanel({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 p-4 backdrop-blur-sm sm:p-10 print:hidden">
-      <div className="relative flex h-full max-h-[900px] min-h-[500px] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl transition-all">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 p-4 sm:p-10 print:hidden">
+      <div className="relative flex h-full max-h-[900px] min-h-[500px] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
         <div className="flex shrink-0 items-center justify-between border-b border-border px-8 py-5">
           <div className="flex items-center gap-3">
             <span
@@ -54,7 +54,7 @@ export default function RecordingPanel({
             </button>
           )}
         </div>
-        <div className="flex-1 overflow-y-auto p-8">
+        <div className="flex-1 overflow-y-auto p-8 pb-28">
           {recording.status === "processing" ? (
             <ProcessingView />
           ) : recording.status === "ready" ? (
@@ -77,7 +77,6 @@ export default function RecordingPanel({
             />
           ) : (
             <MemoView
-              timeString={recording.timeString}
               liveMemo={recording.liveMemo}
               onMemoChange={recording.setLiveMemo}
             />

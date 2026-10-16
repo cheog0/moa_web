@@ -1,9 +1,9 @@
 "use client";
 
+import { memo, KeyboardEvent } from "react";
 import { Loader2, Mic, Pause, Play, Sparkles, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Attendees from "@/components/meeting/Attendees";
-import { KeyboardEvent } from "react";
 import { FREE_MONTHLY_MINUTES } from "@/lib/usage";
 
 export function ProcessingView() {
@@ -85,19 +85,16 @@ export function ReadyView({
   );
 }
 
-export function MemoView({
-  timeString,
+export const MemoView = memo(function MemoView({
   liveMemo,
   onMemoChange,
 }: {
-  timeString: string;
   liveMemo: string;
   onMemoChange: (value: string) => void;
 }) {
   return (
-    <div className="flex h-full flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="flex h-full flex-col">
       <div className="mb-4 flex items-center text-sm font-semibold text-muted-foreground">
-        <span className="font-mono text-primary mr-2">{timeString}</span>
         자유롭게 현장 메모를 작성해보세요. (줄바꿈: Enter)
       </div>
       <textarea
@@ -108,9 +105,9 @@ export function MemoView({
       />
     </div>
   );
-}
+});
 
-export function Controls({
+export const Controls = memo(function Controls({
   status,
   timeString,
   onPauseOrResume,
@@ -124,10 +121,10 @@ export function Controls({
   onFinish: () => void;
 }) {
   return (
-    <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 items-center gap-6 rounded-full bg-zinc-900 px-6 py-3 shadow-2xl dark:bg-zinc-100">
+    <div className="absolute bottom-8 left-1/2 flex w-[min(100%-2rem,28rem)] -translate-x-1/2 items-center justify-between gap-4 rounded-full bg-zinc-900 px-6 py-3 shadow-2xl dark:bg-zinc-100">
       <button
         onClick={onPauseOrResume}
-        className="flex size-10 items-center justify-center rounded-full bg-zinc-700 text-white transition-colors hover:bg-zinc-600 dark:bg-zinc-200 dark:text-black dark:hover:bg-zinc-300"
+        className="flex size-10 shrink-0 items-center justify-center rounded-full bg-zinc-700 text-white transition-colors hover:bg-zinc-600 dark:bg-zinc-200 dark:text-black dark:hover:bg-zinc-300"
       >
         {status === "paused" ? (
           <Play className="size-4 ml-0.5" fill="currentColor" />
@@ -135,32 +132,34 @@ export function Controls({
           <Pause className="size-4" fill="currentColor" />
         )}
       </button>
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-0 flex-1 items-center justify-center gap-3">
         <div
-          className={`flex items-center gap-1.5 ${status === "recording" ? "animate-pulse" : "opacity-50"}`}
+          className={`flex shrink-0 items-center gap-1.5 ${status === "recording" ? "animate-pulse" : "opacity-50"}`}
         >
           <span className="h-4 w-1 rounded-full bg-sky-500" />
           <span className="h-3 w-1 rounded-full bg-sky-500" />
           <span className="h-5 w-1 rounded-full bg-sky-500" />
           <span className="h-3 w-1 rounded-full bg-sky-500" />
         </div>
-        <span className="font-mono text-sm font-medium text-zinc-300 dark:text-zinc-700">
+        <span className="min-w-[7.5rem] font-mono text-sm font-medium tabular-nums text-zinc-300 dark:text-zinc-700">
           {status === "recording" ? "녹음 중" : "일시정지"} {timeString}
         </span>
       </div>
-      <div className="h-5 w-px bg-zinc-700 dark:bg-zinc-300" />
-      <button
-        onClick={onCancel}
-        className="text-sm font-medium text-zinc-400 transition-colors hover:text-white dark:text-zinc-500 dark:hover:text-black"
-      >
-        취소
-      </button>
-      <button
-        onClick={onFinish}
-        className="flex items-center gap-1.5 rounded-full bg-sky-500/10 px-4 py-1.5 text-sm font-bold text-sky-400 transition-colors hover:bg-sky-500/20 hover:text-sky-300 dark:text-sky-600 dark:hover:bg-sky-50 dark:hover:text-sky-700"
-      >
-        <Square className="size-3.5" fill="currentColor" /> 종료
-      </button>
+      <div className="flex shrink-0 items-center gap-3">
+        <div className="h-5 w-px bg-zinc-700 dark:bg-zinc-300" />
+        <button
+          onClick={onCancel}
+          className="text-sm font-medium text-zinc-400 transition-colors hover:text-white dark:text-zinc-500 dark:hover:text-black"
+        >
+          취소
+        </button>
+        <button
+          onClick={onFinish}
+          className="flex items-center gap-1.5 rounded-full bg-sky-500/10 px-4 py-1.5 text-sm font-bold text-sky-400 transition-colors hover:bg-sky-500/20 hover:text-sky-300 dark:text-sky-600 dark:hover:bg-sky-50 dark:hover:text-sky-700"
+        >
+          <Square className="size-3.5" fill="currentColor" /> 종료
+        </button>
+      </div>
     </div>
   );
-}
+});
