@@ -76,6 +76,26 @@ export async function uploadRecording({
   return { meetingId: String(result.meeting_id) };
 }
 
+async function waitForMinutesReady(meetingId: string) {
+  const started = Date.now();
+  const timeoutMs = 45 * 60 * 1000;
+  const intervalMs = 4_000;
+  while (Date.now() - started < timeoutMs) {
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    try {
+      const response = await fetch(
+        `${getApiUrl()}/api/meetings/${meetingId}/minutes`,
+      );
+      if (!response.ok) continue;
+      const data = await response.json();
+      if (data.success && data.minutes) return true;
+    } catch {
+      // keep polling through transient network blips
+    }
+  }
+  return false;
+}
+
 export async function processMeeting({
   meetingId,
   userSettings,
@@ -108,7 +128,12 @@ export async function processMeeting({
     );
     if (!response.ok) return { processed: false };
     const result = await response.json();
-    return { processed: result.success === true };
+    // /process returns success:true as soon as the job is queued.
+    // Only treat minutes as ready when the API says so, or after they exist.
+    if (result.success !== true) return { processed: false };
+    if (result.processed === true) return { processed: true };
+    const ready = await waitForMinutesReady(meetingId);
+    return { processed: ready };
   } catch (error) {
     console.error("회의록 분석 연결 끊김:", error);
     return { processed: false };
