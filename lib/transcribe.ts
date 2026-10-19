@@ -11,11 +11,116 @@ type UserSettingsPayload = {
   manuals: ReplyManual[];
 };
 
+function normalizeUploadMime(type: string, filename = "") {
+  const lowered = (type || "").toLowerCase().split(";", 1)[0].trim();
+  const name = filename.toLowerCase();
+  if (lowered === "video/webm" || lowered === "audio/webm" || name.endsWith(".webm")) {
+    return { type: "audio/webm", extension: "webm" };
+  }
+  if (
+    lowered === "audio/mpeg" ||
+    lowered === "audio/mp3" ||
+    name.endsWith(".mp3") ||
+    name.endsWith(".mpeg")
+  ) {
+    return { type: "audio/mpeg", extension: "mp3" };
+  }
+  if (lowered === "audio/wav" || name.endsWith(".wav")) {
+    return { type: "audio/wav", extension: "wav" };
+  }
+  if (
+    lowered === "video/mp4" ||
+    lowered === "audio/mp4" ||
+    lowered === "audio/m4a" ||
+    lowered === "audio/x-m4a" ||
+    lowered === "audio/aac" ||
+    name.endsWith(".m4a") ||
+    name.endsWith(".mp4") ||
+    name.endsWith(".aac")
+  ) {
+    return { type: "audio/mp4", extension: name.endsWith(".mp4") ? "mp4" : "m4a" };
+  }
+  if (lowered.startsWith("audio/")) {
+    const extension = lowered.includes("ogg")
+      ? "ogg"
+      : lowered.includes("wav")
+        ? "wav"
+        : "webm";
+    return { type: lowered, extension };
+  }
+  return { type: "audio/webm", extension: "webm" };
+}
+
 function audioFileFromBlob(audioBlob: Blob) {
-  const extension = audioBlob.type.includes("mp4") ? "mp4" : "webm";
-  return new File([audioBlob], `meeting_recording.${extension}`, {
-    type: audioBlob.type,
+  const originalName =
+    audioBlob instanceof File && audioBlob.name
+      ? audioBlob.name
+      : "meeting_recording";
+  const { type, extension } = normalizeUploadMime(audioBlob.type, originalName);
+  const base =
+    originalName.includes(".")
+      ? originalName.replace(/\.[^.]+$/, "")
+      : originalName || "meeting_recording";
+  return new File([audioBlob], `${base}.${extension}`, { type });
+}
+
+function readDurationViaElement(file: Blob): Promise<number> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const audio = new Audio();
+    let settled = false;
+    const finish = (seconds: number) => {
+      if (settled) return;
+      settled = true;
+      URL.revokeObjectURL(url);
+      resolve(Math.max(0, Math.round(seconds || 0)));
+    };
+    const timer = window.setTimeout(() => finish(0), 8_000);
+    audio.preload = "metadata";
+    audio.onloadedmetadata = () => {
+      window.clearTimeout(timer);
+      const duration = audio.duration;
+      finish(Number.isFinite(duration) && duration !== Infinity ? duration : 0);
+    };
+    audio.onerror = () => {
+      window.clearTimeout(timer);
+      finish(0);
+    };
+    audio.src = url;
   });
+}
+
+async function readDurationViaDecode(file: Blob): Promise<number> {
+  const AudioCtx =
+    typeof window !== "undefined"
+      ? window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext
+      : undefined;
+  if (!AudioCtx) return 0;
+  let ctx: AudioContext | null = null;
+  try {
+    ctx = new AudioCtx();
+    const buffer = await file.arrayBuffer();
+    const decoded = await ctx.decodeAudioData(buffer.slice(0));
+    const seconds = decoded.duration;
+    return Number.isFinite(seconds) && seconds > 0 ? Math.round(seconds) : 0;
+  } catch {
+    return 0;
+  } finally {
+    try {
+      await ctx?.close();
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
+/** Best-effort duration for uploaded audio files (seconds). */
+export async function readAudioDurationSeconds(file: Blob): Promise<number> {
+  const viaElement = await readDurationViaElement(file);
+  if (viaElement > 0) return viaElement;
+  return readDurationViaDecode(file);
 }
 
 function buildProcessTemplate({
@@ -68,8 +173,17 @@ export async function uploadRecording({
     method: "POST",
     body: formData,
   });
-  if (!response.ok) throw new Error(`서버 오류 (${response.status})`);
-  const result = await response.json();
+  let result: { success?: boolean; meeting_id?: string; error?: string } = {};
+  try {
+    result = await response.json();
+  } catch {
+    result = {};
+  }
+  if (!response.ok) {
+    throw new Error(
+      result.error || `서버 오류 (${response.status}). 잠시 후 다시 시도해 주세요.`,
+    );
+  }
   if (!result.success || !result.meeting_id) {
     throw new Error(result.error || "녹음 업로드에 실패했습니다.");
   }
@@ -126,17 +240,48 @@ export async function processMeeting({
         body: formData,
       },
     );
-    if (!response.ok) return { processed: false };
-    const result = await response.json();
+    let result: {
+      success?: boolean;
+      processed?: boolean;
+      error?: string;
+    } = {};
+    try {
+      result = await response.json();
+    } catch {
+      result = {};
+    }
+    if (!response.ok) {
+      return {
+        processed: false,
+        error:
+          result.error ||
+          `회의록 분석 요청에 실패했습니다. (${response.status})`,
+      };
+    }
     // /process returns success:true as soon as the job is queued.
     // Only treat minutes as ready when the API says so, or after they exist.
-    if (result.success !== true) return { processed: false };
+    if (result.success !== true) {
+      return {
+        processed: false,
+        error: result.error || "회의록 분석에 실패했습니다.",
+      };
+    }
     if (result.processed === true) return { processed: true };
     const ready = await waitForMinutesReady(meetingId);
-    return { processed: ready };
+    if (!ready) {
+      return {
+        processed: false,
+        error:
+          "회의록 생성이 오래 걸리거나 실패했습니다. 회의 목록에서 다시 확인해 주세요.",
+      };
+    }
+    return { processed: true };
   } catch (error) {
     console.error("회의록 분석 연결 끊김:", error);
-    return { processed: false };
+    return {
+      processed: false,
+      error: "회의록 분석 중 연결이 끊겼습니다. 잠시 후 다시 시도해 주세요.",
+    };
   }
 }
 

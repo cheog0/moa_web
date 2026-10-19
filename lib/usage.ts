@@ -2,6 +2,12 @@ import { supabase } from "@/lib/supabase";
 
 export const FREE_MONTHLY_SECONDS = 30 * 60;
 export const FREE_MONTHLY_MINUTES = Math.round(FREE_MONTHLY_SECONDS / 60);
+export const USAGE_CHANGED_EVENT = "raple:usage-changed";
+
+export function notifyUsageChanged() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(USAGE_CHANGED_EVENT));
+}
 
 export type UsageSnapshot = {
   plan: string;

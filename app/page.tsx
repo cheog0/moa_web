@@ -8,6 +8,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import SettingsPanel from "@/components/settings/SettingsPanel";
 import TemplatePanel from "@/components/settings/TemplatePanel";
 import RecordingPanel from "@/components/meeting/RecordingPanel";
+import AudioUploadPanel from "@/components/meeting/AudioUploadPanel";
 import DetailPanel from "@/components/meeting/DetailPanel";
 import ProjectTimeline from "@/components/meeting/ProjectTimeline";
 import InsightPanel from "@/components/insight/InsightPanel";
@@ -32,6 +33,7 @@ export default function Page() {
     "list",
   );
   const [recording, setRecording] = useState(false);
+  const [audioUpload, setAudioUpload] = useState(false);
   const [query, setQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [bootReady, setBootReady] = useState(false);
@@ -219,6 +221,7 @@ export default function Page() {
             dashboardMode={dashboardMode}
             onDashboardModeChange={setDashboardMode}
             onNewRecording={() => setRecording(true)}
+            onUploadAudio={() => setAudioUpload(true)}
             onOpenDetail={workspace.handleOpenDetail}
             onToggleStar={workspace.handleToggleStar}
             query={query}
@@ -246,6 +249,14 @@ export default function Page() {
           onClose={() => setRecording(false)}
           onSaved={() => {
             setRecording(false);
+          }}
+        />
+      )}
+      {audioUpload && (
+        <AudioUploadPanel
+          onClose={() => setAudioUpload(false)}
+          onSaved={() => {
+            setAudioUpload(false);
           }}
         />
       )}

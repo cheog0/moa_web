@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { isDefaultEngine, normalizeEngine } from "@/lib/engines";
 import { supabase } from "@/lib/supabase";
-import { fetchUsage, type UsageSnapshot } from "@/lib/usage";
+import {
+  fetchUsage,
+  USAGE_CHANGED_EVENT,
+  type UsageSnapshot,
+} from "@/lib/usage";
 
 async function isUsingDefaultEngine(userId: string) {
   const { data } = await supabase
@@ -31,6 +35,14 @@ export function useUsage(userId?: string, refreshToken?: unknown) {
   useEffect(() => {
     void refresh();
   }, [refresh, refreshToken]);
+
+  useEffect(() => {
+    const onChanged = () => {
+      void refresh();
+    };
+    window.addEventListener(USAGE_CHANGED_EVENT, onChanged);
+    return () => window.removeEventListener(USAGE_CHANGED_EVENT, onChanged);
+  }, [refresh]);
 
   return { usage, refresh };
 }

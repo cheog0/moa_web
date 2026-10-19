@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { DEFAULT_ENGINE_ID, engineRequiresOwnKey, isDefaultEngine, missingApiKeyMessage, normalizeEngine } from "@/lib/engines";
-import { downloadRecordingBlob, processMeeting, uploadRecording } from "@/lib/transcribe";
+import {
+  downloadRecordingBlob,
+  processMeeting,
+  readAudioDurationSeconds,
+  uploadRecording,
+} from "@/lib/transcribe";
 import { TEMPLATE_SALES } from "@/lib/constants";
 import { normalizeManuals, ReplyManual } from "@/lib/manuals";
 import {
@@ -9,6 +14,7 @@ import {
   formatUsageClock,
   FREE_MONTHLY_MINUTES,
   isUsageExhausted,
+  notifyUsageChanged,
   type UsageSnapshot,
 } from "@/lib/usage";
 import { addMinutesReadyNotice } from "@/lib/notifications";
@@ -133,12 +139,18 @@ export function useRecording(onSaved: (meetingId: string) => void) {
       }
       try {
         setStatus("processing");
+        const measured = await readAudioDurationSeconds(audioBlob);
+        const durationSeconds = measured > 0 ? measured : 0;
         const uploaded = await uploadRecording({
           audioBlob,
           userSettings: settings,
-          seconds: 0,
+          seconds: durationSeconds,
         });
         await clearRecordingDraft();
+        if (meteredRef.current) {
+          await refreshUsage();
+          notifyUsageChanged();
+        }
         showToastNotice(
           "중단됐던 녹음을 복구했습니다.",
           "회의록 분석은 이어서 진행됩니다.",
@@ -150,6 +162,9 @@ export function useRecording(onSaved: (meetingId: string) => void) {
           attendees: [],
           liveMemo: draft.liveMemo || "",
         }).then((result) => {
+          if (meteredRef.current) {
+            void refreshUsage().then(() => notifyUsageChanged());
+          }
           if (!result.processed) return;
           void addMinutesReadyNotice(settings.user_id, uploaded.meetingId);
           showToastNotice(
@@ -250,25 +265,57 @@ export function useRecording(onSaved: (meetingId: string) => void) {
     };
   }, [status]);
 
-  const handleStartRecording = async () => {
-    try {
-      if (engineRequiresOwnKey(userSettings.ai_engine) && !userSettings.api_key.trim()) {
+  const ensureCanUseEngine = async () => {
+    if (engineRequiresOwnKey(userSettings.ai_engine) && !userSettings.api_key.trim()) {
+      showInfoNotice(
+        "API 키가 필요해요",
+        missingApiKeyMessage(userSettings.ai_engine),
+      );
+      return false;
+    }
+    if (meteredRef.current) {
+      const current = await refreshUsage();
+      if (isUsageExhausted(current)) {
         showInfoNotice(
-          "API 키가 필요해요",
-          missingApiKeyMessage(userSettings.ai_engine),
+          "이번 달 사용량을 다 썼어요",
+          `기본 엔진은 한 달에 ${FREE_MONTHLY_MINUTES}분까지 사용할 수 있습니다. 다음 달에 다시 이용하거나 설정에서 내 API 키를 연결해 주세요.`,
+        );
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const startBackgroundAnalysis = (meetingId: string) => {
+    void processMeeting({
+      meetingId,
+      userSettings,
+      attendees: selectedAttendees,
+      liveMemo: liveMemoRef.current,
+    }).then((result) => {
+      if (meteredRef.current) {
+        void refreshUsage().then(() => notifyUsageChanged());
+      }
+      if (!result.processed) {
+        showInfoNotice(
+          "회의록을 만들지 못했어요",
+          result.error ||
+            "녹음은 저장됐지만 회의록 분석에 실패했습니다. 설정에서 엔진/API 키를 확인한 뒤 다시 시도해 주세요.",
         );
         return;
       }
-      if (meteredRef.current) {
-        const current = await refreshUsage();
-        if (isUsageExhausted(current)) {
-          showInfoNotice(
-            "이번 달 사용량을 다 썼어요",
-            `기본 엔진은 한 달에 ${FREE_MONTHLY_MINUTES}분까지 사용할 수 있습니다. 다음 달에 다시 이용하거나 설정에서 내 API 키를 연결해 주세요.`,
-          );
-          return;
-        }
-      }
+      void addMinutesReadyNotice(userSettings.user_id, meetingId);
+      showToastNotice(
+        "회의록이 성공적으로 생성되었습니다.",
+        "회의 목록에서 확인해 주세요.",
+      );
+      window.dispatchEvent(new Event("raple:meetings-changed"));
+    });
+  };
+
+  const handleStartRecording = async () => {
+    try {
+      if (!(await ensureCanUseEngine())) return;
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
@@ -323,12 +370,8 @@ export function useRecording(onSaved: (meetingId: string) => void) {
       runningSinceRef.current = null;
     }
     finishingRef.current = true;
-    const remaining = remainingRef.current;
-    let durationSeconds = Math.max(0, Math.round(elapsedMsRef.current / 1000));
-    if (remaining != null && remaining > 0 && durationSeconds > remaining) {
-      durationSeconds = remaining;
-    }
-    setSeconds(durationSeconds);
+    const elapsedSeconds = Math.max(0, Math.round(elapsedMsRef.current / 1000));
+    setSeconds(elapsedSeconds);
     setStatus("processing");
     void stopRecordingWakeLock();
     // Final flush so the last buffered audio is on disk before stop.
@@ -364,6 +407,15 @@ export function useRecording(onSaved: (meetingId: string) => void) {
       return;
     }
     try {
+      // Same as upload: bill by actual recording length, timer as fallback
+      // when the browser can't read webm metadata.
+      const measured = await readAudioDurationSeconds(audioBlob);
+      let durationSeconds = measured > 0 ? measured : elapsedSeconds;
+      const remaining = remainingRef.current;
+      if (remaining != null && remaining > 0 && durationSeconds > remaining) {
+        durationSeconds = remaining;
+      }
+      setSeconds(durationSeconds);
       await updateRecordingDraftMemo(liveMemoRef.current);
       const uploaded = await uploadRecording({
         audioBlob,
@@ -372,36 +424,15 @@ export function useRecording(onSaved: (meetingId: string) => void) {
       });
       await clearRecordingDraft();
       if (meteredRef.current) {
-        const next = await fetchUsage();
-        if (next) setUsage(next);
+        await refreshUsage();
+        notifyUsageChanged();
       }
       showToastNotice(
         "녹음이 저장되었습니다.",
         "회의록 분석은 이어서 진행됩니다.",
       );
       onSaved(uploaded.meetingId);
-      void processMeeting({
-        meetingId: uploaded.meetingId,
-        userSettings,
-        attendees: selectedAttendees,
-        liveMemo: liveMemoRef.current,
-      }).then((result) => {
-        if (meteredRef.current) {
-          void fetchUsage().then((next) => {
-            if (next) setUsage(next);
-          });
-        }
-        if (!result.processed) return;
-        void addMinutesReadyNotice(
-          userSettings.user_id,
-          uploaded.meetingId,
-        );
-        showToastNotice(
-          "회의록이 성공적으로 생성되었습니다.",
-          "회의 목록에서 확인해 주세요.",
-        );
-        window.dispatchEvent(new Event("raple:meetings-changed"));
-      });
+      startBackgroundAnalysis(uploaded.meetingId);
     } catch (error: any) {
       // Keep local draft so reopen can still recover/upload (ClovaNote pattern).
       downloadRecordingBlob(audioBlob);

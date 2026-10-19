@@ -10,6 +10,7 @@ import {
   Sparkles,
   Calendar,
   List,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CalendarView from "@/components/meeting/CalenderView";
@@ -42,6 +43,7 @@ export default function Home({
   dashboardMode,
   onDashboardModeChange,
   onNewRecording,
+  onUploadAudio,
   onOpenDetail,
   onToggleStar,
   query,
@@ -54,6 +56,7 @@ export default function Home({
   dashboardMode: "list" | "calendar";
   onDashboardModeChange: (mode: "list" | "calendar") => void;
   onNewRecording: () => void;
+  onUploadAudio: () => void;
   onOpenDetail: (meeting: any) => void;
   onToggleStar: (
     e: React.MouseEvent,
@@ -93,15 +96,28 @@ export default function Home({
             더 선명하게 기록해보세요.
           </p>
         </div>
-        <Button
-          onClick={onNewRecording}
-          className="inline-flex h-8 w-full items-center justify-center leading-none shadow-sm sm:w-auto"
-        >
-          <Plus className="size-3.5 shrink-0" />
-          <span className="inline-flex items-center text-[13px] leading-none">
-            새 회의 시작
-          </span>
-        </Button>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onUploadAudio}
+            className="inline-flex h-8 w-full items-center justify-center leading-none sm:w-auto"
+          >
+            <Upload className="size-3.5 shrink-0" />
+            <span className="inline-flex items-center text-[13px] leading-none">
+              음성 파일로 만들기
+            </span>
+          </Button>
+          <Button
+            onClick={onNewRecording}
+            className="inline-flex h-8 w-full items-center justify-center leading-none shadow-sm sm:w-auto"
+          >
+            <Plus className="size-3.5 shrink-0" />
+            <span className="inline-flex items-center text-[13px] leading-none">
+              새 회의 시작
+            </span>
+          </Button>
+        </div>
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">

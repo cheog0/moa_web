@@ -31,9 +31,17 @@ export default function RecordingPanel({
     }
   };
 
+  const canDismissByBackdrop = recording.status === "ready";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 p-4 sm:p-10 print:hidden">
-      <div className="relative flex h-full max-h-[900px] min-h-[500px] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 p-4 sm:p-10 print:hidden"
+      onClick={canDismissByBackdrop ? onClose : undefined}
+    >
+      <div
+        className="relative flex h-full max-h-[900px] min-h-[500px] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="flex shrink-0 items-center justify-between border-b border-border px-8 py-5">
           <div className="flex items-center gap-3">
             <span
