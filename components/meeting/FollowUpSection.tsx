@@ -166,31 +166,25 @@ export default function FollowUpSection({
                           )}
                         />
                       </label>
-                      {(item.timestamp || item.assignee) && (
+                      {item.timestamp && (
                         <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                          {item.assignee && <span>{item.assignee}</span>}
-                          {item.timestamp && (
-                            <button
-                              type="button"
-                              className="cursor-pointer font-mono text-sky-600 hover:underline"
-                              onClick={(event) => {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                onSeek?.(item.timestamp!);
-                              }}
-                            >
-                              [{item.timestamp}
-                              {item.speaker ? ` ${item.speaker}` : ""}]
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            className="cursor-pointer font-mono text-sky-600 hover:underline"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              onSeek?.(item.timestamp!);
+                            }}
+                          >
+                            [{item.timestamp}
+                            {item.speaker ? ` ${item.speaker}` : ""}]
+                          </button>
                         </span>
                       )}
                     </div>
                   ) : (
-                    (item.question ||
-                      item.commitment ||
-                      item.timestamp ||
-                      item.assignee) && (
+                    (item.question || item.commitment || item.timestamp) && (
                       <span
                         className={cn(
                           "mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-500",
@@ -201,7 +195,6 @@ export default function FollowUpSection({
                         {item.commitment && (
                           <span>약속: {item.commitment}</span>
                         )}
-                        {item.assignee && <span>{item.assignee}</span>}
                         {item.timestamp && (
                           <button
                             type="button"
