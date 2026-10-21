@@ -412,9 +412,12 @@ export function useDetail({
         ),
       );
     },
-    changeActionItem: (id: string, task: string) => {
+    changeActionItem: (
+      id: string,
+      patch: Partial<Pick<ActionItem, "task" | "question" | "commitment">>,
+    ) => {
       setActionItems((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, task } : item)),
+        prev.map((item) => (item.id === id ? { ...item, ...patch } : item)),
       );
     },
     addActionItem: () => {

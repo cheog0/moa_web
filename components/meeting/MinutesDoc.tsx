@@ -36,7 +36,10 @@ export default function MinutesDoc({
   actionItems: ActionItem[];
   onSummaryChange: (value: string) => void;
   onToggleActionItem: (id: string) => void;
-  onChangeActionItem: (id: string, task: string) => void;
+  onChangeActionItem: (
+    id: string,
+    patch: Partial<Pick<ActionItem, "task" | "question" | "commitment">>,
+  ) => void;
   onAddActionItem: () => void;
   onRemoveActionItem: (id: string) => void;
   onSeek?: (timeStr: string) => void;

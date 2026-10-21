@@ -22,7 +22,10 @@ export default function FollowUpSection({
   actionItems: ActionItem[];
   isEditing: boolean;
   onToggleItem: (id: string) => void;
-  onChangeItem: (id: string, task: string) => void;
+  onChangeItem: (
+    id: string,
+    patch: Partial<Pick<ActionItem, "task" | "question" | "commitment">>,
+  ) => void;
   onAddItem: () => void;
   onRemoveItem: (id: string) => void;
   onSeek?: (timeStr: string) => void;
@@ -94,7 +97,7 @@ export default function FollowUpSection({
                     <input
                       value={item.task}
                       onChange={(event) =>
-                        onChangeItem(item.id, event.target.value)
+                        onChangeItem(item.id, { task: event.target.value })
                       }
                       placeholder="후속 조치를 입력하세요"
                       className={cn(
@@ -122,34 +125,99 @@ export default function FollowUpSection({
                       {item.task}
                     </span>
                   )}
-                  {(item.question ||
-                    item.commitment ||
-                    item.timestamp ||
-                    item.assignee) && (
-                    <span
+                  {canEdit ? (
+                    <div
                       className={cn(
-                        "mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-500",
+                        "mt-1.5 flex flex-col gap-1 text-[11px] text-slate-500",
                         darkDoc && whenDark(theme, "text-zinc-400"),
                       )}
                     >
-                      {item.question && <span>Q. {item.question}</span>}
-                      {item.commitment && <span>약속: {item.commitment}</span>}
-                      {item.assignee && <span>{item.assignee}</span>}
-                      {item.timestamp && (
-                        <button
-                          type="button"
-                          className="cursor-pointer font-mono text-sky-600 hover:underline"
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            onSeek?.(item.timestamp!);
-                          }}
-                        >
-                          [{item.timestamp}
-                          {item.speaker ? ` ${item.speaker}` : ""}]
-                        </button>
+                      <label className="flex min-w-0 items-center gap-1.5">
+                        <span className="shrink-0 font-medium">Q.</span>
+                        <input
+                          value={item.question || ""}
+                          onChange={(event) =>
+                            onChangeItem(item.id, {
+                              question: event.target.value,
+                            })
+                          }
+                          placeholder="관련 질문"
+                          className={cn(
+                            "min-w-0 flex-1 bg-transparent outline-none placeholder:text-slate-400",
+                            darkDoc &&
+                              whenDark(theme, "placeholder:text-zinc-600"),
+                          )}
+                        />
+                      </label>
+                      <label className="flex min-w-0 items-center gap-1.5">
+                        <span className="shrink-0 font-medium">약속:</span>
+                        <input
+                          value={item.commitment || ""}
+                          onChange={(event) =>
+                            onChangeItem(item.id, {
+                              commitment: event.target.value,
+                            })
+                          }
+                          placeholder="우리 측 약속"
+                          className={cn(
+                            "min-w-0 flex-1 bg-transparent outline-none placeholder:text-slate-400",
+                            darkDoc &&
+                              whenDark(theme, "placeholder:text-zinc-600"),
+                          )}
+                        />
+                      </label>
+                      {(item.timestamp || item.assignee) && (
+                        <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                          {item.assignee && <span>{item.assignee}</span>}
+                          {item.timestamp && (
+                            <button
+                              type="button"
+                              className="cursor-pointer font-mono text-sky-600 hover:underline"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                onSeek?.(item.timestamp!);
+                              }}
+                            >
+                              [{item.timestamp}
+                              {item.speaker ? ` ${item.speaker}` : ""}]
+                            </button>
+                          )}
+                        </span>
                       )}
-                    </span>
+                    </div>
+                  ) : (
+                    (item.question ||
+                      item.commitment ||
+                      item.timestamp ||
+                      item.assignee) && (
+                      <span
+                        className={cn(
+                          "mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-500",
+                          darkDoc && whenDark(theme, "text-zinc-400"),
+                        )}
+                      >
+                        {item.question && <span>Q. {item.question}</span>}
+                        {item.commitment && (
+                          <span>약속: {item.commitment}</span>
+                        )}
+                        {item.assignee && <span>{item.assignee}</span>}
+                        {item.timestamp && (
+                          <button
+                            type="button"
+                            className="cursor-pointer font-mono text-sky-600 hover:underline"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              onSeek?.(item.timestamp!);
+                            }}
+                          >
+                            [{item.timestamp}
+                            {item.speaker ? ` ${item.speaker}` : ""}]
+                          </button>
+                        )}
+                      </span>
+                    )
                   )}
                 </div>
                 {canEdit ? (
@@ -178,6 +246,8 @@ export default function FollowUpSection({
           <li key={`print-${item.id}`}>
             {item.done ? "[완료] " : "[미완료] "}
             {item.task}
+            {item.question ? ` / Q. ${item.question}` : ""}
+            {item.commitment ? ` / 약속: ${item.commitment}` : ""}
           </li>
         ))}
       </ul>
